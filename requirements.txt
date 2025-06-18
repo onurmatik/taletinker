@@ -21,3 +21,4 @@ markdown
 celery
 django-celery-results
 pillow
+stripe
