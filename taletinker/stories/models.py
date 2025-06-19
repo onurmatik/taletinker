@@ -8,17 +8,33 @@ class Story(models.Model):
         on_delete=models.CASCADE,
         related_name="stories",
     )
-    title = models.CharField(max_length=255)
-    text = models.TextField()
-    audio_file = models.FileField(upload_to="audio/", blank=True)
-    cover_image = models.ImageField(upload_to="covers/", blank=True)
-    language = models.CharField(max_length=32, default="en")
-    target_age = models.PositiveSmallIntegerField()
-    themes = models.CharField(max_length=255, blank=True)
-    is_published = models.BooleanField(default=False)
-    is_anonymous = models.BooleanField(default=False)
+
+    parameters = models.JSONField(default=dict, blank=True)
+    prompt = models.TextField(blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return self.title
+    is_published = models.BooleanField(default=False)
+    is_anonymous = models.BooleanField(default=False)
+
+
+class StoryTranslation(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="translations")
+    language = models.CharField(max_length=10)
+
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+
+class StoryImage(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="images/", blank=True)
+    cover = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class StoryAudio(models.Model):
+    story = models.ForeignKey(StoryTranslation, on_delete=models.CASCADE, related_name="audio")
+    mp3 = models.FileField(upload_to="audio/", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
