@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Create Story{% endblock %}
+{% block extra_head %}
+<script>
+function toggleChip(el) {
+  const input = el.querySelector('input');
+  input.checked = !input.checked;
+  if (input.checked) {
+    el.classList.add('selected');
+  } else {
+    el.classList.remove('selected');
+  }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => toggleChip(chip));
+  });
+  document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.text;
+      document.getElementById('id_extra_instructions').value = text;
+    });
+  });
+});
+</script>
+{% endblock %}
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    {{ form.realism.label_tag }}<br>
+    {{ form.realism }}
+  </div>
+  <div class="form-group">
+    {{ form.didactic.label_tag }}<br>
+    {{ form.didactic }}
+  </div>
+  <div class="form-group">
+    {{ form.age.label_tag }} (3–10+)<br>
+    {{ form.age }}
+  </div>
+  <div class="form-group">
+    <label>Themes</label>
+    <div class="chips">
+      {% for checkbox in form.themes %}
+      <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Purpose</label>
+    <div class="chips">
+      {% for checkbox in form.purposes %}
+      <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="form-group">
+    {{ form.characters.label_tag }}
+    {{ form.characters }}
+  </div>
+  <div class="form-group">
+    {{ form.extra_instructions.label_tag }}
+    {{ form.extra_instructions }}
+  </div>
+  <div class="form-group">
+    {{ form.story_length.label_tag }}
+    {{ form.story_length }}
+  </div>
+  <div class="form-group">
+    {{ form.language.label_tag }}
+    {{ form.language }}
+  </div>
+  <button type="submit">Generate Story</button>
+</form>
+<div class="form-group examples">
+  <strong>Inspire me:</strong>
+  <button type="button" class="example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
+  <button type="button" class="example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
+  <button type="button" class="example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
+</div>
+{% endblock %}

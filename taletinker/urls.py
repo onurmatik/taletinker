@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from taletinker.stories.views import create_story
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('create/', create_story, name='create_story'),
 ]
