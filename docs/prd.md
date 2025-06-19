@@ -85,7 +85,6 @@ TaleTinker is a web application that lets parents instantly generate **personali
 
 * Native mobile apps.
 * Real‑time collaborative editing or illustration uploads.
-* Automatic multi‑language translation of user‑generated tales.
 * Advanced AI image editing; only single cover image needed.
 
 ## 6. Design Considerations

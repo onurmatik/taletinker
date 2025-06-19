@@ -11,6 +11,7 @@ class Story(models.Model):
 
     parameters = models.JSONField(default=dict, blank=True)
     prompt = models.TextField(blank=True)
+    original_language = models.CharField(max_length=10, default="en")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -22,9 +23,13 @@ class Story(models.Model):
 class StoryTranslation(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="translations")
     language = models.CharField(max_length=10)
+    is_auto = models.BooleanField(default=True)
 
     title = models.CharField(max_length=255)
     text = models.TextField()
+
+    class Meta:
+        unique_together = ("story", "language")
 
 
 class StoryImage(models.Model):
@@ -35,6 +40,6 @@ class StoryImage(models.Model):
 
 
 class StoryAudio(models.Model):
-    story = models.ForeignKey(StoryTranslation, on_delete=models.CASCADE, related_name="audio")
+    translation = models.ForeignKey(StoryTranslation, on_delete=models.CASCADE, related_name="audio")
     mp3 = models.FileField(upload_to="audio/", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
