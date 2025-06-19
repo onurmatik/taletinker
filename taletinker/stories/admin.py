@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Story, StoryAudio, StoryImage, StoryTranslation
+from .models import Story, StoryAudio, StoryImage, StoryText
 
 
 @admin.register(Story)
@@ -14,12 +14,11 @@ class StoryAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(StoryTranslation)
+@admin.register(StoryText)
 class StoryTranslationAdmin(admin.ModelAdmin):
     list_display = [
         "story",
         "language",
-        "is_auto",
     ]
 
 
@@ -27,7 +26,7 @@ class StoryTranslationAdmin(admin.ModelAdmin):
 class StoryImageAdmin(admin.ModelAdmin):
     list_display = [
         "story",
-        "cover",
+        "image",
         "created_at",
     ]
 
@@ -35,6 +34,6 @@ class StoryImageAdmin(admin.ModelAdmin):
 @admin.register(StoryAudio)
 class StoryAudioAdmin(admin.ModelAdmin):
     list_display = [
-        "translation",
+        "story",
         "created_at",
     ]
