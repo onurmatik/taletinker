@@ -124,6 +124,27 @@ class StoryListAndDetailTests(TestCase):
         response = self.client.get(reverse("story_detail", args=[story.id]))
         self.assertContains(response, 'class="like-btn"')
 
+    def test_filter_my_stories(self):
+        my_story = self._create_story(title="Mine", published=True)
+        other = User.objects.create_user(username="bob", password="pass")
+        other_story = Story.objects.create(author=other, is_published=True)
+        other_story.texts.create(language="en", title="Other", text="X")
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse("story_list") + "?filter=mine")
+        self.assertContains(resp, "Mine")
+        self.assertNotContains(resp, "Other")
+
+    def test_filter_my_favorites(self):
+        fav = self._create_story(title="Fav", published=True)
+        not_fav = self._create_story(title="Not", published=True)
+        fav.liked_by.add(self.user)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse("story_list") + "?filter=favorites")
+        self.assertContains(resp, "Fav")
+        self.assertNotContains(resp, "Not")
+
 
 class LikeApiTests(TestCase):
     def setUp(self):
