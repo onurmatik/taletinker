@@ -33,6 +33,22 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'create_story' %}">New Story</a>
               </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  id="storyDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Stories
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="storyDropdown">
+                  <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=mine">My Stories</a></li>
+                  <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=favorites">My Favorites</a></li>
+                </ul>
+              </li>
               <li class="nav-item">
                 <span class="navbar-text">{{ user.username }}</span>
               </li>

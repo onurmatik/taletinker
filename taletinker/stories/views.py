@@ -6,12 +6,20 @@ from .models import Story, StoryText
 
 
 def story_list(request):
-    """Public homepage listing published stories."""
+    """Public homepage listing published stories with optional filters."""
+
     stories = (
         Story.objects.filter(is_published=True)
         .prefetch_related("texts", "author")
         .order_by("-created_at")
     )
+
+    filter_param = request.GET.get("filter")
+    if filter_param == "mine" and request.user.is_authenticated:
+        stories = stories.filter(author=request.user)
+    elif filter_param == "favorites" and request.user.is_authenticated:
+        stories = stories.filter(liked_by=request.user)
+
     return render(request, "stories/story_list.html", {"stories": stories})
 
 
