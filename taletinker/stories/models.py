@@ -19,6 +19,12 @@ class Story(models.Model):
     is_published = models.BooleanField(default=False)
     is_anonymous = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name_plural = "stories"
+
+    def __str__(self):
+        return f"Story by {self.author} @{self.created_at} in {self.original_language}"
+
 
 class StoryText(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="texts")
@@ -30,12 +36,21 @@ class StoryText(models.Model):
     class Meta:
         unique_together = ("story", "language")
 
+    def __str__(self):
+        return self.title
+
 
 class StoryImage(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to="images/", blank=True)
     thumbnail = models.ImageField(upload_to="thumbs/", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.story
+
+    def __str__(self):
+        return f"Cover photo for story {self.story.pk}"
 
 
 class StoryAudio(models.Model):
@@ -47,3 +62,6 @@ class StoryAudio(models.Model):
 
     class Meta:
         unique_together = ("story", "language")
+
+    def __str__(self):
+        return f"Naration of story {self.story.pk} in {self.language}"
