@@ -3,29 +3,35 @@
 {% block content %}
 <h2>Stories</h2>
 {% if stories %}
-<ul class="list-group">
+<div class="row row-cols-1 row-cols-md-3 g-4">
   {% for story in stories %}
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    <div>
-      <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
-      <small class="text-muted">
-      {% if story.is_anonymous %}
-        by Anonymous
-      {% else %}
-        by {{ story.author.username }}
-      {% endif %}
-      </small>
+  <div class="col">
+    <div class="card h-100">
+      {% with img=story.images.first %}
+        {% if img %}
+          <img src="{{ img.thumbnail.url }}" class="card-img-top" alt="Cover image" />
+        {% endif %}
+      {% endwith %}
+      <div class="card-body">
+        <h5 class="card-title"><a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a></h5>
+        <p class="card-text">
+          <small class="text-muted">
+          {% if story.is_anonymous %}
+            by Anonymous
+          {% else %}
+            by {{ story.author.username }}
+          {% endif %}
+          </small>
+        </p>
+      </div>
+      <div class="card-footer d-flex justify-content-between align-items-center">
+        <span class="like-btn" data-story-id="{{ story.id }}">{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
+        <span class="like-count">{{ story.liked_by.count }}</span>
+      </div>
     </div>
-    <div>
-      <span
-        class="like-btn"
-        data-story-id="{{ story.id }}"
-      >{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
-      <span class="like-count">{{ story.liked_by.count }}</span>
-    </div>
-  </li>
+  </div>
   {% endfor %}
-</ul>
+</div>
 {% else %}
 <p>No stories yet.</p>
 {% endif %}
