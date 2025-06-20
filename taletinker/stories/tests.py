@@ -245,6 +245,14 @@ class StoryImageDisplayTests(TestCase):
         resp = self.client.get(reverse("story_detail", args=[story.id]))
         self.assertContains(resp, "<img")
 
+    def test_list_shows_image(self):
+        story = Story.objects.create(author=self.user, is_published=True)
+        story.texts.create(language="en", title="T", text="x")
+        story.images.create(image=ContentFile(b"im", "c.png"), thumbnail=ContentFile(b"im", "c.png"))
+
+        resp = self.client.get(reverse("story_list"))
+        self.assertContains(resp, "<img")
+
 
 class ImageCreationFlowTests(TestCase):
     def setUp(self):

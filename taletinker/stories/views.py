@@ -10,7 +10,7 @@ def story_list(request):
 
     stories = (
         Story.objects.filter(is_published=True)
-        .prefetch_related("texts", "author")
+        .prefetch_related("texts", "author", "images")
         .order_by("-created_at")
     )
 
