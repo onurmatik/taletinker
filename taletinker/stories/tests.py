@@ -93,3 +93,29 @@ class NinjaCreateApiTests(TestCase):
         self.assertEqual(response.json()["title"], "Hi")
         self.assertEqual(response.json()["text"], "Hello")
 
+
+class StoryListAndDetailTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pass")
+        self.client = Client()
+
+    def _create_story(self, title="Title", published=True):
+        story = Story.objects.create(author=self.user, is_published=published)
+        story.texts.create(language="en", title=title, text="Once")
+        return story
+
+    def test_homepage_lists_published_stories(self):
+        self._create_story(title="Visible", published=True)
+        self._create_story(title="Hidden", published=False)
+
+        response = self.client.get(reverse("story_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Visible")
+        self.assertNotContains(response, "Hidden")
+
+    def test_story_detail_accessible_anonymously(self):
+        story = self._create_story()
+        response = self.client.get(reverse("story_detail", args=[story.id]))
+        self.assertEqual(response.status_code, 200)
+
+
