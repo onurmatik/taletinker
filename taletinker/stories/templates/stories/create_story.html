@@ -51,7 +51,8 @@ window.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data),
       });
       const json = await resp.json();
-      form.story_text.value = json.story;
+      form.story_text.value = json.text;
+      document.getElementById('story_title').value = json.title;
     } catch (err) {
       console.error(err);
       spinner.style.display = 'none';
@@ -68,6 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <form method="post">
   {% csrf_token %}
   <input type="hidden" name="story_text" id="story_text" />
+  <input type="hidden" name="story_title" id="story_title" />
   <div class="form-group">
     {{ form.realism.label_tag }}<br>
     {{ form.realism }}

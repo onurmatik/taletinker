@@ -31,6 +31,7 @@ class CreateStoryViewTests(TestCase):
             "story_length": "short",
             "language": "en",
             "story_text": "Once upon a time",
+            "story_title": "My Story",
         }
         response = self.client.post(reverse("create_story"), data)
         self.assertEqual(response.status_code, 302)
@@ -39,6 +40,7 @@ class CreateStoryViewTests(TestCase):
         self.assertEqual(story.author, self.user)
         self.assertEqual(story.parameters["realism"], 50)
         self.assertEqual(story.texts.first().text, "Once upon a time")
+        self.assertEqual(story.texts.first().title, "My Story")
 
     def test_post_redirects_to_detail(self):
         self.client.force_login(self.user)
@@ -53,6 +55,7 @@ class CreateStoryViewTests(TestCase):
             "story_length": "short",
             "language": "en",
             "story_text": "Once upon a time",
+            "story_title": "My Story",
         }
         response = self.client.post(reverse("create_story"), data)
         story = Story.objects.first()
@@ -67,7 +70,13 @@ class NinjaCreateApiTests(TestCase):
     def test_post_returns_story_text(self, mock_openai):
         mock_client = mock_openai.return_value
         mock_client.chat.completions.create.return_value = SimpleNamespace(
-            choices=[SimpleNamespace(message=SimpleNamespace(content="Hello"))]
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(
+                        content='{"title": "Hi", "text": "Hello"}'
+                    )
+                )
+            ]
         )
 
         response = self.client.post(
@@ -81,5 +90,6 @@ class NinjaCreateApiTests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["story"], "Hello")
+        self.assertEqual(response.json()["title"], "Hi")
+        self.assertEqual(response.json()["text"], "Hello")
 
