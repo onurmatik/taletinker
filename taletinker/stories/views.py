@@ -1,17 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import StoryCreationForm
+from django.db.models import Count
+
+from .forms import StoryCreationForm, StoryFilterForm
 from .models import Story, StoryText
 
 
 def story_list(request):
     """Public homepage listing published stories with optional filters."""
 
-    stories = (
-        Story.objects.filter(is_published=True)
-        .prefetch_related("texts", "author", "images")
-        .order_by("-created_at")
+    stories = Story.objects.filter(is_published=True).prefetch_related(
+        "texts", "author", "images"
     )
 
     filter_param = request.GET.get("filter")
@@ -20,7 +20,34 @@ def story_list(request):
     elif filter_param == "favorites" and request.user.is_authenticated:
         stories = stories.filter(liked_by=request.user)
 
-    return render(request, "stories/story_list.html", {"stories": stories})
+    form = StoryFilterForm(request.GET)
+    if form.is_valid():
+        age = form.cleaned_data.get("age")
+        theme = form.cleaned_data.get("theme")
+        language = form.cleaned_data.get("language")
+        sort = form.cleaned_data.get("sort") or "newest"
+
+        if age:
+            stories = stories.filter(parameters__age=int(age))
+        if language:
+            stories = stories.filter(texts__language=language)
+
+        stories = stories.annotate(num_likes=Count("liked_by"))
+        stories = stories.order_by("-created_at")
+
+        stories = list(stories)
+
+        if theme:
+            stories = [s for s in stories if theme in s.parameters.get("themes", [])]
+
+        if sort == "popular":
+            stories.sort(key=lambda s: (-s.num_likes, -s.created_at.timestamp()))
+    else:
+        stories = list(stories.order_by("-created_at").annotate(num_likes=Count("liked_by")))
+
+    context = {"stories": stories, "form": form}
+
+    return render(request, "stories/story_list.html", context)
 
 
 @login_required

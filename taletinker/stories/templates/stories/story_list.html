@@ -7,6 +7,27 @@
     <a class="btn btn-primary" href="{% url 'create_story' %}">Create a new story</a>
   {% endif %}
 </div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    {{ form.age.label_tag }}
+    {{ form.age }}
+  </div>
+  <div class="col-auto">
+    {{ form.theme.label_tag }}
+    {{ form.theme }}
+  </div>
+  <div class="col-auto">
+    {{ form.language.label_tag }}
+    {{ form.language }}
+  </div>
+  <div class="col-auto">
+    {{ form.sort.label_tag }}
+    {{ form.sort }}
+  </div>
+  <div class="col-auto align-self-end">
+    <button type="submit" class="btn btn-secondary">Apply</button>
+  </div>
+</form>
 {% if stories %}
 <div class="row row-cols-1 row-cols-md-4 g-4">
   {% for story in stories %}

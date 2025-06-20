@@ -99,9 +99,20 @@ class StoryListAndDetailTests(TestCase):
         self.user = User.objects.create_user(username="alice", password="pass")
         self.client = Client()
 
-    def _create_story(self, title="Title", published=True):
-        story = Story.objects.create(author=self.user, is_published=published)
-        story.texts.create(language="en", title=title, text="Once")
+    def _create_story(
+        self,
+        title="Title",
+        published=True,
+        parameters=None,
+        languages=None,
+    ):
+        story = Story.objects.create(
+            author=self.user,
+            is_published=published,
+            parameters=parameters or {"age": 5, "themes": []},
+        )
+        for lang in languages or ["en"]:
+            story.texts.create(language=lang, title=title, text="Once")
         return story
 
     def test_homepage_lists_published_stories(self):
@@ -146,6 +157,49 @@ class StoryListAndDetailTests(TestCase):
         resp = self.client.get(reverse("story_list") + "?filter=favorites")
         self.assertContains(resp, "Fav")
         self.assertNotContains(resp, "Not")
+
+    def test_filter_by_age(self):
+        self._create_story(title="A5", published=True, parameters={"age": 5, "themes": []})
+        self._create_story(title="A7", published=True, parameters={"age": 7, "themes": []})
+
+        resp = self.client.get(reverse("story_list") + "?age=5")
+        self.assertContains(resp, "A5")
+        self.assertNotContains(resp, "A7")
+
+    def test_filter_by_theme(self):
+        self._create_story(
+            title="Fam",
+            published=True,
+            parameters={"age": 5, "themes": ["family"]},
+        )
+        self._create_story(
+            title="Ani",
+            published=True,
+            parameters={"age": 5, "themes": ["animals"]},
+        )
+
+        resp = self.client.get(reverse("story_list") + "?theme=family")
+        stories = resp.context["stories"]
+        titles = [s.texts.first().title for s in stories]
+        self.assertIn("Fam", titles)
+        self.assertNotIn("Ani", titles)
+
+    def test_filter_by_language(self):
+        self._create_story(title="EN", published=True, languages=["en"])
+        self._create_story(title="ES", published=True, languages=["es"])
+
+        resp = self.client.get(reverse("story_list") + "?language=es")
+        self.assertContains(resp, "ES")
+        self.assertNotContains(resp, "EN")
+
+    def test_sort_by_popularity(self):
+        s1 = self._create_story(title="One", published=True)
+        s2 = self._create_story(title="Two", published=True)
+        s1.liked_by.add(self.user)
+
+        resp = self.client.get(reverse("story_list") + "?sort=popular")
+        stories = resp.context["stories"]
+        self.assertEqual(stories[0].id, s1.id)
 
 
 class LikeApiTests(TestCase):
