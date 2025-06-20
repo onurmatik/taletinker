@@ -7,11 +7,11 @@
   {{ form.non_field_errors }}
   <div class="mb-3">
     {{ form.username.label_tag }}
-    {{ form.username.as_widget(attrs={"class": "form-control"}) }}
+    {{ form.username }}
   </div>
   <div class="mb-3">
     {{ form.password.label_tag }}
-    {{ form.password.as_widget(attrs={"class": "form-control"}) }}
+    {{ form.password }}
   </div>
   <button type="submit" class="btn btn-primary">Login</button>
 </form>

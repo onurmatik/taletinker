@@ -19,6 +19,12 @@ class Story(models.Model):
     is_published = models.BooleanField(default=False)
     is_anonymous = models.BooleanField(default=False)
 
+    liked_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="liked_stories",
+        blank=True,
+    )
+
     class Meta:
         verbose_name_plural = "stories"
 

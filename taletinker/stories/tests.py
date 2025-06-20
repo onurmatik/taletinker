@@ -72,9 +72,7 @@ class NinjaCreateApiTests(TestCase):
         mock_client.chat.completions.create.return_value = SimpleNamespace(
             choices=[
                 SimpleNamespace(
-                    message=SimpleNamespace(
-                        content='{"title": "Hi", "text": "Hello"}'
-                    )
+                    message=SimpleNamespace(content='{"title": "Hi", "text": "Hello"}')
                 )
             ]
         )
@@ -118,4 +116,32 @@ class StoryListAndDetailTests(TestCase):
         response = self.client.get(reverse("story_detail", args=[story.id]))
         self.assertEqual(response.status_code, 200)
 
+    def test_like_button_present(self):
+        story = self._create_story()
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("story_list"))
+        self.assertContains(response, 'class="like-btn"')
+        response = self.client.get(reverse("story_detail", args=[story.id]))
+        self.assertContains(response, 'class="like-btn"')
 
+
+class LikeApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="john", password="pass")
+        self.client = Client()
+        self.story = Story.objects.create(author=self.user)
+        self.story.texts.create(language="en", title="T", text="x")
+
+    def test_like_and_unlike(self):
+        self.client.force_login(self.user)
+        url = "/api/like"
+        resp = self.client.post(
+            url, {"story_id": self.story.id}, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["liked"])
+        resp = self.client.post(
+            url, {"story_id": self.story.id}, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(resp.json()["liked"])
