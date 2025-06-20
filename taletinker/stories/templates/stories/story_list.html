@@ -3,15 +3,17 @@
 {% block content %}
 <h2>Stories</h2>
 {% if stories %}
-<ul>
+<ul class="list-group">
   {% for story in stories %}
-  <li>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
     <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
+    <small class="text-muted">
     {% if story.is_anonymous %}
       by Anonymous
     {% else %}
       by {{ story.author.username }}
     {% endif %}
+    </small>
   </li>
   {% endfor %}
 </ul>
@@ -19,7 +21,7 @@
 <p>No stories yet.</p>
 {% endif %}
 {% if user.is_authenticated %}
-<p><a href="{% url 'create_story' %}">Create a new story</a></p>
+<p class="mt-3"><a class="btn btn-primary" href="{% url 'create_story' %}">Create a new story</a></p>
 {% endif %}
 {% endblock %}
 
