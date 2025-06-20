@@ -105,8 +105,9 @@
             if (resp.ok) {
               const data = await resp.json();
               el.textContent = data.liked ? '★' : '☆';
-              const countEl = el.nextElementSibling;
-              if (countEl && countEl.classList.contains('like-count')) {
+              const container = el.parentElement;
+              const countEl = container.querySelector('.like-count');
+              if (countEl) {
                 countEl.textContent = data.likes;
               }
             }

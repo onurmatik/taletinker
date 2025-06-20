@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Story Library{% endblock %}
 {% block content %}
-<h2>Stories</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Stories</h2>
+  {% if user.is_authenticated %}
+    <a class="btn btn-primary" href="{% url 'create_story' %}">Create a new story</a>
+  {% endif %}
+</div>
 {% if stories %}
 <div class="row row-cols-1 row-cols-md-4 g-4">
   {% for story in stories %}
@@ -36,8 +41,11 @@
         {% endif %}
       </div>
       <div class="card-footer d-flex justify-content-between align-items-center">
-        <span class="like-btn" data-story-id="{{ story.id }}">{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
-        <span class="like-count">{{ story.liked_by.count }}</span>
+        <span class="text-muted">Age {{ story.parameters.age }}</span>
+        <span>
+          <span class="like-count me-1">{{ story.liked_by.count }}</span>
+          <span class="like-btn" data-story-id="{{ story.id }}">{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
+        </span>
       </div>
     </div>
   </div>
@@ -46,8 +54,6 @@
 {% else %}
 <p>No stories yet.</p>
 {% endif %}
-{% if user.is_authenticated %}
-<p class="mt-3"><a class="btn btn-primary" href="{% url 'create_story' %}">Create a new story</a></p>
-{% endif %}
+
 {% endblock %}
 
