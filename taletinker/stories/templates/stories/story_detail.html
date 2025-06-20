@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Story Detail{% endblock %}
+{% block content %}
+<h2>{{ story.texts.first.title }}</h2>
+<p>{{ story.texts.first.text }}</p>
+<a href="{% url 'create_story' %}">Create another story</a>
+{% endblock %}

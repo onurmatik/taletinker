@@ -40,6 +40,24 @@ class CreateStoryViewTests(TestCase):
         self.assertEqual(story.parameters["realism"], 50)
         self.assertEqual(story.texts.first().text, "Once upon a time")
 
+    def test_post_redirects_to_detail(self):
+        self.client.force_login(self.user)
+        data = {
+            "realism": 50,
+            "didactic": 50,
+            "age": 5,
+            "themes": ["family"],
+            "purposes": ["joyful"],
+            "characters": "Jane",
+            "extra_instructions": "A test story.",
+            "story_length": "short",
+            "language": "en",
+            "story_text": "Once upon a time",
+        }
+        response = self.client.post(reverse("create_story"), data)
+        story = Story.objects.first()
+        self.assertRedirects(response, reverse("story_detail", args=[story.id]))
+
 
 class NinjaCreateApiTests(TestCase):
     def setUp(self):
