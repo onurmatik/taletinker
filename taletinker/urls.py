@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from taletinker.stories.views import create_story, story_detail, story_list
 from taletinker.accounts.views import LogoutView
@@ -31,3 +34,8 @@ urlpatterns = [
     path('api/', ninja_api.urls),
     path('', story_list, name='story_list'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

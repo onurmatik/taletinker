@@ -2,22 +2,6 @@
 {% block title %}Story Detail{% endblock %}
 {% block content %}
 <h2>{{ story.texts.first.title }}</h2>
-{% if story.images.first %}
-  <div id="image-container">
-    <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
-  </div>
-{% else %}
-  <p id="image-status">Creating image...</p>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      fetch('/api/create_image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ story_id: {{ story.id }} })
-      }).then(resp => { if (resp.ok) location.reload(); });
-    });
-  </script>
-{% endif %}
 <p>
   <span
     class="like-btn"
@@ -25,6 +9,28 @@
   >{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
   <span class="like-count">{{ story.liked_by.count }}</span>
 </p>
-<p>{{ story.texts.first.text|linebreaks }}</p>
-<a class="btn btn-secondary mt-3" href="{% url 'create_story' %}">Create another story</a>
+
+<div>
+
+    {% if story.images.first %}
+      <div id="image-container" class="w-50 m-2" style="float: right;">
+        <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
+      </div>
+    {% else %}
+      <p id="image-status">Creating image...</p>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          fetch('/api/create_image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ story_id: {{ story.id }} })
+          }).then(resp => { if (resp.ok) location.reload(); });
+        });
+      </script>
+    {% endif %}
+
+    <p>{{ story.texts.first.text|linebreaks }}</p>
+</div>
+
+<div style="clear: both;"></div>
 {% endblock %}

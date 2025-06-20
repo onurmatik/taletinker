@@ -6,12 +6,12 @@
   {% csrf_token %}
   {{ form.non_field_errors }}
   <div class="mb-3">
-    {{ form.username.label_tag }}
-    {{ form.username }}
+  {{ form.username.label_tag }}
+  {{ form.username }}
   </div>
   <div class="mb-3">
-    {{ form.password.label_tag }}
-    {{ form.password }}
+  {{ form.password.label_tag }}
+  {{ form.password }}
   </div>
   <button type="submit" class="btn btn-primary">Login</button>
 </form>
