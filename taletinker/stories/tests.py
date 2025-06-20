@@ -1,6 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from types import SimpleNamespace
 from django.core.files.base import ContentFile
 import base64
@@ -233,7 +233,9 @@ class CreateImageApiTests(TestCase):
 
     @patch("taletinker.api.openai.OpenAI")
     def test_generate_image(self, mock_openai):
-        img_data = base64.b64encode(b"img").decode()
+        img_data = (
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC"
+        )
         mock_client = mock_openai.return_value
         mock_client.images.generate.return_value = SimpleNamespace(
             data=[SimpleNamespace(b64_json=img_data)]
@@ -270,9 +272,10 @@ class CreateAudioApiTests(TestCase):
 
         dummy = DummyResp()
         mock_client = mock_openai.return_value
+        create_mock = MagicMock(return_value=dummy)
         mock_client.audio = SimpleNamespace(
             speech=SimpleNamespace(
-                with_streaming_response=SimpleNamespace(create=lambda **kwargs: dummy)
+                with_streaming_response=SimpleNamespace(create=create_mock)
             )
         )
 
@@ -284,6 +287,44 @@ class CreateAudioApiTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.story.audios.count(), 1)
+
+    @patch("taletinker.api.openai.OpenAI")
+    def test_generate_audio_specific_language(self, mock_openai):
+        self.story.texts.create(language="es", title="S", text="hola")
+
+        class DummyResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                pass
+
+            def iter_bytes(self, chunk_size=None):
+                return [b"mp3"]
+
+        dummy = DummyResp()
+        mock_client = mock_openai.return_value
+        create_mock = MagicMock(return_value=dummy)
+        mock_client.audio = SimpleNamespace(
+            speech=SimpleNamespace(
+                with_streaming_response=SimpleNamespace(create=create_mock)
+            )
+        )
+
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/create_audio",
+            {"story_id": self.story.id, "language": "es"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.story.audios.count(), 1)
+        self.assertEqual(self.story.audios.first().language, "es")
+        create_mock.assert_called_with(
+            model="gpt-4o-mini-tts",
+            voice="alloy",
+            input="hola",
+        )
 
 
 class StoryImageDisplayTests(TestCase):

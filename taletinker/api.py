@@ -143,6 +143,7 @@ def create_image(request, payload: ImagePayload):
 class AudioPayload(BaseModel):
     story_id: int
     voice: str = "alloy"
+    language: str | None = None
 
 
 @api.post("/create_audio")
@@ -152,7 +153,10 @@ def create_audio(request, payload: AudioPayload):
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
-    text_obj = story.texts.first()
+    if payload.language:
+        text_obj = story.texts.filter(language=payload.language).first()
+    else:
+        text_obj = story.texts.first()
     if not text_obj:
         return api.create_response(request, {"detail": "no story text"}, status=400)
 
