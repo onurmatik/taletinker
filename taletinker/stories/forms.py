@@ -88,3 +88,38 @@ class StoryCreationForm(forms.Form):
     language = forms.ChoiceField(
         choices=LANGUAGE_CHOICES, widget=forms.Select(attrs={"class": "form-select"})
     )
+
+
+AGE_FILTER_CHOICES = [("", "Any Age")] + [(str(i), str(i)) for i in range(3, 11)]
+
+
+class StoryFilterForm(forms.Form):
+    """Filtering options for the story list."""
+
+    age = forms.ChoiceField(
+        choices=AGE_FILTER_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        label="Age",
+    )
+
+    theme = forms.ChoiceField(
+        choices=[("", "Any Theme")] + THEME_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        label="Theme",
+    )
+
+    language = forms.ChoiceField(
+        choices=[("", "Any Language")] + LANGUAGE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        label="Language",
+    )
+
+    sort = forms.ChoiceField(
+        choices=[("newest", "Newest"), ("popular", "Most Liked")],
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        label="Sort By",
+    )
