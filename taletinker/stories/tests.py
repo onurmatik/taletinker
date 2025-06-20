@@ -1,5 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from unittest.mock import patch
+from types import SimpleNamespace
 
 from taletinker.accounts.models import User
 from taletinker.stories.models import Story
@@ -35,3 +37,29 @@ class CreateStoryViewTests(TestCase):
         story = Story.objects.first()
         self.assertEqual(story.author, self.user)
         self.assertEqual(story.parameters["realism"], 50)
+
+
+class NinjaCreateApiTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    @patch("taletinker.api.openai.OpenAI")
+    def test_post_returns_story_text(self, mock_openai):
+        mock_client = mock_openai.return_value
+        mock_client.chat.completions.create.return_value = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content="Hello"))]
+        )
+
+        response = self.client.post(
+            "/api/create",
+            {
+                "realism": 50,
+                "didactic": 50,
+                "age": 5,
+                "story_length": "short",
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["story"], "Hello")
+
