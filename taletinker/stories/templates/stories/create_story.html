@@ -2,6 +2,9 @@
 {% load static %}
 {% block title %}Create Story{% endblock %}
 {% block extra_head %}
+<style>
+  #spinner { display: none; margin: 1rem 0; font-weight: bold; }
+</style>
 <script>
 function toggleChip(el) {
   const input = el.querySelector('input');
@@ -13,6 +16,8 @@ function toggleChip(el) {
   }
 }
 window.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  const spinner = document.getElementById('spinner');
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => toggleChip(chip));
   });
@@ -22,12 +27,47 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('id_extra_instructions').value = text;
     });
   });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    spinner.style.display = 'block';
+
+    const data = {
+      realism: parseInt(form.realism.value),
+      didactic: parseInt(form.didactic.value),
+      age: parseInt(form.age.value),
+      themes: Array.from(form.querySelectorAll('input[name="themes"]:checked')).map(el => el.value),
+      purposes: Array.from(form.querySelectorAll('input[name="purposes"]:checked')).map(el => el.value),
+      characters: form.characters.value,
+      extra_instructions: form.extra_instructions.value,
+      story_length: form.story_length.value,
+      language: form.language.value,
+    };
+
+    try {
+      const resp = await fetch('/api/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await resp.json();
+      form.story_text.value = json.story;
+    } catch (err) {
+      console.error(err);
+      spinner.style.display = 'none';
+      return;
+    }
+
+    spinner.style.display = 'none';
+    form.submit();
+  });
 });
 </script>
 {% endblock %}
 {% block content %}
 <form method="post">
   {% csrf_token %}
+  <input type="hidden" name="story_text" id="story_text" />
   <div class="form-group">
     {{ form.realism.label_tag }}<br>
     {{ form.realism }}
@@ -73,6 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
     {{ form.language }}
   </div>
   <button type="submit">Generate Story</button>
+  <div id="spinner">Generating...</div>
 </form>
 <div class="form-group examples">
   <strong>Inspire me:</strong>

@@ -30,6 +30,7 @@ class CreateStoryViewTests(TestCase):
             "extra_instructions": "A test story.",
             "story_length": "short",
             "language": "en",
+            "story_text": "Once upon a time",
         }
         response = self.client.post(reverse("create_story"), data)
         self.assertEqual(response.status_code, 302)
@@ -37,6 +38,7 @@ class CreateStoryViewTests(TestCase):
         story = Story.objects.first()
         self.assertEqual(story.author, self.user)
         self.assertEqual(story.parameters["realism"], 50)
+        self.assertEqual(story.texts.first().text, "Once upon a time")
 
 
 class NinjaCreateApiTests(TestCase):
