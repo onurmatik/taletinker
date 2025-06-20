@@ -1,8 +1,18 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import StoryCreationForm
 from .models import Story, StoryText
+
+
+def story_list(request):
+    """Public homepage listing published stories."""
+    stories = (
+        Story.objects.filter(is_published=True)
+        .prefetch_related("texts", "author")
+        .order_by("-created_at")
+    )
+    return render(request, "stories/story_list.html", {"stories": stories})
 
 
 @login_required

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Story Library{% endblock %}
+{% block content %}
+<h2>Stories</h2>
+{% if stories %}
+<ul>
+  {% for story in stories %}
+  <li>
+    <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
+    {% if story.is_anonymous %}
+      by Anonymous
+    {% else %}
+      by {{ story.author.username }}
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No stories yet.</p>
+{% endif %}
+{% if user.is_authenticated %}
+<p><a href="{% url 'create_story' %}">Create a new story</a></p>
+{% endif %}
+{% endblock %}
+
