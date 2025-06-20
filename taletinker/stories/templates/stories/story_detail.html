@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Story Detail{% endblock %}
 {% block content %}
-<h2>{{ story.texts.first.title }}</h2>
+<h2>{{ text.title }}</h2>
 <p>
   <span
     class="like-btn"
@@ -9,6 +9,47 @@
   >{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
   <span class="like-count">{{ story.liked_by.count }}</span>
 </p>
+
+<p><strong>Languages:</strong>
+  {% for lang in languages %}
+    <a href="?lang={{ lang }}">{{ lang }}</a>{% if not forloop.last %}, {% endif %}
+  {% endfor %}
+</p>
+
+{% if user.is_authenticated and new_language_choices %}
+<form id="translate-form" class="row g-2 mb-3">
+  <div class="col-auto">
+    <label for="new-language" class="form-label">Add language</label>
+    <select id="new-language" class="form-select">
+      {% for code, label in new_language_choices %}
+      <option value="{{ code }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto align-self-end">
+    <button type="submit" class="btn btn-secondary">Create</button>
+  </div>
+</form>
+<script>
+  document.getElementById('translate-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const lang = document.getElementById('new-language').value;
+    fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ story_id: {{ story.id }}, language: lang })
+    }).then(resp => {
+      if (resp.ok) {
+        fetch('/api/create_audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ story_id: {{ story.id }}, language: lang })
+        }).then(() => { window.location = '?lang=' + lang; });
+      }
+    });
+  });
+</script>
+{% endif %}
 
 <div>
 
@@ -29,12 +70,12 @@
       </script>
     {% endif %}
 
-    <p>{{ story.texts.first.text|linebreaks }}</p>
+    <p>{{ text.text|linebreaks }}</p>
 
-    {% if story.audios.first %}
+    {% if audio %}
       <div id="audio-container" class="my-3">
         <audio id="story-audio" controls>
-          <source src="{{ story.audios.first.mp3.url }}" type="audio/mpeg" />
+          <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
         </audio>
       </div>
     {% else %}
@@ -44,7 +85,7 @@
           fetch('/api/create_audio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ story_id: {{ story.id }} })
+            body: JSON.stringify({ story_id: {{ story.id }}, language: '{{ selected_language }}' })
           }).then(resp => { if (resp.ok) location.reload(); });
         });
       </script>

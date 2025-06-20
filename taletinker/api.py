@@ -6,7 +6,7 @@ from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
 
-from taletinker.stories.models import Story, StoryImage, StoryAudio
+from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 from django.core.files.base import ContentFile
 import base64
 
@@ -144,6 +144,54 @@ class AudioPayload(BaseModel):
     story_id: int
     voice: str = "alloy"
     language: str | None = None
+
+
+class TranslationPayload(BaseModel):
+    story_id: int
+    language: str
+
+
+@api.post("/translate")
+def create_translation(request, payload: TranslationPayload):
+    if not request.user.is_authenticated:
+        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+
+    story = get_object_or_404(Story, pk=payload.story_id)
+
+    if story.texts.filter(language=payload.language).exists():
+        return api.create_response(request, {"detail": "exists"}, status=400)
+
+    base_text = story.texts.first()
+    if not base_text:
+        return api.create_response(request, {"detail": "no story text"}, status=400)
+
+    prompt = (
+        f"Translate the following children's story to {payload.language}. "
+        "Return the result strictly as JSON with keys 'title' and 'text'.\n"
+        f"Title: {base_text.title}\nStory: {base_text.text}"
+    )
+
+    client = openai.OpenAI()
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+        )
+        result = json.loads(response.choices[0].message.content)
+        story_text = StoryText.objects.create(
+            story=story,
+            language=payload.language,
+            title=result.get("title") or base_text.title,
+            text=result.get("text") or base_text.text,
+        )
+        return {"text_id": story_text.id}
+    except openai.OpenAIError as exc:
+        api.logger.exception("OpenAI API error")
+        return api.create_response(request, {"detail": str(exc)}, status=503)
+    except Exception:  # noqa: PIE786
+        api.logger.exception("Unexpected error")
+        return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
 @api.post("/create_audio")

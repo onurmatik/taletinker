@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from django.db.models import Count
 
-from .forms import StoryCreationForm, StoryFilterForm
+from .forms import LANGUAGE_CHOICES, StoryCreationForm, StoryFilterForm
 from .models import Story, StoryText
 
 
@@ -86,4 +86,31 @@ def create_story(request):
 
 def story_detail(request, story_id: int):
     story = get_object_or_404(Story, pk=story_id)
-    return render(request, "stories/story_detail.html", {"story": story})
+
+    lang = request.GET.get("lang")
+    text_obj = None
+    if lang:
+        text_obj = story.texts.filter(language=lang).first()
+    if not text_obj:
+        text_obj = story.texts.first()
+        lang = text_obj.language if text_obj else None
+
+    audio_obj = story.audios.filter(language=lang).first() if lang else None
+
+    available_langs = story.languages
+    new_language_choices = [
+        (code, label)
+        for code, label in LANGUAGE_CHOICES
+        if code not in available_langs
+    ]
+
+    context = {
+        "story": story,
+        "text": text_obj,
+        "audio": audio_obj,
+        "languages": available_langs,
+        "selected_language": lang,
+        "new_language_choices": new_language_choices,
+    }
+
+    return render(request, "stories/story_detail.html", context)
