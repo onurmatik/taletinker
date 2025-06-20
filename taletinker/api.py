@@ -6,7 +6,9 @@ from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
 
-from taletinker.stories.models import Story
+from taletinker.stories.models import Story, StoryImage
+from django.core.files.base import ContentFile
+import base64
 
 
 api = NinjaAPI()
@@ -81,3 +83,37 @@ def like_story(request, payload: LikePayload):
         liked = True
 
     return {"liked": liked, "likes": story.liked_by.count()}
+
+
+class ImagePayload(BaseModel):
+    story_id: int
+
+
+@api.post("/create_image")
+def create_image(request, payload: ImagePayload):
+    if not request.user.is_authenticated:
+        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+
+    story = get_object_or_404(Story, pk=payload.story_id)
+
+    prompt = story.texts.first().title if story.texts.exists() else "children's story cover"
+    client = openai.OpenAI()
+    try:
+        result = client.images.generate(
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+            response_format="b64_json",
+        )
+        b64 = result.data[0].b64_json
+        image_data = base64.b64decode(b64)
+        story_image = StoryImage(story=story)
+        story_image.image.save("cover.png", ContentFile(image_data))
+        story_image.thumbnail.save("cover.png", ContentFile(image_data))
+        return {"image_id": story_image.id}
+    except openai.OpenAIError as exc:
+        api.logger.exception("OpenAI API error")
+        return api.create_response(request, {"detail": str(exc)}, status=503)
+    except Exception:  # noqa: PIE786
+        api.logger.exception("Unexpected error")
+        return api.create_response(request, {"detail": "internal error"}, status=500)

@@ -2,6 +2,9 @@
 {% block title %}Story Detail{% endblock %}
 {% block content %}
 <h2>{{ story.texts.first.title }}</h2>
+{% if story.images.first %}
+  <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
+{% endif %}
 <p>
   <span
     class="like-btn"

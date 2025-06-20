@@ -2,6 +2,8 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from unittest.mock import patch
 from types import SimpleNamespace
+from django.core.files.base import ContentFile
+import base64
 
 from taletinker.accounts.models import User
 from taletinker.stories.models import Story
@@ -166,3 +168,43 @@ class LikeApiTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.json()["liked"])
+
+
+class CreateImageApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="pic", password="pass")
+        self.client = Client()
+        self.story = Story.objects.create(author=self.user)
+        self.story.texts.create(language="en", title="Cover", text="t")
+
+    @patch("taletinker.api.openai.OpenAI")
+    def test_generate_image(self, mock_openai):
+        img_data = base64.b64encode(b"img").decode()
+        mock_client = mock_openai.return_value
+        mock_client.images.generate.return_value = SimpleNamespace(
+            data=[SimpleNamespace(b64_json=img_data)]
+        )
+
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/create_image",
+            {"story_id": self.story.id},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.story.images.count(), 1)
+
+
+class StoryImageDisplayTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="img", password="pass")
+        self.client = Client()
+
+    def test_detail_shows_image(self):
+        story = Story.objects.create(author=self.user, is_published=True)
+        story.texts.create(language="en", title="T", text="x")
+        story.images.create(image=ContentFile(b"im", "c.png"), thumbnail=ContentFile(b"im", "c.png"))
+
+        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        self.assertContains(resp, "<img")
+
