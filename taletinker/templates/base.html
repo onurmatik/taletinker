@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TaleTinker{% endblock %}</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-VmR5l6GbLrp3UEbzRpw4Ik7HuX3bv3XbnwkD+ljPO5zsxFrq4eDUl784j8AeqbdB"
-      crossorigin="anonymous"
-    />
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+          integrity="sha256-zRgmWB5PK4CvTx4FiXsxbHaYRBBjz/rvu97sOC7kzXI=" crossorigin="anonymous"
+    >
+
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-      <div class="container-fluid">
+      <div class="container">
         <a class="navbar-brand" href="/">TaleTinker</a>
         <button
           class="navbar-toggler"
@@ -29,15 +29,12 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'story_list' %}">Home</a>
-            </li>
             {% if user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'create_story' %}">New Story</a>
               </li>
               <li class="nav-item">
-                <span class="navbar-text me-2">Logged in as {{ user.username }}</span>
+                <span class="navbar-text">{{ user.username }}</span>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'logout' %}">Logout</a>
@@ -56,10 +53,9 @@
         {% block content %}{% endblock %}
     </div>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-mfNdK+UGeCRsUShFbcZpQlE3eWEY5VmIp+MSpV5Hz20sjsFvdcTtgEcL50DJbRZF"
-      crossorigin="anonymous"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+            integrity="sha256-NfRUfZNkERrKSFA0c1a8VmCplPDYtpTYj5lQmKe1R/o="
+            crossorigin="anonymous"
     ></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {

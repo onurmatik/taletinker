@@ -12,6 +12,7 @@ class StoryAdmin(admin.ModelAdmin):
         "is_published",
         "created_at",
     ]
+    list_editable = ["is_published"]
 
 
 @admin.register(StoryText)

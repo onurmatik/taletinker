@@ -91,7 +91,7 @@ window.addEventListener('DOMContentLoaded', () => {
     <label class="form-label">Themes</label>
     <div class="chips">
       {% for checkbox in form.themes %}
-      <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
+      <div class="chip">{{ checkbox }}</div>
       {% endfor %}
     </div>
   </div>
@@ -99,7 +99,7 @@ window.addEventListener('DOMContentLoaded', () => {
     <label class="form-label">Purpose</label>
     <div class="chips">
       {% for checkbox in form.purposes %}
-      <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
+      <div class="chip">{{ checkbox }}</div>
       {% endfor %}
     </div>
   </div>
