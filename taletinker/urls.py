@@ -15,11 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.http import HttpResponseRedirect
 from django.urls import path
 
 from taletinker.stories.views import create_story
+from taletinker.accounts.views import LogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('create/', create_story, name='create_story'),
+    path('', lambda request: HttpResponseRedirect('/create/')),
 ]

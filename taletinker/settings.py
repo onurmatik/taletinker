@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-*^-ox&1)_r578k)%!2(eoj)@rp3yr9rz!ws9qvaoz6=5@c+!k8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "testserver"]
 
 
 # Application definition
@@ -132,3 +132,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
+
+# Auth settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'create_story'
+LOGOUT_REDIRECT_URL = 'login'
