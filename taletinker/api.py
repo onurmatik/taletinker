@@ -6,7 +6,7 @@ from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
 
-from taletinker.stories.models import Story, StoryImage
+from taletinker.stories.models import Story, StoryImage, StoryAudio
 from django.core.files.base import ContentFile
 import base64
 
@@ -111,6 +111,42 @@ def create_image(request, payload: ImagePayload):
         story_image.image.save("cover.png", ContentFile(image_data))
         story_image.thumbnail.save("cover.png", ContentFile(image_data))
         return {"image_id": story_image.id}
+    except openai.OpenAIError as exc:
+        api.logger.exception("OpenAI API error")
+        return api.create_response(request, {"detail": str(exc)}, status=503)
+    except Exception:  # noqa: PIE786
+        api.logger.exception("Unexpected error")
+        return api.create_response(request, {"detail": "internal error"}, status=500)
+
+
+class AudioPayload(BaseModel):
+    story_id: int
+    voice: str = "alloy"
+
+
+@api.post("/create_audio")
+def create_audio(request, payload: AudioPayload):
+    if not request.user.is_authenticated:
+        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+
+    story = get_object_or_404(Story, pk=payload.story_id)
+
+    text_obj = story.texts.first()
+    if not text_obj:
+        return api.create_response(request, {"detail": "no story text"}, status=400)
+
+    client = openai.OpenAI()
+    try:
+        with client.audio.speech.with_streaming_response.create(
+            model="gpt-4o-mini-tts",
+            voice=payload.voice,
+            input=text_obj.text,
+        ) as response:
+            audio_data = b"".join(response.iter_bytes())
+
+        story_audio = StoryAudio(story=story, language=text_obj.language)
+        story_audio.mp3.save("speech.mp3", ContentFile(audio_data))
+        return {"audio_id": story_audio.id}
     except openai.OpenAIError as exc:
         api.logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
