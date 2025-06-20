@@ -31,6 +31,11 @@ class Story(models.Model):
     def __str__(self):
         return f"Story by {self.author} @{self.created_at} in {self.original_language}"
 
+    @property
+    def languages(self) -> list[str]:
+        """Return list of language codes available for this story."""
+        return list(self.texts.values_list("language", flat=True))
+
 
 class StoryText(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="texts")
