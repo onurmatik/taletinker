@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 
 from .forms import StoryCreationForm
 from .models import Story, StoryText
@@ -32,7 +32,12 @@ def create_story(request):
                     title=text.splitlines()[0][:255] if text.strip() else "Story",
                     text=text,
                 )
-            return redirect("create_story")
+            return redirect("story_detail", story_id=story.id)
     else:
         form = StoryCreationForm()
     return render(request, "stories/create_story.html", {"form": form})
+
+
+def story_detail(request, story_id: int):
+    story = get_object_or_404(Story, pk=story_id)
+    return render(request, "stories/story_detail.html", {"story": story})

@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.http import HttpResponseRedirect
 from django.urls import path
 
-from taletinker.stories.views import create_story
+from taletinker.stories.views import create_story, story_detail
 from taletinker.accounts.views import LogoutView
 from taletinker.api import api as ninja_api
 
@@ -28,6 +28,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('create/', create_story, name='create_story'),
+    path('story/<int:story_id>/', story_detail, name='story_detail'),
     path('api/', ninja_api.urls),
     path('', lambda request: HttpResponseRedirect('/create/')),
 ]
