@@ -3,7 +3,20 @@
 {% block content %}
 <h2>{{ story.texts.first.title }}</h2>
 {% if story.images.first %}
-  <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
+  <div id="image-container">
+    <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
+  </div>
+{% else %}
+  <p id="image-status">Creating image...</p>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/create_image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ story_id: {{ story.id }} })
+      }).then(resp => { if (resp.ok) location.reload(); });
+    });
+  </script>
 {% endif %}
 <p>
   <span

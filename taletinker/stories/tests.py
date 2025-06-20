@@ -208,3 +208,27 @@ class StoryImageDisplayTests(TestCase):
         resp = self.client.get(reverse("story_detail", args=[story.id]))
         self.assertContains(resp, "<img")
 
+
+class ImageCreationFlowTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="flow", password="pass")
+        self.client = Client()
+
+    def test_detail_shows_creation_message_after_story_post(self):
+        self.client.force_login(self.user)
+        data = {
+            "realism": 50,
+            "didactic": 50,
+            "age": 5,
+            "themes": ["family"],
+            "purposes": ["joyful"],
+            "characters": "Jane",
+            "extra_instructions": "A test story.",
+            "story_length": "short",
+            "language": "en",
+            "story_text": "Once",
+            "story_title": "T",
+        }
+        resp = self.client.post(reverse("create_story"), data, follow=True)
+        self.assertContains(resp, "Creating image...")
+
