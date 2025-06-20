@@ -89,16 +89,27 @@ class ImagePayload(BaseModel):
     story_id: int
 
 
+from io import BytesIO
+
+from PIL import Image
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+import base64
+import openai
+
+THUMB_MAX_SIZE = (256, 256)          # tweak as you like
+
 @api.post("/create_image")
 def create_image(request, payload: ImagePayload):
     if not request.user.is_authenticated:
         return api.create_response(request, {"detail": "unauthorized"}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
-
     prompt = story.texts.first().title if story.texts.exists() else "children's story cover"
+
     client = openai.OpenAI()
     try:
+        # 1) generate the cover once
         result = client.images.generate(
             prompt=prompt,
             n=1,
@@ -107,14 +118,24 @@ def create_image(request, payload: ImagePayload):
         )
         b64 = result.data[0].b64_json
         image_data = base64.b64decode(b64)
+
+        # 2) save the full-size cover
         story_image = StoryImage(story=story)
-        story_image.image.save("cover.png", ContentFile(image_data))
-        story_image.thumbnail.save("cover.png", ContentFile(image_data))
+        story_image.image.save(f"cover_{story.pk}.png", ContentFile(image_data))
+
+        # 3) build and save the thumbnail locally
+        with Image.open(BytesIO(image_data)) as im:
+            im.thumbnail(THUMB_MAX_SIZE, Image.LANCZOS)
+            thumb_io = BytesIO()
+            im.save(thumb_io, format="PNG")
+            story_image.thumbnail.save(f"thumb_{story.pk}.png", ContentFile(thumb_io.getvalue()))
+
         return {"image_id": story_image.id}
+
     except openai.OpenAIError as exc:
         api.logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
-    except Exception:  # noqa: PIE786
+    except Exception:                   # noqa: PIE786
         api.logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
@@ -145,7 +166,7 @@ def create_audio(request, payload: AudioPayload):
             audio_data = b"".join(response.iter_bytes())
 
         story_audio = StoryAudio(story=story, language=text_obj.language)
-        story_audio.mp3.save("speech.mp3", ContentFile(audio_data))
+        story_audio.mp3.save(f"speech{story.pk}.mp3", ContentFile(audio_data))
         return {"audio_id": story_audio.id}
     except openai.OpenAIError as exc:
         api.logger.exception("OpenAI API error")
