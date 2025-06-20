@@ -4,31 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TaleTinker{% endblock %}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 1rem auto; max-width: 800px; padding: 0 1rem; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; }
-        input[type=range] { width: 100%; }
-        .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
-        .chip { padding: 0.25rem 0.75rem; border: 1px solid #999; border-radius: 16px; cursor: pointer; }
-        .chip input { display: none; }
-        .chip.selected { background-color: #ddd; }
-        .examples button { margin-right: 0.5rem; }
-    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-VmR5l6GbLrp3UEbzRpw4Ik7HuX3bv3XbnwkD+ljPO5zsxFrq4eDUl784j8AeqbdB"
+      crossorigin="anonymous"
+    />
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <h1><a href="/">TaleTinker</a></h1>
-    <p>
-        <a href="{% url 'story_list' %}">Home</a>
-        {% if user.is_authenticated %}
-            | <a href="{% url 'create_story' %}">New Story</a>
-            | Logged in as {{ user.username }} |
-            <a href="{% url 'logout' %}">Logout</a>
-        {% else %}
-            | <a href="{% url 'login' %}">Login</a>
-        {% endif %}
-    </p>
-    {% block content %}{% endblock %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">TaleTinker</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'story_list' %}">Home</a>
+            </li>
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'create_story' %}">New Story</a>
+              </li>
+              <li class="nav-item">
+                <span class="navbar-text me-2">Logged in as {{ user.username }}</span>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-mfNdK+UGeCRsUShFbcZpQlE3eWEY5VmIp+MSpV5Hz20sjsFvdcTtgEcL50DJbRZF"
+      crossorigin="anonymous"
+    ></script>
 </body>
 </html>

@@ -4,6 +4,11 @@
 {% block extra_head %}
 <style>
   #spinner { display: none; margin: 1rem 0; font-weight: bold; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+  .chip { padding: 0.25rem 0.75rem; border: 1px solid #999; border-radius: 16px; cursor: pointer; }
+  .chip input { display: none; }
+  .chip.selected { background-color: #ddd; }
+  .examples button { margin-right: 0.5rem; }
 </style>
 <script>
 function toggleChip(el) {
@@ -66,61 +71,61 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 {% endblock %}
 {% block content %}
-<form method="post">
+<form method="post" class="mb-4">
   {% csrf_token %}
   <input type="hidden" name="story_text" id="story_text" />
   <input type="hidden" name="story_title" id="story_title" />
-  <div class="form-group">
-    {{ form.realism.label_tag }}<br>
+  <div class="mb-3">
+    {{ form.realism.label_tag }}
     {{ form.realism }}
   </div>
-  <div class="form-group">
-    {{ form.didactic.label_tag }}<br>
+  <div class="mb-3">
+    {{ form.didactic.label_tag }}
     {{ form.didactic }}
   </div>
-  <div class="form-group">
-    {{ form.age.label_tag }} (3–10+)<br>
+  <div class="mb-3">
+    {{ form.age.label_tag }} (3–10+)
     {{ form.age }}
   </div>
-  <div class="form-group">
-    <label>Themes</label>
+  <div class="mb-3">
+    <label class="form-label">Themes</label>
     <div class="chips">
       {% for checkbox in form.themes %}
       <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
       {% endfor %}
     </div>
   </div>
-  <div class="form-group">
-    <label>Purpose</label>
+  <div class="mb-3">
+    <label class="form-label">Purpose</label>
     <div class="chips">
       {% for checkbox in form.purposes %}
       <div class="chip">{{ checkbox }} {{ checkbox.choice_label }}</div>
       {% endfor %}
     </div>
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     {{ form.characters.label_tag }}
     {{ form.characters }}
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     {{ form.extra_instructions.label_tag }}
     {{ form.extra_instructions }}
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     {{ form.story_length.label_tag }}
     {{ form.story_length }}
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     {{ form.language.label_tag }}
     {{ form.language }}
   </div>
-  <button type="submit">Generate Story</button>
+  <button type="submit" class="btn btn-primary">Generate Story</button>
   <div id="spinner">Generating...</div>
 </form>
-<div class="form-group examples">
+<div class="mb-3 examples">
   <strong>Inspire me:</strong>
-  <button type="button" class="example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
-  <button type="button" class="example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
-  <button type="button" class="example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
+  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
+  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
+  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
 </div>
 {% endblock %}

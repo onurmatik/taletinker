@@ -3,5 +3,5 @@
 {% block content %}
 <h2>{{ story.texts.first.title }}</h2>
 <p>{{ story.texts.first.text|linebreaks }}</p>
-<a href="{% url 'create_story' %}">Create another story</a>
+<a class="btn btn-secondary mt-3" href="{% url 'create_story' %}">Create another story</a>
 {% endblock %}

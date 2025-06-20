@@ -34,7 +34,7 @@ class StoryCreationForm(forms.Form):
         min_value=0,
         max_value=100,
         initial=50,
-        widget=forms.NumberInput(attrs={"type": "range"}),
+        widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Realistic ↔ Fantastic",
     )
 
@@ -42,7 +42,7 @@ class StoryCreationForm(forms.Form):
         min_value=0,
         max_value=100,
         initial=50,
-        widget=forms.NumberInput(attrs={"type": "range"}),
+        widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Didactic ↔ Fun",
     )
 
@@ -50,7 +50,9 @@ class StoryCreationForm(forms.Form):
         min_value=3,
         max_value=10,
         initial=5,
-        widget=forms.NumberInput(attrs={"type": "range", "step": 1}),
+        widget=forms.NumberInput(
+            attrs={"type": "range", "step": 1, "class": "form-range"}
+        ),
         label="Target Age",
     )
 
@@ -67,12 +69,22 @@ class StoryCreationForm(forms.Form):
         label="Purpose",
     )
 
-    characters = forms.CharField(required=False, label="Characters")
+    characters = forms.CharField(
+        required=False,
+        label="Characters",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
     extra_instructions = forms.CharField(
-        widget=forms.Textarea,
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         required=False,
         label="Extra Instructions",
     )
 
-    story_length = forms.ChoiceField(choices=LENGTH_CHOICES, label="Story Length")
-    language = forms.ChoiceField(choices=LANGUAGE_CHOICES)
+    story_length = forms.ChoiceField(
+        choices=LENGTH_CHOICES,
+        label="Story Length",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    language = forms.ChoiceField(
+        choices=LANGUAGE_CHOICES, widget=forms.Select(attrs={"class": "form-select"})
+    )
