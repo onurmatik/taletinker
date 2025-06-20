@@ -195,6 +195,43 @@ class CreateImageApiTests(TestCase):
         self.assertEqual(self.story.images.count(), 1)
 
 
+class CreateAudioApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="snd", password="pass")
+        self.client = Client()
+        self.story = Story.objects.create(author=self.user)
+        self.story.texts.create(language="en", title="S", text="hello")
+
+    @patch("taletinker.api.openai.OpenAI")
+    def test_generate_audio(self, mock_openai):
+        class DummyResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                pass
+
+            def iter_bytes(self, chunk_size=None):
+                return [b"mp3"]
+
+        dummy = DummyResp()
+        mock_client = mock_openai.return_value
+        mock_client.audio = SimpleNamespace(
+            speech=SimpleNamespace(
+                with_streaming_response=SimpleNamespace(create=lambda **kwargs: dummy)
+            )
+        )
+
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/create_audio",
+            {"story_id": self.story.id},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.story.audios.count(), 1)
+
+
 class StoryImageDisplayTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="img", password="pass")
