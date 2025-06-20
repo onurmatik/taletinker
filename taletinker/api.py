@@ -1,4 +1,5 @@
 from typing import List
+import json
 
 from ninja import NinjaAPI
 from pydantic import BaseModel, Field
@@ -34,6 +35,9 @@ def build_prompt(params: StoryParams) -> str:
         parts.append("Characters: " + params.characters + ".")
     if params.extra_instructions:
         parts.append(params.extra_instructions)
+    parts.append(
+        "Return the result strictly as JSON with keys 'title' and 'text'."
+    )
     return " ".join(parts)
 
 
@@ -45,9 +49,10 @@ def create_story(request, params: StoryParams):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
         )
-        story_text = response.choices[0].message.content.strip()
-        return {"story": story_text}
+        result = json.loads(response.choices[0].message.content)
+        return {"title": result.get("title"), "text": result.get("text")}
     except openai.OpenAIError as exc:
         api.logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)

@@ -25,11 +25,12 @@ def create_story(request):
                 original_language=form.cleaned_data["language"],
             )
             text = request.POST.get("story_text")
+            title = request.POST.get("story_title")
             if text:
                 StoryText.objects.create(
                     story=story,
                     language=form.cleaned_data["language"],
-                    title=text.splitlines()[0][:255] if text.strip() else "Story",
+                    title=title or (text.splitlines()[0][:255] if text.strip() else "Story"),
                     text=text,
                 )
             return redirect("story_detail", story_id=story.id)
