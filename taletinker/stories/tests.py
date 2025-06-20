@@ -268,4 +268,19 @@ class ImageCreationFlowTests(TestCase):
         }
         resp = self.client.post(reverse("create_story"), data, follow=True)
         self.assertContains(resp, "Creating image...")
+        self.assertContains(resp, "Creating audio...")
+
+
+class StoryAudioDisplayTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="aud", password="pass")
+        self.client = Client()
+
+    def test_detail_shows_audio(self):
+        story = Story.objects.create(author=self.user, is_published=True)
+        story.texts.create(language="en", title="T", text="x")
+        story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
+
+        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        self.assertContains(resp, "<audio")
 

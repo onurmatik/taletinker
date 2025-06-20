@@ -30,6 +30,25 @@
     {% endif %}
 
     <p>{{ story.texts.first.text|linebreaks }}</p>
+
+    {% if story.audios.first %}
+      <div id="audio-container" class="my-3">
+        <audio id="story-audio" controls>
+          <source src="{{ story.audios.first.mp3.url }}" type="audio/mpeg" />
+        </audio>
+      </div>
+    {% else %}
+      <p id="audio-status">Creating audio...</p>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          fetch('/api/create_audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ story_id: {{ story.id }} })
+          }).then(resp => { if (resp.ok) location.reload(); });
+        });
+      </script>
+    {% endif %}
 </div>
 
 <div style="clear: both;"></div>
