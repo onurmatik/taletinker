@@ -1,9 +1,12 @@
 from typing import List
 import json
 
+from django.shortcuts import get_object_or_404
 from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
+
+from taletinker.stories.models import Story
 
 
 api = NinjaAPI()
@@ -35,9 +38,7 @@ def build_prompt(params: StoryParams) -> str:
         parts.append("Characters: " + params.characters + ".")
     if params.extra_instructions:
         parts.append(params.extra_instructions)
-    parts.append(
-        "Return the result strictly as JSON with keys 'title' and 'text'."
-    )
+    parts.append("Return the result strictly as JSON with keys 'title' and 'text'.")
     return " ".join(parts)
 
 
@@ -59,3 +60,24 @@ def create_story(request, params: StoryParams):
     except Exception as exc:  # noqa: PIE786
         api.logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
+
+
+class LikePayload(BaseModel):
+    story_id: int
+
+
+@api.post("/like")
+def like_story(request, payload: LikePayload):
+    if not request.user.is_authenticated:
+        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+
+    story = get_object_or_404(Story, pk=payload.story_id)
+
+    if story.liked_by.filter(pk=request.user.pk).exists():
+        story.liked_by.remove(request.user)
+        liked = False
+    else:
+        story.liked_by.add(request.user)
+        liked = True
+
+    return {"liked": liked, "likes": story.liked_by.count()}

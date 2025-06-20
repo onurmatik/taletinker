@@ -61,5 +61,27 @@
       integrity="sha384-mfNdK+UGeCRsUShFbcZpQlE3eWEY5VmIp+MSpV5Hz20sjsFvdcTtgEcL50DJbRZF"
       crossorigin="anonymous"
     ></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.like-btn').forEach(el => {
+          el.addEventListener('click', async () => {
+            const storyId = el.dataset.storyId;
+            const resp = await fetch('/api/like', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ story_id: storyId })
+            });
+            if (resp.ok) {
+              const data = await resp.json();
+              el.textContent = data.liked ? '★' : '☆';
+              const countEl = el.nextElementSibling;
+              if (countEl && countEl.classList.contains('like-count')) {
+                countEl.textContent = data.likes;
+              }
+            }
+          });
+        });
+      });
+    </script>
 </body>
 </html>

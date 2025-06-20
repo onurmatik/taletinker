@@ -2,6 +2,13 @@
 {% block title %}Story Detail{% endblock %}
 {% block content %}
 <h2>{{ story.texts.first.title }}</h2>
+<p>
+  <span
+    class="like-btn"
+    data-story-id="{{ story.id }}"
+  >{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
+  <span class="like-count">{{ story.liked_by.count }}</span>
+</p>
 <p>{{ story.texts.first.text|linebreaks }}</p>
 <a class="btn btn-secondary mt-3" href="{% url 'create_story' %}">Create another story</a>
 {% endblock %}
