@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Play Playlist{% endblock %}
+{% block extra_head %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const audios = document.querySelectorAll('.playlist-audio');
+    if (audios.length) {
+      audios.forEach((audio, idx) => {
+        audio.addEventListener('ended', () => {
+          const next = audios[idx + 1];
+          if (next) next.play();
+        });
+      });
+      audios[0].play();
+    }
+  });
+</script>
+{% endblock %}
 {% block content %}
 <h2 class="mb-3">My Playlist</h2>
 <ul class="list-group mb-3">
@@ -8,7 +24,7 @@
       <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
       {% with audio=story.audios.first %}
         {% if audio %}
-          <audio controls class="w-100 mt-2">
+          <audio controls class="w-100 mt-2 playlist-audio">
             <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
           </audio>
         {% else %}
