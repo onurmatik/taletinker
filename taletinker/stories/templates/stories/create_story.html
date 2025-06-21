@@ -9,6 +9,19 @@
   .chip input { display: none; }
   .chip.selected { background-color: #ddd; }
   .examples button { margin-right: 0.5rem; }
+  .range-bubble-wrapper { position: relative; }
+  .range-bubble {
+    position: absolute;
+    top: -1.5rem;
+    left: 0;
+    transform: translateX(-50%);
+    padding: 0 0.25rem;
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
 </style>
 <script>
 function toggleChip(el) {
@@ -25,6 +38,22 @@ window.addEventListener('DOMContentLoaded', () => {
   const spinner = document.getElementById('spinner');
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => toggleChip(chip));
+  });
+  document.querySelectorAll('.range-bubble').forEach(input => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'range-bubble-wrapper';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+    const bubble = document.createElement('span');
+    bubble.className = 'range-bubble';
+    wrapper.appendChild(bubble);
+    const update = () => {
+      const val = (input.value - input.min) / (input.max - input.min);
+      bubble.textContent = input.value;
+      bubble.style.left = `calc(${val * 100}% + (${8 - val * 16}px))`;
+    };
+    input.addEventListener('input', update);
+    update();
   });
   document.querySelectorAll('.example-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -75,17 +104,38 @@ window.addEventListener('DOMContentLoaded', () => {
   {% csrf_token %}
   <input type="hidden" name="story_text" id="story_text" />
   <input type="hidden" name="story_title" id="story_title" />
+
+  <h5 class="mt-3">Tone &amp; Audience</h5>
   <div class="mb-3">
     {{ form.realism.label_tag }}
     {{ form.realism }}
+    <div class="d-flex justify-content-between small text-muted px-1">
+      <span>Realistic</span><span>Fantastic</span>
+    </div>
   </div>
   <div class="mb-3">
     {{ form.didactic.label_tag }}
     {{ form.didactic }}
+    <div class="d-flex justify-content-between small text-muted px-1">
+      <span>Didactic</span><span>Fun</span>
+    </div>
   </div>
   <div class="mb-3">
     {{ form.age.label_tag }} (3–10+)
     {{ form.age }}
+    <datalist id="age-ticks">
+      <option value="3"></option>
+      <option value="4"></option>
+      <option value="5"></option>
+      <option value="6"></option>
+      <option value="7"></option>
+      <option value="8"></option>
+      <option value="9"></option>
+      <option value="10" label="10+"></option>
+    </datalist>
+    <div class="d-flex justify-content-between small text-muted px-1">
+      <span>3</span><span class="ms-auto">10+</span>
+    </div>
   </div>
   <div class="mb-3">
     <label class="form-label">Themes</label>
