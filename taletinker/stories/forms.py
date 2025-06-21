@@ -29,7 +29,9 @@ class StoryCreationForm(forms.Form):
         min_value=0,
         max_value=100,
         initial=50,
-        widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
+        widget=forms.NumberInput(
+            attrs={"type": "range", "class": "form-range range-bubble"}
+        ),
         label="Realistic ↔ Fantastic",
     )
 
@@ -37,7 +39,9 @@ class StoryCreationForm(forms.Form):
         min_value=0,
         max_value=100,
         initial=50,
-        widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
+        widget=forms.NumberInput(
+            attrs={"type": "range", "class": "form-range range-bubble"}
+        ),
         label="Didactic ↔ Fun",
     )
 
@@ -46,7 +50,12 @@ class StoryCreationForm(forms.Form):
         max_value=10,
         initial=5,
         widget=forms.NumberInput(
-            attrs={"type": "range", "step": 1, "class": "form-range"}
+            attrs={
+                "type": "range",
+                "step": 1,
+                "class": "form-range range-bubble",
+                "list": "age-ticks",
+            }
         ),
         label="Target Age",
     )
