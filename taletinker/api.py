@@ -7,6 +7,7 @@ from PIL import Image
 from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
+import logging
 
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
@@ -15,6 +16,7 @@ from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 
 
 api = NinjaAPI()
+logger = logging.getLogger(__name__)
 
 
 class StoryParams(BaseModel):
@@ -60,10 +62,10 @@ def create_story(request, params: StoryParams):
         result = json.loads(response.choices[0].message.content)
         return {"title": result.get("title"), "text": result.get("text")}
     except openai.OpenAIError as exc:
-        api.logger.exception("OpenAI API error")
+        logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception as exc:  # noqa: PIE786
-        api.logger.exception("Unexpected error")
+        logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
@@ -133,10 +135,10 @@ def create_image(request, payload: ImagePayload):
         return {"image_id": story_image.id}
 
     except openai.OpenAIError as exc:
-        api.logger.exception("OpenAI API error")
+        logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception:                   # noqa: PIE786
-        api.logger.exception("Unexpected error")
+        logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
@@ -181,10 +183,10 @@ def create_translation(request, payload: TranslationPayload):
         )
         return {"text_id": story_text.id}
     except openai.OpenAIError as exc:
-        api.logger.exception("OpenAI API error")
+        logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception:  # noqa: PIE786
-        api.logger.exception("Unexpected error")
+        logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
@@ -224,8 +226,8 @@ def create_audio(request, payload: AudioPayload):
         story_audio.mp3.save(f"speech{story.pk}.mp3", ContentFile(audio_data))
         return {"audio_id": story_audio.id}
     except openai.OpenAIError as exc:
-        api.logger.exception("OpenAI API error")
+        logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception:  # noqa: PIE786
-        api.logger.exception("Unexpected error")
+        logger.exception("Unexpected error")
         return api.create_response(request, {"detail": "internal error"}, status=500)
