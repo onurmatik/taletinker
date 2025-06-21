@@ -9,7 +9,13 @@
   .chip input { display: none; }
   .chip.selected { background-color: #ddd; }
   .examples button { margin-right: 0.5rem; }
-  .range-bubble-wrapper { position: relative; }
+  .range-bubble-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .range-bubble-wrapper input[type=range] {
+    width: 100%;
+  }
   .range-bubble {
     position: absolute;
     top: -1.5rem;
@@ -47,9 +53,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const bubble = document.createElement('span');
     bubble.className = 'range-bubble';
     wrapper.appendChild(bubble);
+    const labels = input.dataset.labels
+      ? input.dataset.labels.split(',').map(l => l.trim())
+      : null;
     const update = () => {
       const val = (input.value - input.min) / (input.max - input.min);
-      bubble.textContent = input.value;
+      bubble.textContent = labels ? labels[input.value - input.min] : input.value;
       bubble.style.left = `calc(${val * 100}% + (${8 - val * 16}px))`;
     };
     input.addEventListener('input', update);
@@ -110,14 +119,22 @@ window.addEventListener('DOMContentLoaded', () => {
     {{ form.realism.label_tag }}
     {{ form.realism }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>Realistic</span><span>Fantastic</span>
+      <span>realistic</span>
+      <span>moderately realistic</span>
+      <span>balanced</span>
+      <span>moderately fantastic</span>
+      <span>fantastic</span>
     </div>
   </div>
   <div class="mb-3">
     {{ form.didactic.label_tag }}
     {{ form.didactic }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>Didactic</span><span>Fun</span>
+      <span>realistic</span>
+      <span>moderately realistic</span>
+      <span>balanced</span>
+      <span>moderately fantastic</span>
+      <span>fantastic</span>
     </div>
   </div>
   <div class="mb-3">

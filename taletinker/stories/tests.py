@@ -23,8 +23,8 @@ class CreateStoryViewTests(TestCase):
     def test_post_creates_story(self):
         self.client.force_login(self.user)
         data = {
-            "realism": 50,
-            "didactic": 50,
+            "realism": 3,
+            "didactic": 3,
             "age": 5,
             "themes": ["family"],
             "purposes": ["joyful"],
@@ -40,15 +40,15 @@ class CreateStoryViewTests(TestCase):
         self.assertEqual(Story.objects.count(), 1)
         story = Story.objects.first()
         self.assertEqual(story.author, self.user)
-        self.assertEqual(story.parameters["realism"], 50)
+        self.assertEqual(story.parameters["realism"], 3)
         self.assertEqual(story.texts.first().text, "Once upon a time")
         self.assertEqual(story.texts.first().title, "My Story")
 
     def test_post_redirects_to_detail(self):
         self.client.force_login(self.user)
         data = {
-            "realism": 50,
-            "didactic": 50,
+            "realism": 3,
+            "didactic": 3,
             "age": 5,
             "themes": ["family"],
             "purposes": ["joyful"],
@@ -82,8 +82,8 @@ class NinjaCreateApiTests(TestCase):
         response = self.client.post(
             "/api/create",
             {
-                "realism": 50,
-                "didactic": 50,
+                "realism": 3,
+                "didactic": 3,
                 "age": 5,
                 "story_length": "short",
             },
@@ -357,8 +357,8 @@ class ImageCreationFlowTests(TestCase):
     def test_detail_shows_creation_message_after_story_post(self):
         self.client.force_login(self.user)
         data = {
-            "realism": 50,
-            "didactic": 50,
+            "realism": 3,
+            "didactic": 3,
             "age": 5,
             "themes": ["family"],
             "purposes": ["joyful"],
