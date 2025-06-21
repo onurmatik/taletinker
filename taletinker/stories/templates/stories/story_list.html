@@ -7,7 +7,6 @@
     top: 70px;
   }
   #playlist-panel .playlist-item.active {
-    background-color: #e9ecef;
   }
 </style>
 <script>
@@ -183,16 +182,20 @@
   <div class="col-md-4">
     {% if user.is_authenticated %}
     <div id="playlist-panel" class="bg-light border p-3 rounded">
-      <h5>My Playlist</h5>
-      <p id="playlist-summary" class="small text-muted mb-1"></p>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">My Playlist</h5>
+          <p id="playlist-summary" class="small text-muted mb-0">3 songs, 10 min</p>
+        </div>
+
       <ul class="list-group mb-3" id="playlist">
         {% for item in playlist.stories.all %}
           {% with audio=item.audios.first %}
-          <li class="list-group-item d-flex justify-content-between align-items-center playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
+          <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
             <span class="text-decoration-none">{{ item.texts.first.title }}</span>
             <div class="d-flex align-items-center">
               {% if audio %}
-                <span class="duration small text-muted me-2"></span>
+                <span class="duration small me-2"></span>
                 <audio preload="metadata" class="metadata-audio d-none">
                   <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
                 </audio>
