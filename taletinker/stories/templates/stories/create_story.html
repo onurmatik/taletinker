@@ -1,198 +1,197 @@
+{# templates/create_story.html #}
 {% extends "base.html" %}
 {% load static %}
+
 {% block title %}Create Story{% endblock %}
+
 {% block extra_head %}
 <style>
-  #spinner { display: none; margin: 1rem 0; font-weight: bold; }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
-  .chip { padding: 0.25rem 0.75rem; border: 1px solid #999; border-radius: 16px; cursor: pointer; }
-  .chip input { display: none; }
-  .chip.selected { background-color: #ddd; }
-  .examples button { margin-right: 0.5rem; }
-  .range-bubble-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .range-bubble-wrapper input[type=range] {
-    width: 100%;
-  }
-  .range-bubble {
-    position: absolute;
-    top: -1.5rem;
-    left: 0;
-    transform: translateX(-50%);
-    padding: 0 0.25rem;
-    background: #0d6efd;
-    color: #fff;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
-</style>
-<script>
-function toggleChip(el) {
-  const input = el.querySelector('input');
-  input.checked = !input.checked;
-  if (input.checked) {
-    el.classList.add('selected');
-  } else {
-    el.classList.remove('selected');
-  }
-}
-window.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('form');
-  const spinner = document.getElementById('spinner');
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => toggleChip(chip));
-  });
-  document.querySelectorAll('.range-bubble').forEach(input => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'range-bubble-wrapper';
-    input.parentNode.insertBefore(wrapper, input);
-    wrapper.appendChild(input);
-    const bubble = document.createElement('span');
-    bubble.className = 'range-bubble';
-    wrapper.appendChild(bubble);
-    const labels = input.dataset.labels
-      ? input.dataset.labels.split(',').map(l => l.trim())
-      : null;
-    const update = () => {
-      const val = (input.value - input.min) / (input.max - input.min);
-      bubble.textContent = labels ? labels[input.value - input.min] : input.value;
-      bubble.style.left = `calc(${val * 100}% + (${8 - val * 16}px))`;
-    };
-    input.addEventListener('input', update);
-    update();
-  });
-  document.querySelectorAll('.example-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const text = btn.dataset.text;
-      document.getElementById('id_extra_instructions').value = text;
-    });
-  });
+/* ───────── Layout ───────── */
+.content-narrow    { max-width: 720px; margin: 0 auto; }
+#spinner           { display:none; margin:1rem 0; font-weight:bold; }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    spinner.style.display = 'block';
+/* ───────── Chips (checkbox pills) ───────── */
+.chips             { display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; }
+.chip              { padding:.25rem .75rem; border:1px solid #999; border-radius:16px;
+                     cursor:pointer; user-select:none; }
+.chip input        { display:none; }
+.chip.selected     { background:#ddd; }
+
+/* ───────── Range sliders with value bubbles ───────── */
+.range-bubble-wrapper           { position:relative; width:100%; padding-top:2rem; }
+.range-bubble-wrapper input[type=range]{
+    width:100%;
+    margin:0;           /* no extra margin */
+    height:0.4rem;      /* just makes the hit-area a bit taller */
+}
+
+/* custom thumb */
+input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:1rem; height:1rem; border-radius:50%;
+    background:#0d6efd; cursor:pointer; margin-top:-.3rem;
+}
+input[type=range]::-moz-range-thumb{
+    width:1rem; height:1rem; border-radius:50%; background:#0d6efd; cursor:pointer;
+}
+
+/* value bubble */
+.range-bubble{
+    position:absolute; top:0; left:0; transform:translateX(-50%);
+    padding:2px 6px; background:#0d6efd; color:#fff; border-radius:4px;
+    font-size:.75rem; line-height:1.2; white-space:nowrap; pointer-events:none;
+    transition:left .1s ease-out;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+/* ───── 1. CHIPS ───── */
+document.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', () => {
+        const input = chip.querySelector('input');
+        input.checked = !input.checked;
+        chip.classList.toggle('selected', input.checked);
+    });
+});
+
+/* ───── 2. RANGE BUBBLES ───── */
+const makeWrapper = (input) => {
+    const w = document.createElement('div');
+    w.className = 'range-bubble-wrapper';
+    input.parentNode.insertBefore(w, input);
+    w.appendChild(input);
+    w.insertAdjacentHTML('beforeend','<span class="range-bubble"></span>');
+};
+
+document.querySelectorAll('input[type="range"]').forEach(input=>{
+    if(!input.closest('.range-bubble-wrapper')) makeWrapper(input);
+});
+
+const updateBubble = (input)=>{
+    const min=+input.min||0, max=+input.max||100, val=+input.value;
+    const pct = (val-min)/(max-min);
+
+    const bubble = input.parentElement.querySelector('.range-bubble');
+    const labels = input.dataset.labels ? input.dataset.labels.split(',').map(s=>s.trim()) : null;
+    bubble.textContent = labels ? labels[val-min] : val;
+
+    /* keep bubble inside track */
+    const trackW = input.offsetWidth, bubbleW = bubble.offsetWidth;
+    const px = pct * trackW;
+    const left = Math.min(Math.max(px, bubbleW/2), trackW-bubbleW/2);
+    bubble.style.left = `${left}px`;
+};
+
+/* initialise & bind */
+const sliders = document.querySelectorAll('.range-bubble-wrapper input[type="range"]');
+sliders.forEach(s=>{
+    updateBubble(s);
+    s.addEventListener('input', ()=>updateBubble(s));
+});
+window.addEventListener('resize', () => sliders.forEach(updateBubble));
+
+/* ───── 3. EXAMPLE QUICK-FILL ───── */
+document.querySelectorAll('.example-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.getElementById('id_extra_instructions').value = btn.dataset.text;
+    });
+});
+
+/* ───── 4. AJAX GENERATE STORY ───── */
+const form    = document.querySelector('form');
+const spinner = document.getElementById('spinner');
+
+form.addEventListener('submit', async e=>{
+    e.preventDefault(); spinner.style.display='block';
 
     const data = {
-      realism: parseInt(form.realism.value),
-      didactic: parseInt(form.didactic.value),
-      age: parseInt(form.age.value),
-      themes: Array.from(form.querySelectorAll('input[name="themes"]:checked')).map(el => el.value),
-      purposes: Array.from(form.querySelectorAll('input[name="purposes"]:checked')).map(el => el.value),
-      characters: form.characters.value,
-      extra_instructions: form.extra_instructions.value,
-      story_length: form.story_length.value,
-      language: form.language.value,
+        realism: +form.realism.value,
+        didactic: +form.didactic.value,
+        age: +form.age.value,
+        themes: [...form.querySelectorAll('input[name="themes"]:checked')].map(el=>el.value),
+        purposes: [...form.querySelectorAll('input[name="purposes"]:checked')].map(el=>el.value),
+        characters: form.characters.value,
+        extra_instructions: form.extra_instructions.value,
+        story_length: form.story_length.value,
+        language: form.language.value,
     };
 
-    try {
-      const resp = await fetch('/api/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const json = await resp.json();
-      form.story_text.value = json.text;
-      document.getElementById('story_title').value = json.title;
-    } catch (err) {
-      console.error(err);
-      spinner.style.display = 'none';
-      return;
-    }
+    try{
+        const resp = await fetch('/api/create',{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(data)
+        });
+        const json = await resp.json();
+        form.story_text.value = json.text;
+        document.getElementById('story_title').value = json.title;
+    }catch(err){ console.error(err); spinner.style.display='none'; return; }
 
-    spinner.style.display = 'none';
+    spinner.style.display='none';
     form.submit();
-  });
+});
 });
 </script>
 {% endblock %}
+
 {% block content %}
-<form method="post" class="mb-4">
+<form method="post" class="content-narrow mb-4">
   {% csrf_token %}
-  <input type="hidden" name="story_text" id="story_text" />
-  <input type="hidden" name="story_title" id="story_title" />
+  <input type="hidden" name="story_text"  id="story_text">
+  <input type="hidden" name="story_title" id="story_title">
 
   <h5 class="mt-3">Tone &amp; Audience</h5>
+
   <div class="mb-3">
-    {{ form.realism.label_tag }}
-    {{ form.realism }}
+    {{ form.realism.label_tag }} {{ form.realism }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>realistic</span>
-      <span>moderately realistic</span>
-      <span>balanced</span>
-      <span>moderately fantastic</span>
-      <span>fantastic</span>
+      <span>realistic</span><span>moderately realistic</span><span>balanced</span>
+      <span>moderately fantastic</span><span>fantastic</span>
     </div>
   </div>
+
   <div class="mb-3">
-    {{ form.didactic.label_tag }}
-    {{ form.didactic }}
+    {{ form.didactic.label_tag }} {{ form.didactic }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>realistic</span>
-      <span>moderately realistic</span>
-      <span>balanced</span>
-      <span>moderately fantastic</span>
-      <span>fantastic</span>
+      <span>didactic</span><span>mostly didactic</span><span>balanced</span>
+      <span>mostly fun</span><span>just for fun</span>
     </div>
   </div>
+
   <div class="mb-3">
     {{ form.age.label_tag }} (3–10+)
-    {{ form.age }}
+    {{ form.age }}   {# Django adds list="age-ticks" automatically #}
     <datalist id="age-ticks">
-      <option value="3"></option>
-      <option value="4"></option>
-      <option value="5"></option>
-      <option value="6"></option>
-      <option value="7"></option>
-      <option value="8"></option>
-      <option value="9"></option>
+      {% for i in '3456789' %}<option value="{{ i }}"></option>{% endfor %}
       <option value="10" label="10+"></option>
     </datalist>
     <div class="d-flex justify-content-between small text-muted px-1">
       <span>3</span><span class="ms-auto">10+</span>
     </div>
   </div>
+
   <div class="mb-3">
     <label class="form-label">Themes</label>
-    <div class="chips">
-      {% for checkbox in form.themes %}
-      <div class="chip">{{ checkbox }}</div>
-      {% endfor %}
-    </div>
+    <div class="chips">{% for cb in form.themes %}<div class="chip">{{ cb }}</div>{% endfor %}</div>
   </div>
+
   <div class="mb-3">
     <label class="form-label">Purpose</label>
-    <div class="chips">
-      {% for checkbox in form.purposes %}
-      <div class="chip">{{ checkbox }}</div>
-      {% endfor %}
-    </div>
+    <div class="chips">{% for cb in form.purposes %}<div class="chip">{{ cb }}</div>{% endfor %}</div>
   </div>
-  <div class="mb-3">
-    {{ form.characters.label_tag }}
-    {{ form.characters }}
-  </div>
-  <div class="mb-3">
-    {{ form.extra_instructions.label_tag }}
-    {{ form.extra_instructions }}
-  </div>
-  <div class="mb-3">
-    {{ form.story_length.label_tag }}
-    {{ form.story_length }}
-  </div>
-  <div class="mb-3">
-    {{ form.language.label_tag }}
-    {{ form.language }}
-  </div>
+
+  <div class="mb-3">{{ form.extra_instructions.label_tag }} {{ form.extra_instructions }}</div>
+  <div class="mb-3">{{ form.story_length.label_tag }} {{ form.story_length }}</div>
+  <div class="mb-3">{{ form.language.label_tag }} {{ form.language }}</div>
+
   <button type="submit" class="btn btn-primary">Generate Story</button>
-  <div id="spinner">Generating...</div>
+  <div id="spinner">Generating…</div>
 </form>
-<div class="mb-3 examples">
+
+<div class="content-narrow mb-3 examples">
   <strong>Inspire me:</strong>
-  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
-  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
-  <button type="button" class="btn btn-sm btn-outline-secondary example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
+  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
+  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
+  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
 </div>
 {% endblock %}
