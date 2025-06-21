@@ -17,30 +17,6 @@
 .chip input        { display:none; }
 .chip.selected     { background:#ddd; }
 
-/* ───────── Range sliders with value bubbles ───────── */
-.range-bubble-wrapper           { position:relative; width:100%; padding-top:2rem; }
-.range-bubble-wrapper input[type=range]{
-    width:100%;
-    margin:0;           /* no extra margin */
-    height:0.4rem;      /* just makes the hit-area a bit taller */
-}
-
-/* custom thumb */
-input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none; width:1rem; height:1rem; border-radius:50%;
-    background:#0d6efd; cursor:pointer; margin-top:-.3rem;
-}
-input[type=range]::-moz-range-thumb{
-    width:1rem; height:1rem; border-radius:50%; background:#0d6efd; cursor:pointer;
-}
-
-/* value bubble */
-.range-bubble{
-    position:absolute; top:0; left:0; transform:translateX(-50%);
-    padding:2px 6px; background:#0d6efd; color:#fff; border-radius:4px;
-    font-size:.75rem; line-height:1.2; white-space:nowrap; pointer-events:none;
-    transition:left .1s ease-out;
-}
 </style>
 
 <script>
@@ -55,41 +31,6 @@ document.querySelectorAll('.chip').forEach(chip=>{
     });
 });
 
-/* ───── 2. RANGE BUBBLES ───── */
-const makeWrapper = (input) => {
-    const w = document.createElement('div');
-    w.className = 'range-bubble-wrapper';
-    input.parentNode.insertBefore(w, input);
-    w.appendChild(input);
-    w.insertAdjacentHTML('beforeend','<span class="range-bubble"></span>');
-};
-
-document.querySelectorAll('input[type="range"]').forEach(input=>{
-    if(!input.closest('.range-bubble-wrapper')) makeWrapper(input);
-});
-
-const updateBubble = (input)=>{
-    const min=+input.min||0, max=+input.max||100, val=+input.value;
-    const pct = (val-min)/(max-min);
-
-    const bubble = input.parentElement.querySelector('.range-bubble');
-    const labels = input.dataset.labels ? input.dataset.labels.split(',').map(s=>s.trim()) : null;
-    bubble.textContent = labels ? labels[val-min] : val;
-
-    /* keep bubble inside track */
-    const trackW = input.offsetWidth, bubbleW = bubble.offsetWidth;
-    const px = pct * trackW;
-    const left = Math.min(Math.max(px, bubbleW/2), trackW-bubbleW/2);
-    bubble.style.left = `${left}px`;
-};
-
-/* initialise & bind */
-const sliders = document.querySelectorAll('.range-bubble-wrapper input[type="range"]');
-sliders.forEach(s=>{
-    updateBubble(s);
-    s.addEventListener('input', ()=>updateBubble(s));
-});
-window.addEventListener('resize', () => sliders.forEach(updateBubble));
 
 /* ───── 3. EXAMPLE QUICK-FILL ───── */
 document.querySelectorAll('.example-btn').forEach(btn=>{

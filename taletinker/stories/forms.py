@@ -25,8 +25,6 @@ LENGTH_CHOICES = [
 
 
 class StoryCreationForm(forms.Form):
-    LABELS_REALISM = "realistic,moderately realistic,balanced,moderately fantastic,fantastic"
-    LABELS_DIDACTIC = "didactic,mostly didactic,balanced,mostly fun,just for fun"
 
     realism = forms.IntegerField(
         min_value=1,
@@ -35,9 +33,8 @@ class StoryCreationForm(forms.Form):
         widget=forms.NumberInput(
             attrs={
                 "type": "range",
-                "class": "form-range range-bubble",
+                "class": "form-range",
                 "step": 1,
-                "data-labels": LABELS_REALISM,
             }
         ),
         label="Realistic ↔ Fantastic",
@@ -50,9 +47,8 @@ class StoryCreationForm(forms.Form):
         widget=forms.NumberInput(
             attrs={
                 "type": "range",
-                "class": "form-range range-bubble",
+                "class": "form-range",
                 "step": 1,
-                "data-labels": LABELS_DIDACTIC,
             }
         ),
         label="Didactic ↔ Fun",
@@ -66,7 +62,7 @@ class StoryCreationForm(forms.Form):
             attrs={
                 "type": "range",
                 "step": 1,
-                "class": "form-range range-bubble",
+                "class": "form-range",
                 "list": "age-ticks",
             }
         ),
