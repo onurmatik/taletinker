@@ -209,13 +209,14 @@ def create_audio(request, payload: AudioPayload):
         return api.create_response(request, {"detail": "no story text"}, status=400)
 
     client = openai.OpenAI()
+
     try:
         with client.audio.speech.with_streaming_response.create(
             # model="gpt-4o-mini-tts",
             model="tts-1",
             # model="tts-1-hd",
             voice=payload.voice,
-            input=text_obj.text,
+            input=f"#{text_obj.title}\n{text_obj.text}",
         ) as response:
             audio_data = b"".join(response.iter_bytes())
 
