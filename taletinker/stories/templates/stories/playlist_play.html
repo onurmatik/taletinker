@@ -5,6 +5,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const items = Array.from(document.querySelectorAll('.playlist-item'));
     const player = document.getElementById('playlist-player');
+    const summaryEl = document.getElementById('playlist-summary');
+    const durations = Array(items.length).fill(0);
     let index = 0;
 
     function formatTime(sec) {
@@ -26,9 +28,13 @@
       if (metaAudio) {
         metaAudio.addEventListener('loadedmetadata', () => {
           const dur = metaAudio.duration;
+          durations[idx] = isNaN(dur) ? 0 : dur;
           const span = item.querySelector('.duration');
           if (span && !isNaN(dur)) span.textContent = formatTime(dur);
+          updateSummary();
         });
+      } else {
+        updateSummary();
       }
       item.addEventListener('click', () => {
         index = idx;
@@ -36,6 +42,13 @@
         player.play();
       });
     });
+
+    function updateSummary() {
+      const total = durations.reduce((a, b) => a + b, 0);
+      if (summaryEl) {
+        summaryEl.textContent = `${items.length} stories \u2013 ${formatTime(total)}`;
+      }
+    }
 
     player.addEventListener('ended', () => {
       if (index + 1 < items.length) {
@@ -49,19 +62,20 @@
 
     if (items.length) {
       setActive(0);
-      player.addEventListener('loadedmetadata', () => player.play(), { once: true });
+      updateSummary();
     }
   });
 </script>
 {% endblock %}
 {% block content %}
 <h2 class="mb-3">My Playlist</h2>
+<p id="playlist-summary" class="small text-muted"></p>
 <ul class="list-group mb-3" id="playlist">
   {% for story in stories %}
     {% with audio=story.audios.first %}
     <li class="list-group-item playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
       <div class="d-flex justify-content-between align-items-center">
-        <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
+        <span>{{ story.texts.first.title }}</span>
         {% if audio %}
           <span class="duration small text-muted"></span>
           <audio preload="metadata" class="metadata-audio d-none">
