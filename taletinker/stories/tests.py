@@ -326,6 +326,17 @@ class CreateAudioApiTests(TestCase):
             input="#S\nhola",
         )
 
+    def test_audio_already_exists(self):
+        self.story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/create_audio",
+            {"story_id": self.story.id},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertJSONEqual(resp.content, {"detail": "exists"})
+
 
 class StoryImageDisplayTests(TestCase):
     def setUp(self):
