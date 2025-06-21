@@ -4,11 +4,11 @@ from django.conf import settings
 from django.db.models import Count
 
 from .forms import StoryCreationForm, StoryFilterForm
-from .models import Story, StoryText
+from .models import Story, StoryText, Playlist
 
 
-def story_list(request):
-    """Public homepage listing published stories with optional filters."""
+def _filtered_stories(request):
+    """Return stories and bound filter form applying GET parameters."""
 
     stories = Story.objects.filter(is_published=True).prefetch_related(
         "texts", "author", "images"
@@ -45,7 +45,19 @@ def story_list(request):
     else:
         stories = list(stories.order_by("-created_at").annotate(num_likes=Count("liked_by")))
 
-    context = {"stories": stories, "form": form}
+    return stories, form
+
+
+def story_list(request):
+    """Public homepage listing published stories with optional filters."""
+
+    stories, form = _filtered_stories(request)
+
+    playlist = None
+    if request.user.is_authenticated:
+        playlist, _ = Playlist.objects.get_or_create(user=request.user)
+
+    context = {"stories": stories, "form": form, "playlist": playlist}
 
     return render(request, "stories/story_list.html", context)
 
@@ -114,3 +126,19 @@ def story_detail(request, story_id: int):
     }
 
     return render(request, "stories/story_detail.html", context)
+
+
+@login_required
+def add_to_playlist(request, story_id: int):
+    playlist, _ = Playlist.objects.get_or_create(user=request.user)
+    story = get_object_or_404(Story, pk=story_id)
+    playlist.stories.add(story)
+    return redirect("story_list")
+
+
+@login_required
+def add_filtered_to_playlist(request):
+    stories, _ = _filtered_stories(request)
+    playlist, _ = Playlist.objects.get_or_create(user=request.user)
+    playlist.stories.add(*stories)
+    return redirect("story_list")

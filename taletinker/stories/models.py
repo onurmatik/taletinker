@@ -73,3 +73,17 @@ class StoryAudio(models.Model):
 
     def __str__(self):
         return f"Naration of story {self.story.pk} in {self.language}"
+
+
+class Playlist(models.Model):
+    """Simple per-user playlist of stories."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="playlist",
+    )
+    stories = models.ManyToManyField(Story, related_name="playlists", blank=True)
+
+    def __str__(self):  # pragma: no cover - trivial
+        return f"{self.user}'s playlist"

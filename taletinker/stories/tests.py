@@ -397,3 +397,33 @@ class StoryAudioDisplayTests(TestCase):
         self.assertContains(resp, "<audio")
         self.assertContains(resp, "Languages: en, es")
 
+
+class PlaylistTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="plist", password="pass")
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def _create_story(self, title="T"):
+        story = Story.objects.create(
+            author=self.user,
+            is_published=True,
+            parameters={"age": 5, "themes": []},
+        )
+        story.texts.create(language="en", title=title, text="x")
+        return story
+
+    def test_add_single_story(self):
+        story = self._create_story()
+        resp = self.client.post(reverse("add_to_playlist", args=[story.id]))
+        self.assertRedirects(resp, reverse("story_list"))
+        self.assertIn(story, self.user.playlist.stories.all())
+
+    def test_bulk_add_filtered(self):
+        s1 = self._create_story("A")
+        s2 = self._create_story("B")
+        resp = self.client.post(reverse("add_filtered_to_playlist") + "?age=5")
+        self.assertRedirects(resp, reverse("story_list"))
+        playlist_stories = set(self.user.playlist.stories.all())
+        self.assertEqual(playlist_stories, {s1, s2})
+

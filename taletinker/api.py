@@ -18,8 +18,8 @@ api = NinjaAPI()
 
 
 class StoryParams(BaseModel):
-    realism: int = Field(3, ge=1, le=5)
-    didactic: int = Field(3, ge=1, le=5)
+    realism: int = Field(50, ge=0, le=100)
+    didactic: int = Field(50, ge=0, le=100)
     age: int = Field(5, ge=3, le=10)
     themes: List[str] = Field(default_factory=list)
     purposes: List[str] = Field(default_factory=list)
@@ -32,8 +32,8 @@ class StoryParams(BaseModel):
 def build_prompt(params: StoryParams) -> str:
     parts = [
         f"Write a {params.story_length} children's story suitable for a {params.age}-year-old child.",
-        f"Balance realism vs fantasy at {params.realism}/5.",
-        f"Balance didactic vs fun at {params.didactic}/5.",
+        f"Balance realism vs fantasy at {params.realism}/100.",
+        f"Balance didactic vs fun at {params.didactic}/100.",
     ]
     if params.themes:
         parts.append("Themes: " + ", ".join(params.themes) + ".")
@@ -140,12 +140,6 @@ def create_image(request, payload: ImagePayload):
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
-class AudioPayload(BaseModel):
-    story_id: int
-    voice: str = "alloy"
-    language: str | None = None
-
-
 class TranslationPayload(BaseModel):
     story_id: int
     language: str
@@ -194,6 +188,12 @@ def create_translation(request, payload: TranslationPayload):
         return api.create_response(request, {"detail": "internal error"}, status=500)
 
 
+class AudioPayload(BaseModel):
+    story_id: int
+    voice: str = "alloy"
+    language: str | None = None
+
+
 @api.post("/create_audio")
 def create_audio(request, payload: AudioPayload):
     if not request.user.is_authenticated:
@@ -211,7 +211,9 @@ def create_audio(request, payload: AudioPayload):
     client = openai.OpenAI()
     try:
         with client.audio.speech.with_streaming_response.create(
-            model="gpt-4o-mini-tts",
+            # model="gpt-4o-mini-tts",
+            model="tts-1",
+            # model="tts-1-hd",
             voice=payload.voice,
             input=text_obj.text,
         ) as response:

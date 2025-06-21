@@ -21,7 +21,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from taletinker.stories.views import create_story, story_detail, story_list
+from taletinker.stories.views import (
+    create_story,
+    story_detail,
+    story_list,
+    add_to_playlist,
+    add_filtered_to_playlist,
+)
 from taletinker.accounts.views import LogoutView
 from taletinker.api import api as ninja_api
 
@@ -31,6 +37,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('create/', create_story, name='create_story'),
     path('story/<int:story_id>/', story_detail, name='story_detail'),
+    path('playlist/add/<int:story_id>/', add_to_playlist, name='add_to_playlist'),
+    path('playlist/add_all/', add_filtered_to_playlist, name='add_filtered_to_playlist'),
     path('api/', ninja_api.urls),
     path('', story_list, name='story_list'),
 ]

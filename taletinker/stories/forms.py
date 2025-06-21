@@ -26,17 +26,17 @@ LENGTH_CHOICES = [
 
 class StoryCreationForm(forms.Form):
     realism = forms.IntegerField(
-        min_value=1,
-        max_value=5,
-        initial=3,
+        min_value=0,
+        max_value=100,
+        initial=50,
         widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Realistic ↔ Fantastic",
     )
 
     didactic = forms.IntegerField(
-        min_value=1,
-        max_value=5,
-        initial=3,
+        min_value=0,
+        max_value=100,
+        initial=50,
         widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Didactic ↔ Fun",
     )

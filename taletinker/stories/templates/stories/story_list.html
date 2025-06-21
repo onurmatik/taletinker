@@ -24,6 +24,22 @@
     <button type="submit" class="btn btn-secondary">Apply</button>
   </div>
 </form>
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}" class="mb-3">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-outline-primary">Add all to playlist</button>
+</form>
+<h3>My Playlist</h3>
+<ul class="list-group mb-3">
+  {% for item in playlist.stories.all %}
+    <li class="list-group-item">
+      <a href="{% url 'story_detail' item.id %}">{{ item.texts.first.title }}</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">No stories yet.</li>
+  {% endfor %}
+</ul>
+{% endif %}
 {% if stories %}
 <div class="row row-cols-1 row-cols-md-4 g-4">
   {% for story in stories %}
@@ -52,9 +68,7 @@
 
         <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
         <p class="card-text">
-          <small class="text-muted">
-
-          </small>
+          <small class="text-muted">Languages: {{ story.languages|join:", " }}</small>
         </p>
         {% if story.audios.first %}
           <audio controls class="w-100">
@@ -74,6 +88,12 @@
               {% endif %}
           </span>
           <span class="like-count me-1 text-secondary small">{{ story.liked_by.count }}</span>
+          {% if user.is_authenticated %}
+          <form method="post" action="{% url 'add_to_playlist' story.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-primary">Add</button>
+          </form>
+          {% endif %}
         </span>
       </div>
     </div>
