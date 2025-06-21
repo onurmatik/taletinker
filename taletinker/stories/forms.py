@@ -82,11 +82,6 @@ class StoryCreationForm(forms.Form):
         label="Purpose",
     )
 
-    characters = forms.CharField(
-        required=False,
-        label="Characters",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-    )
     extra_instructions = forms.CharField(
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         required=False,

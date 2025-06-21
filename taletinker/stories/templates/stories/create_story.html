@@ -52,7 +52,6 @@ form.addEventListener('submit', async e=>{
         age: +form.age.value,
         themes: [...form.querySelectorAll('input[name="themes"]:checked')].map(el=>el.value),
         purposes: [...form.querySelectorAll('input[name="purposes"]:checked')].map(el=>el.value),
-        characters: form.characters.value,
         extra_instructions: form.extra_instructions.value,
         story_length: form.story_length.value,
         language: form.language.value,

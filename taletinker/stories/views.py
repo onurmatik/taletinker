@@ -75,7 +75,6 @@ def create_story(request):
                     "age": form.cleaned_data["age"],
                     "themes": form.cleaned_data["themes"],
                     "purposes": form.cleaned_data["purposes"],
-                    "characters": form.cleaned_data["characters"],
                     "story_length": form.cleaned_data["story_length"],
                 },
                 prompt=form.cleaned_data["extra_instructions"],
