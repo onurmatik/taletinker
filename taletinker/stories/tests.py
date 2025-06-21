@@ -323,7 +323,7 @@ class CreateAudioApiTests(TestCase):
         create_mock.assert_called_with(
             model="tts-1",
             voice="alloy",
-            input="hola",
+            input="#S\nhola",
         )
 
 
