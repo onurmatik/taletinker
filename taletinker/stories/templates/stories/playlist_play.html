@@ -3,38 +3,80 @@
 {% block extra_head %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const audios = document.querySelectorAll('.playlist-audio');
-    if (audios.length) {
-      audios.forEach((audio, idx) => {
-        audio.addEventListener('ended', () => {
-          const next = audios[idx + 1];
-          if (next) next.play();
-        });
+    const items = Array.from(document.querySelectorAll('.playlist-item'));
+    const player = document.getElementById('playlist-player');
+    let index = 0;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function setActive(i) {
+      items.forEach((el, idx) => {
+        el.classList.toggle('active', idx === i);
       });
-      audios[0].play();
+      const url = items[i].dataset.url;
+      player.src = url;
+    }
+
+    items.forEach((item, idx) => {
+      const metaAudio = item.querySelector('.metadata-audio');
+      if (metaAudio) {
+        metaAudio.addEventListener('loadedmetadata', () => {
+          const dur = metaAudio.duration;
+          const span = item.querySelector('.duration');
+          if (span && !isNaN(dur)) span.textContent = formatTime(dur);
+        });
+      }
+      item.addEventListener('click', () => {
+        index = idx;
+        setActive(index);
+        player.play();
+      });
+    });
+
+    player.addEventListener('ended', () => {
+      if (index + 1 < items.length) {
+        setTimeout(() => {
+          index += 1;
+          setActive(index);
+          player.play();
+        }, 3000);
+      }
+    });
+
+    if (items.length) {
+      setActive(0);
+      player.addEventListener('loadedmetadata', () => player.play(), { once: true });
     }
   });
 </script>
 {% endblock %}
 {% block content %}
 <h2 class="mb-3">My Playlist</h2>
-<ul class="list-group mb-3">
+<ul class="list-group mb-3" id="playlist">
   {% for story in stories %}
-    <li class="list-group-item">
-      <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
-      {% with audio=story.audios.first %}
+    {% with audio=story.audios.first %}
+    <li class="list-group-item playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
         {% if audio %}
-          <audio controls class="w-100 mt-2 playlist-audio">
+          <span class="duration small text-muted"></span>
+          <audio preload="metadata" class="metadata-audio d-none">
             <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
           </audio>
         {% else %}
-          <p class="text-muted mb-0">No audio</p>
+          <span class="text-muted small">No audio</span>
         {% endif %}
-      {% endwith %}
+      </div>
     </li>
+    {% endwith %}
   {% empty %}
     <li class="list-group-item">No stories.</li>
   {% endfor %}
 </ul>
+<audio id="playlist-player" controls class="w-100 mb-3"></audio>
 <a href="{% url 'story_list' %}" class="btn btn-secondary">Back</a>
 {% endblock %}
