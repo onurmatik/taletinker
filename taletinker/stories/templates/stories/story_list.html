@@ -30,10 +30,15 @@
   <button type="submit" class="btn btn-outline-primary">Add all to playlist</button>
 </form>
 <h3>My Playlist</h3>
+<a href="{% url 'play_playlist' %}" class="btn btn-sm btn-secondary mb-2">Play All</a>
 <ul class="list-group mb-3">
   {% for item in playlist.stories.all %}
-    <li class="list-group-item">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
       <a href="{% url 'story_detail' item.id %}">{{ item.texts.first.title }}</a>
+      <form method="post" action="{% url 'remove_from_playlist' item.id %}" class="ms-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+      </form>
     </li>
   {% empty %}
     <li class="list-group-item">No stories yet.</li>

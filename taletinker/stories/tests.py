@@ -321,7 +321,7 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(self.story.audios.count(), 1)
         self.assertEqual(self.story.audios.first().language, "es")
         create_mock.assert_called_with(
-            model="gpt-4o-mini-tts",
+            model="tts-1",
             voice="alloy",
             input="hola",
         )
@@ -426,4 +426,19 @@ class PlaylistTests(TestCase):
         self.assertRedirects(resp, reverse("story_list"))
         playlist_stories = set(self.user.playlist.stories.all())
         self.assertEqual(playlist_stories, {s1, s2})
+
+    def test_remove_story(self):
+        story = self._create_story()
+        self.client.post(reverse("add_to_playlist", args=[story.id]))
+        resp = self.client.post(reverse("remove_from_playlist", args=[story.id]))
+        self.assertRedirects(resp, reverse("story_list"))
+        self.assertNotIn(story, self.user.playlist.stories.all())
+
+    def test_play_playlist_page(self):
+        story = self._create_story()
+        story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
+        self.client.post(reverse("add_to_playlist", args=[story.id]))
+        resp = self.client.get(reverse("play_playlist"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "<audio")
 
