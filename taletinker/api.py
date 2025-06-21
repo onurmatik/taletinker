@@ -210,6 +210,9 @@ def create_audio(request, payload: AudioPayload):
     if not text_obj:
         return api.create_response(request, {"detail": "no story text"}, status=400)
 
+    if story.audios.filter(language=text_obj.language).exists():
+        return api.create_response(request, {"detail": "exists"}, status=400)
+
     client = openai.OpenAI()
 
     try:
