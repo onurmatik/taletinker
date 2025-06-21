@@ -142,3 +142,19 @@ def add_filtered_to_playlist(request):
     playlist, _ = Playlist.objects.get_or_create(user=request.user)
     playlist.stories.add(*stories)
     return redirect("story_list")
+
+
+@login_required
+def remove_from_playlist(request, story_id: int):
+    playlist, _ = Playlist.objects.get_or_create(user=request.user)
+    story = get_object_or_404(Story, pk=story_id)
+    playlist.stories.remove(story)
+    return redirect("story_list")
+
+
+@login_required
+def play_playlist(request):
+    playlist, _ = Playlist.objects.get_or_create(user=request.user)
+    stories = playlist.stories.prefetch_related("audios", "texts")
+    context = {"playlist": playlist, "stories": stories}
+    return render(request, "stories/playlist_play.html", context)

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Play Playlist{% endblock %}
+{% block content %}
+<h2 class="mb-3">My Playlist</h2>
+<ul class="list-group mb-3">
+  {% for story in stories %}
+    <li class="list-group-item">
+      <a href="{% url 'story_detail' story.id %}">{{ story.texts.first.title }}</a>
+      {% with audio=story.audios.first %}
+        {% if audio %}
+          <audio controls class="w-100 mt-2">
+            <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
+          </audio>
+        {% else %}
+          <p class="text-muted mb-0">No audio</p>
+        {% endif %}
+      {% endwith %}
+    </li>
+  {% empty %}
+    <li class="list-group-item">No stories.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'story_list' %}" class="btn btn-secondary">Back</a>
+{% endblock %}
