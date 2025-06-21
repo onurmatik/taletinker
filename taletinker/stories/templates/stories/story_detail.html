@@ -6,7 +6,13 @@
   <span
     class="like-btn"
     data-story-id="{{ story.id }}"
-  >{% if user.is_authenticated and user in story.liked_by.all %}★{% else %}☆{% endif %}</span>
+  >
+      {% if user.is_authenticated and user in story.liked_by.all %}
+          <i class="bi bi-star-fill text-warning"></i>
+      {% else %}
+          <i class="bi bi-star text-warning"></i>
+      {% endif %}
+  </span>
   <span class="like-count">{{ story.liked_by.count }}</span>
 </p>
 

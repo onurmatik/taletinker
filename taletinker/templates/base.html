@@ -53,6 +53,7 @@
                 <li><a class="dropdown-item" href="?lang=es">Spanish</a></li>
                 <li><a class="dropdown-item" href="?lang=fr">French</a></li>
                 <li><a class="dropdown-item" href="?lang=de">German</a></li>
+                <li><a class="dropdown-item" href="?lang=tr">Turkish</a></li>
               </ul>
             </li>
             {% if user.is_authenticated %}
@@ -93,6 +94,10 @@
             crossorigin="anonymous"
     ></script>
     <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
+    <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.like-btn').forEach(el => {
           el.addEventListener('click', async () => {
@@ -104,7 +109,7 @@
             });
             if (resp.ok) {
               const data = await resp.json();
-              el.textContent = data.liked ? '★' : '☆';
+              el.innerHTML = data.liked ? '<i class="bi bi-star-fill text-warning"></i>' : '<i class="bi bi-star text-warning"></i>';
               const container = el.parentElement;
               const countEl = container.querySelector('.like-count');
               if (countEl) {

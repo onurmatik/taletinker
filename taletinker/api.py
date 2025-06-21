@@ -1,22 +1,25 @@
 from typing import List
 import json
+import base64
+from io import BytesIO
+from PIL import Image
 
-from django.shortcuts import get_object_or_404
 from ninja import NinjaAPI
 from pydantic import BaseModel, Field
 import openai
 
-from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
+from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
-import base64
+
+from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 
 
 api = NinjaAPI()
 
 
 class StoryParams(BaseModel):
-    realism: int = Field(50, ge=0, le=100)
-    didactic: int = Field(50, ge=0, le=100)
+    realism: int = Field(3, ge=1, le=5)
+    didactic: int = Field(3, ge=1, le=5)
     age: int = Field(5, ge=3, le=10)
     themes: List[str] = Field(default_factory=list)
     purposes: List[str] = Field(default_factory=list)
@@ -29,8 +32,8 @@ class StoryParams(BaseModel):
 def build_prompt(params: StoryParams) -> str:
     parts = [
         f"Write a {params.story_length} children's story suitable for a {params.age}-year-old child.",
-        f"Balance realism vs fantasy at {params.realism}/100.",
-        f"Balance didactic vs fun at {params.didactic}/100.",
+        f"Balance realism vs fantasy at {params.realism}/5.",
+        f"Balance didactic vs fun at {params.didactic}/5.",
     ]
     if params.themes:
         parts.append("Themes: " + ", ".join(params.themes) + ".")
@@ -89,15 +92,7 @@ class ImagePayload(BaseModel):
     story_id: int
 
 
-from io import BytesIO
-
-from PIL import Image
-from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
-import base64
-import openai
-
-THUMB_MAX_SIZE = (256, 256)          # tweak as you like
+THUMB_MAX_SIZE = (256, 256)
 
 @api.post("/create_image")
 def create_image(request, payload: ImagePayload):
@@ -105,14 +100,19 @@ def create_image(request, payload: ImagePayload):
         return api.create_response(request, {"detail": "unauthorized"}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
-    prompt = story.texts.first().title if story.texts.exists() else "children's story cover"
+    prompt = "cover image for a children's story"
+    if story.texts.exists():
+        prompt += f" called {story.texts.first().title}"
 
     client = openai.OpenAI()
     try:
         # 1) generate the cover once
         result = client.images.generate(
+            # model="dall-e-3",
+            # style="vivid",
+            # quality="standard",
+            # size="1792x1024",
             prompt=prompt,
-            n=1,
             size="1024x1024",
             response_format="b64_json",
         )

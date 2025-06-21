@@ -1,4 +1,6 @@
 from django import forms
+from django.conf import settings
+
 
 THEME_CHOICES = [
     ("family", "Family"),
@@ -15,13 +17,6 @@ PURPOSE_CHOICES = [
     ("support", "Supportive"),
 ]
 
-LANGUAGE_CHOICES = [
-    ("en", "English"),
-    ("es", "Spanish"),
-    ("fr", "French"),
-    ("de", "German"),
-]
-
 LENGTH_CHOICES = [
     ("short", "Short"),
     ("medium", "Medium"),
@@ -31,17 +26,17 @@ LENGTH_CHOICES = [
 
 class StoryCreationForm(forms.Form):
     realism = forms.IntegerField(
-        min_value=0,
-        max_value=100,
-        initial=50,
+        min_value=1,
+        max_value=5,
+        initial=3,
         widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Realistic ↔ Fantastic",
     )
 
     didactic = forms.IntegerField(
-        min_value=0,
-        max_value=100,
-        initial=50,
+        min_value=1,
+        max_value=5,
+        initial=3,
         widget=forms.NumberInput(attrs={"type": "range", "class": "form-range"}),
         label="Didactic ↔ Fun",
     )
@@ -86,7 +81,7 @@ class StoryCreationForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     language = forms.ChoiceField(
-        choices=LANGUAGE_CHOICES, widget=forms.Select(attrs={"class": "form-select"})
+        choices=settings.LANGUAGES, widget=forms.Select(attrs={"class": "form-select"})
     )
 
 
@@ -111,7 +106,7 @@ class StoryFilterForm(forms.Form):
     )
 
     language = forms.ChoiceField(
-        choices=[("", "Any Language")] + LANGUAGE_CHOICES,
+        choices=[("", "Any Language")] + settings.LANGUAGES,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
         label="Language",

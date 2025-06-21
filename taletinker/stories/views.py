@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-
+from django.conf import settings
 from django.db.models import Count
 
-from .forms import LANGUAGE_CHOICES, StoryCreationForm, StoryFilterForm
+from .forms import StoryCreationForm, StoryFilterForm
 from .models import Story, StoryText
 
 
@@ -100,7 +100,7 @@ def story_detail(request, story_id: int):
     available_langs = story.languages
     new_language_choices = [
         (code, label)
-        for code, label in LANGUAGE_CHOICES
+        for code, label in settings.LANGUAGES
         if code not in available_langs
     ]
 
