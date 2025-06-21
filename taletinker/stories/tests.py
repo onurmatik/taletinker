@@ -442,3 +442,10 @@ class PlaylistTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "<audio")
 
+    def test_playlist_player_on_list_page(self):
+        story = self._create_story()
+        story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
+        self.client.post(reverse("add_to_playlist", args=[story.id]))
+        resp = self.client.get(reverse("story_list"))
+        self.assertContains(resp, "playlist-player")
+

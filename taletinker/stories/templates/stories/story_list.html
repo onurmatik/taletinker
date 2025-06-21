@@ -1,5 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Story Library{% endblock %}
+{% block extra_head %}
+<style>
+  #playlist-panel {
+    position: sticky;
+    top: 70px;
+  }
+  #playlist-panel .playlist-item.active {
+    background-color: #e9ecef;
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = Array.from(document.querySelectorAll('#playlist-panel .playlist-item'));
+    const player = document.getElementById('playlist-player');
+    let index = 0;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function setActive(i) {
+      items.forEach((el, idx) => {
+        el.classList.toggle('active', idx === i);
+      });
+      const url = items[i].dataset.url;
+      player.src = url;
+    }
+
+    items.forEach((item, idx) => {
+      const metaAudio = item.querySelector('.metadata-audio');
+      if (metaAudio) {
+        metaAudio.addEventListener('loadedmetadata', () => {
+          const dur = metaAudio.duration;
+          const span = item.querySelector('.duration');
+          if (span && !isNaN(dur)) span.textContent = formatTime(dur);
+        });
+      }
+      item.addEventListener('click', () => {
+        index = idx;
+        setActive(index);
+        player.play();
+      });
+    });
+
+    player.addEventListener('ended', () => {
+      if (index + 1 < items.length) {
+        setTimeout(() => {
+          index += 1;
+          setActive(index);
+          player.play();
+        }, 3000);
+      }
+    });
+
+    if (items.length) {
+      setActive(0);
+      player.addEventListener('loadedmetadata', () => player.play(), { once: true });
+    }
+  });
+</script>
+{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2 class="mb-0">Stories</h2>
@@ -24,29 +87,11 @@
     <button type="submit" class="btn btn-secondary">Apply</button>
   </div>
 </form>
-{% if user.is_authenticated %}
-<form method="post" action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}" class="mb-3">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-outline-primary">Add all to playlist</button>
-</form>
-<h3>My Playlist</h3>
-<a href="{% url 'play_playlist' %}" class="btn btn-sm btn-secondary mb-2">Play All</a>
-<ul class="list-group mb-3">
-  {% for item in playlist.stories.all %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'story_detail' item.id %}">{{ item.texts.first.title }}</a>
-      <form method="post" action="{% url 'remove_from_playlist' item.id %}" class="ms-2">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-      </form>
-    </li>
-  {% empty %}
-    <li class="list-group-item">No stories yet.</li>
-  {% endfor %}
-</ul>
-{% endif %}
-{% if stories %}
-<div class="row row-cols-1 row-cols-md-4 g-4">
+
+<div class="row">
+  <div class="col-md-8">
+    {% if stories %}
+    <div class="row row-cols-1 row-cols-md-4 g-4">
   {% for story in stories %}
   <div class="col">
     <div class="card h-100">
@@ -104,10 +149,50 @@
     </div>
   </div>
   {% endfor %}
+    </div>
+    {% else %}
+    <p>No stories yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-md-4">
+    {% if user.is_authenticated %}
+    <div id="playlist-panel" class="bg-light border p-3">
+      <form method="post" action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}" class="mb-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-primary w-100">Add all to playlist</button>
+      </form>
+      <h3 class="h5">My Playlist</h3>
+      <ul class="list-group mb-3" id="playlist">
+        {% for item in playlist.stories.all %}
+          {% with audio=item.audios.first %}
+          <li class="list-group-item d-flex justify-content-between align-items-center playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
+            <a href="{% url 'story_detail' item.id %}">{{ item.texts.first.title }}</a>
+            <div class="d-flex align-items-center">
+              {% if audio %}
+                <span class="duration small text-muted me-2"></span>
+                <audio preload="metadata" class="metadata-audio d-none">
+                  <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
+                </audio>
+              {% else %}
+                <span class="text-muted small me-2">No audio</span>
+              {% endif %}
+              <form method="post" action="{% url 'remove_from_playlist' item.id %}" class="ms-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+              </form>
+            </div>
+          </li>
+          {% endwith %}
+        {% empty %}
+          <li class="list-group-item">No stories yet.</li>
+        {% endfor %}
+      </ul>
+      <audio id="playlist-player" controls class="w-100 mb-3"></audio>
+    </div>
+    {% endif %}
+  </div>
 </div>
-{% else %}
-<p>No stories yet.</p>
-{% endif %}
 
 {% endblock %}
 
