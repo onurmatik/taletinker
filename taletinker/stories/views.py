@@ -53,11 +53,39 @@ def story_list(request):
 
     stories, form = _filtered_stories(request)
 
+    selected_language = request.GET.get("language")
+
+    for story in stories:
+        lang = selected_language or (story.texts.first().language if story.texts.exists() else None)
+        story.display_language = lang
+        if lang:
+            story.display_audio = story.audios.filter(language=lang).first()
+        else:
+            story.display_audio = story.audios.first()
+
     playlist = None
     if request.user.is_authenticated:
         playlist, _ = Playlist.objects.get_or_create(user=request.user)
+        playlist_stories = list(
+            playlist.stories.prefetch_related("audios", "texts")
+        )
+        for item in playlist_stories:
+            lang = selected_language or (item.texts.first().language if item.texts.exists() else None)
+            item.display_language = lang
+            if lang:
+                item.display_audio = item.audios.filter(language=lang).first()
+            else:
+                item.display_audio = item.audios.first()
+    else:
+        playlist_stories = []
 
-    context = {"stories": stories, "form": form, "playlist": playlist}
+    context = {
+        "stories": stories,
+        "form": form,
+        "playlist": playlist,
+        "playlist_stories": playlist_stories,
+        "selected_language": selected_language,
+    }
 
     return render(request, "stories/story_list.html", context)
 
