@@ -62,8 +62,10 @@ def story_list(request):
         story.display_language = lang
         if lang:
             story.display_audio = story.audios.filter(language=lang).first()
+            story.display_text = story.texts.filter(language=lang).first()
         else:
             story.display_audio = None
+            story.display_text = story.texts.first()
 
     playlist = None
     if request.user.is_authenticated:
@@ -78,8 +80,10 @@ def story_list(request):
             item.display_language = lang
             if lang:
                 item.display_audio = item.audios.filter(language=lang).first()
+                item.display_text = item.texts.filter(language=lang).first()
             else:
                 item.display_audio = None
+                item.display_text = item.texts.first()
     else:
         playlist_stories = []
 

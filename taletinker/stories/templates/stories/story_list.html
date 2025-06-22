@@ -188,7 +188,13 @@
       <div class="card-body  d-flex flex-column">
 
             <blockquote class="blockquote">
-                <a href="{% url 'story_detail' story.id %}" class="text-reset text-decoration-none">{{ story.texts.first.title }}</a>
+                <a href="{% url 'story_detail' story.id %}{% if story.display_language %}?lang={{ story.display_language }}{% endif %}" class="text-reset text-decoration-none">
+                    {% if story.display_text %}
+                      {{ story.display_text.title }}
+                    {% else %}
+                      {{ story.texts.first.title }}
+                    {% endif %}
+                </a>
             </blockquote>
 
             <figcaption class="blockquote-footer">
@@ -261,7 +267,13 @@
         {% for item in playlist_stories %}
           {% with audio=item.display_audio %}
           <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center playlist-item" data-story-id="{{ item.id }}" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
-            <span class="text-decoration-none small">{{ item.texts.first.title }}</span>
+            <span class="text-decoration-none small">
+              {% if item.display_text %}
+                {{ item.display_text.title }}
+              {% else %}
+                {{ item.texts.first.title }}
+              {% endif %}
+            </span>
             <div class="d-flex align-items-center">
               {% if audio %}
                 <span class="duration small me-2"></span>
