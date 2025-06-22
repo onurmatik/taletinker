@@ -1,20 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Story Detail{% endblock %}
 {% block content %}
-<h2>{{ text.title }}</h2>
-<p>
-  <span
-    class="like-btn"
-    data-story-id="{{ story.id }}"
-  >
-      {% if user.is_authenticated and user in story.liked_by.all %}
-          <i class="bi bi-star-fill text-warning"></i>
-      {% else %}
-          <i class="bi bi-star text-warning"></i>
-      {% endif %}
-  </span>
-  <span class="like-count">{{ story.liked_by.count }}</span>
-</p>
+
+<div class="d-flex justify-content-between">
+    <h2>{{ text.title }}</h2>
+    <p>
+      <span
+        class="like-btn fs-4"
+        data-story-id="{{ story.id }}"
+      >
+          {% if user.is_authenticated and user in story.liked_by.all %}
+              <i class="bi bi-star-fill text-warning"></i>
+          {% else %}
+              <i class="bi bi-star text-warning"></i>
+          {% endif %}
+      </span>
+      <span class="like-count text-secondary">{{ story.liked_by.count }}</span>
+    </p>
+</div>
 
 <p><strong>Languages:</strong>
   {% for lang in languages %}
@@ -61,7 +64,7 @@
 
     {% if story.images.first %}
       <div id="image-container" class="w-50 m-2" style="float: right;">
-        <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3" alt="Cover image" />
+        <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3 rounded" alt="Cover image" />
       </div>
     {% else %}
       <p id="image-status">Creating image...</p>
@@ -75,8 +78,6 @@
         });
       </script>
     {% endif %}
-
-    <p>{{ text.text|linebreaks }}</p>
 
     {% if audio %}
       <div id="audio-container" class="my-3">
@@ -96,6 +97,9 @@
         });
       </script>
     {% endif %}
+
+    <p>{{ text.text|linebreaks }}</p>
+
 </div>
 
 <div style="clear: both;"></div>
