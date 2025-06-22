@@ -192,7 +192,7 @@ def create_translation(request, payload: TranslationPayload):
 
 class AudioPayload(BaseModel):
     story_id: int
-    voice: str = "alloy"
+    voice: str = "shimmer"
     language: str | None = None
 
 
@@ -221,7 +221,7 @@ def create_audio(request, payload: AudioPayload):
             model="tts-1",
             # model="tts-1-hd",
             voice=payload.voice,
-            input=f"{text_obj.title}\n\n{text_obj.text}",
+            input=f"# {text_obj.title}\n...\n{text_obj.text}",
         ) as response:
             audio_data = b"".join(response.iter_bytes())
 
