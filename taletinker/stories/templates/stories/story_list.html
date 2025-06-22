@@ -11,6 +11,60 @@
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    function initAudioGeneration(root = document) {
+      root.querySelectorAll('[data-create-audio]').forEach(statusEl => {
+        const storyId = statusEl.dataset.storyId;
+        const language = statusEl.dataset.language;
+        const bar = statusEl.querySelector('.progress-bar');
+        if (bar) {
+          const duration = parseInt(bar.dataset.duration, 10) || 60000;
+          const start = Date.now();
+          setInterval(() => {
+            const elapsed = Date.now() - start;
+            const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
+            bar.style.width = Math.min(99, progress) + '%';
+          }, 200);
+        }
+        fetch('/api/create_audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ story_id: storyId, language: language })
+        }).then(async resp => {
+          if (resp.ok) {
+            const data = await resp.json();
+            const container = document.createElement('div');
+            container.id = 'audio-container-' + storyId;
+            container.className = 'mt-auto';
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.className = 'w-100';
+            const source = document.createElement('source');
+            source.src = '/media/' + data.file + '?' + Date.now();
+            source.type = 'audio/mpeg';
+            audio.appendChild(source);
+            container.appendChild(audio);
+            statusEl.replaceWith(container);
+            const btn = document.getElementById('add-btn-' + storyId);
+            if (btn) btn.removeAttribute('disabled');
+            const pItem = document.querySelector('#playlist [data-story-id="' + storyId + '"]');
+            if (pItem) {
+              pItem.dataset.url = source.src;
+              const durSpan = pItem.querySelector('.duration');
+              const meta = pItem.querySelector('.metadata-audio');
+              if (meta) {
+                meta.querySelector('source').src = source.src;
+                meta.load();
+                meta.addEventListener('loadedmetadata', () => {
+                  const dur = meta.duration;
+                  if (durSpan && !isNaN(dur)) durSpan.textContent = formatTime(dur);
+                  updateSummary();
+                });
+              }
+            }
+          }
+        });
+      });
+    }
     const items = Array.from(document.querySelectorAll('#playlist-panel .playlist-item'));
     const player = document.getElementById('playlist-player');
     const summaryEl = document.getElementById('playlist-summary');
@@ -73,57 +127,31 @@
       updateSummary();
     }
 
-    document.querySelectorAll('[data-create-audio]').forEach(statusEl => {
-      const storyId = statusEl.dataset.storyId;
-      const language = statusEl.dataset.language;
-      const bar = statusEl.querySelector('.progress-bar');
-      if (bar) {
-        const duration = parseInt(bar.dataset.duration, 10) || 60000;
-        const start = Date.now();
-        const timer = setInterval(() => {
-          const elapsed = Date.now() - start;
-          const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
-          bar.style.width = Math.min(99, progress) + '%';
-        }, 200);
+    initAudioGeneration(document);
+
+    const grid = document.getElementById('story-grid');
+    let nextPage = parseInt(grid.dataset.nextPage, 10);
+
+    async function loadNext() {
+      if (!nextPage) return;
+      const params = new URLSearchParams(window.location.search);
+      params.set('page', nextPage);
+      const resp = await fetch('?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (resp.ok) {
+        const html = await resp.text();
+        grid.insertAdjacentHTML('beforeend', html);
+        attachLikeHandlers(grid);
+        initAudioGeneration(grid);
+        const hasNext = resp.headers.get('X-Has-Next') === 'true';
+        nextPage = hasNext ? nextPage + 1 : null;
       }
-      fetch('/api/create_audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ story_id: storyId, language: language })
-      }).then(async resp => {
-        if (resp.ok) {
-          const data = await resp.json();
-          const container = document.createElement('div');
-          container.id = 'audio-container-' + storyId;
-          container.className = 'mt-auto';
-          const audio = document.createElement('audio');
-          audio.controls = true;
-          audio.className = 'w-100';
-          const source = document.createElement('source');
-          source.src = '/media/' + data.file + '?' + Date.now();
-          source.type = 'audio/mpeg';
-          audio.appendChild(source);
-          container.appendChild(audio);
-          statusEl.replaceWith(container);
-          const btn = document.getElementById('add-btn-' + storyId);
-          if (btn) btn.removeAttribute('disabled');
-          const pItem = document.querySelector('#playlist [data-story-id="' + storyId + '"]');
-          if (pItem) {
-            pItem.dataset.url = source.src;
-            const durSpan = pItem.querySelector('.duration');
-            const meta = pItem.querySelector('.metadata-audio');
-            if (meta) {
-              meta.querySelector('source').src = source.src;
-              meta.load();
-              meta.addEventListener('loadedmetadata', () => {
-                const dur = meta.duration;
-                if (durSpan && !isNaN(dur)) durSpan.textContent = formatTime(dur);
-                updateSummary();
-              });
-            }
-          }
-        }
-      });
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!nextPage) return;
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        loadNext();
+      }
     });
   });
 </script>
@@ -174,80 +202,8 @@
 <div class="row">
   <div class="col-md-9">
     {% if stories %}
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-  {% for story in stories %}
-  <div class="col">
-    <div class="card h-100">
-      {% with img=story.images.first %}
-        {% if img %}
-          <a href="{% url 'story_detail' story.id %}">
-            <img src="{{ img.thumbnail.url }}" class="card-img-top" alt="Cover image" />
-          </a>
-        {% endif %}
-      {% endwith %}
-      <div class="card-body  d-flex flex-column">
-
-            <blockquote class="blockquote">
-                <a href="{% url 'story_detail' story.id %}{% if story.display_language %}?lang={{ story.display_language }}{% endif %}" class="text-reset text-decoration-none">
-                    {% if story.display_text %}
-                      {{ story.display_text.title }}
-                    {% else %}
-                      {{ story.texts.first.title }}
-                    {% endif %}
-                </a>
-            </blockquote>
-
-            <figcaption class="blockquote-footer">
-                {% if story.is_anonymous %}
-                    Anonymous
-                {% else %}
-                    {{ story.author.username }}
-                {% endif %}
-            </figcaption>
-
-        <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
-
-        {% if story.display_audio %}
-          <div id="audio-container-{{ story.id }}" class="mt-auto">
-            <audio controls class="w-100">
-              <source src="{{ story.display_audio.mp3.url }}" type="audio/mpeg" />
-            </audio>
-          </div>
-        {% else %}
-          <div id="audio-status-{{ story.id }}" data-create-audio data-story-id="{{ story.id }}" data-language="{{ story.display_language }}" class="mt-auto">
-            <div class="progress">
-              <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="60000" style="width: 0%">Creating audio...</div>
-            </div>
-          </div>
-        {% endif %}
-
-      </div>
-      <div class="card-footer d-flex justify-content-between align-items-center">
-        <span class="badge text-bg-success" data-bs-toggle="tooltip" data-bs-title="Age"
-        >{{ story.parameters.age }} +</span>
-          {% if user.is_authenticated %}
-          <form method="post" action="{% url 'add_to_playlist' story.id %}" class="d-inline">
-            {% csrf_token %}
-            <button id="add-btn-{{ story.id }}" type="submit" class="btn btn-link text-dark p-0 fw-bolder"
-                    data-bs-toggle="tooltip" data-bs-title="Add to Playlist"
-                    {% if not story.display_audio %}disabled{% endif %}
-            ><i class="bi bi-plus-circle"></i></button>
-          </form>
-          {% endif %}
-        <span>
-          <span class="like-btn" style="cursor: pointer;" data-story-id="{{ story.id }}">
-              {% if user.is_authenticated and user in story.liked_by.all %}
-                  <i class="bi bi-star-fill text-warning"></i>
-              {% else %}
-                  <i class="bi bi-star text-warning"></i>
-              {% endif %}
-          </span>
-          <span class="like-count me-1 text-secondary small">{{ story.liked_by.count }}</span>
-        </span>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
+    <div id="story-grid" class="row row-cols-1 row-cols-md-3 g-4" data-next-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% endif %}">
+      {% include 'stories/story_cards.html' with stories=stories %}
     </div>
     {% else %}
     <p>No stories yet.</p>

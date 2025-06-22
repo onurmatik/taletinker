@@ -98,8 +98,10 @@
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     </script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.like-btn').forEach(el => {
+      function attachLikeHandlers(root = document) {
+        root.querySelectorAll('.like-btn').forEach(el => {
+          if (el.dataset.bound) return;
+          el.dataset.bound = '1';
           el.addEventListener('click', async () => {
             const storyId = el.dataset.storyId;
             const resp = await fetch('/api/like', {
@@ -118,6 +120,10 @@
             }
           });
         });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        attachLikeHandlers(document);
       });
     </script>
 </body>

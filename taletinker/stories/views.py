@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.db.models import Count
+from django.core.paginator import Paginator
 
 from .forms import StoryCreationForm, StoryFilterForm
 from .models import Story, StoryText, Playlist
@@ -53,9 +54,14 @@ def story_list(request):
 
     stories, form = _filtered_stories(request)
 
+    paginator = Paginator(stories, 9)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+    stories_page = list(page_obj.object_list)
+
     selected_language = request.GET.get("lang")
 
-    for story in stories:
+    for story in stories_page:
         lang = selected_language or (
             story.texts.first().language if story.texts.exists() else None
         )
@@ -88,12 +94,18 @@ def story_list(request):
         playlist_stories = []
 
     context = {
-        "stories": stories,
+        "stories": stories_page,
         "form": form,
+        "page_obj": page_obj,
         "playlist": playlist,
         "playlist_stories": playlist_stories,
         "selected_language": selected_language,
     }
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        resp = render(request, "stories/story_cards.html", context)
+        resp["X-Has-Next"] = "true" if page_obj.has_next() else "false"
+        return resp
 
     return render(request, "stories/story_list.html", context)
 
