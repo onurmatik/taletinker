@@ -56,12 +56,14 @@ def story_list(request):
     selected_language = request.GET.get("language")
 
     for story in stories:
-        lang = selected_language or (story.texts.first().language if story.texts.exists() else None)
+        lang = selected_language or (
+            story.texts.first().language if story.texts.exists() else None
+        )
         story.display_language = lang
         if lang:
             story.display_audio = story.audios.filter(language=lang).first()
         else:
-            story.display_audio = story.audios.first()
+            story.display_audio = None
 
     playlist = None
     if request.user.is_authenticated:
@@ -70,12 +72,14 @@ def story_list(request):
             playlist.stories.prefetch_related("audios", "texts")
         )
         for item in playlist_stories:
-            lang = selected_language or (item.texts.first().language if item.texts.exists() else None)
+            lang = selected_language or (
+                item.texts.first().language if item.texts.exists() else None
+            )
             item.display_language = lang
             if lang:
                 item.display_audio = item.audios.filter(language=lang).first()
             else:
-                item.display_audio = item.audios.first()
+                item.display_audio = None
     else:
         playlist_stories = []
 
