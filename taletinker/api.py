@@ -207,17 +207,49 @@ def create_audio(request, payload: AudioPayload):
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
-    if payload.language:
-        text_obj = story.texts.filter(language=payload.language).first()
-    else:
-        text_obj = story.texts.first()
-    if not text_obj:
+    target_language = payload.language or (story.texts.first().language if story.texts.exists() else None)
+
+    if not target_language:
         return api.create_response(request, {"detail": "no story text"}, status=400)
 
-    if story.audios.filter(language=text_obj.language).exists():
+    if story.audios.filter(language=target_language).exists():
         return api.create_response(request, {"detail": "exists"}, status=400)
 
+    text_obj = story.texts.filter(language=target_language).first()
+
     client = openai.OpenAI()
+
+    if not text_obj and payload.language:
+        base_text = story.texts.first()
+        if not base_text:
+            return api.create_response(request, {"detail": "no story text"}, status=400)
+        prompt = (
+            f"Translate the following children's story to {payload.language}. "
+            "Return the result strictly as JSON with keys 'title' and 'text'.\n"
+            f"Title: {base_text.title}\nStory: {base_text.text}"
+        )
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+            )
+            result = json.loads(response.choices[0].message.content)
+            text_obj = StoryText.objects.create(
+                story=story,
+                language=payload.language,
+                title=result.get("title") or base_text.title,
+                text=result.get("text") or base_text.text,
+            )
+        except openai.OpenAIError as exc:
+            logger.exception("OpenAI API error")
+            return api.create_response(request, {"detail": str(exc)}, status=503)
+        except Exception:  # noqa: PIE786
+            logger.exception("Unexpected error")
+            return api.create_response(request, {"detail": "internal error"}, status=500)
+
+    if not text_obj:
+        return api.create_response(request, {"detail": "no story text"}, status=400)
 
     try:
         with client.audio.speech.with_streaming_response.create(
@@ -229,7 +261,7 @@ def create_audio(request, payload: AudioPayload):
         ) as response:
             audio_data = b"".join(response.iter_bytes())
 
-        story_audio = StoryAudio(story=story, language=text_obj.language)
+        story_audio = StoryAudio(story=story, language=target_language)
         story_audio.mp3.save(f"speech{story.pk}.mp3", ContentFile(audio_data))
         return {"audio_id": story_audio.id}
     except openai.OpenAIError as exc:
