@@ -39,11 +39,22 @@
     {% else %}
       <div id="image-status" class="w-50 m-2" style="float: right;">
         <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating image...</div>
+          <div id="image-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="20000" style="width: 0%">Creating image...</div>
         </div>
       </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
+          const bar = document.getElementById('image-progress');
+          if (bar) {
+            const duration = parseInt(bar.dataset.duration, 10) || 20000;
+            const start = Date.now();
+            const timer = setInterval(() => {
+              const elapsed = Date.now() - start;
+              const percent = Math.min(100, (elapsed / duration) * 100);
+              bar.style.width = percent + '%';
+              if (percent >= 100) clearInterval(timer);
+            }, 200);
+          }
           fetch('/api/create_image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -62,11 +73,22 @@
     {% else %}
       <div id="audio-status" class="my-3">
         <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating audio...</div>
+          <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="30000" style="width: 0%">Creating audio...</div>
         </div>
       </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
+          const bar = document.getElementById('audio-progress');
+          if (bar) {
+            const duration = parseInt(bar.dataset.duration, 10) || 30000;
+            const start = Date.now();
+            const timer = setInterval(() => {
+              const elapsed = Date.now() - start;
+              const percent = Math.min(100, (elapsed / duration) * 100);
+              bar.style.width = percent + '%';
+              if (percent >= 100) clearInterval(timer);
+            }, 200);
+          }
           fetch('/api/create_audio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -81,11 +103,22 @@
     {% else %}
       <div id="text-status" class="my-3">
         <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating text...</div>
+          <div id="text-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="10000" style="width: 0%">Creating text...</div>
         </div>
       </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
+          const bar = document.getElementById('text-progress');
+          if (bar) {
+            const duration = parseInt(bar.dataset.duration, 10) || 10000;
+            const start = Date.now();
+            const timer = setInterval(() => {
+              const elapsed = Date.now() - start;
+              const percent = Math.min(100, (elapsed / duration) * 100);
+              bar.style.width = percent + '%';
+              if (percent >= 100) clearInterval(timer);
+            }, 200);
+          }
           fetch('/api/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
