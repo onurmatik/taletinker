@@ -89,14 +89,14 @@
     {% else %}
       <div id="audio-status" class="my-3">
         <div class="progress">
-          <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="30000" style="width: 0%">Creating audio...</div>
+          <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="60000" style="width: 0%">Creating audio...</div>
         </div>
       </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
           const bar = document.getElementById('audio-progress');
           if (bar) {
-            const duration = parseInt(bar.dataset.duration, 10) || 30000;
+            const duration = parseInt(bar.dataset.duration, 10) || 60000;
             const start = Date.now();
             const timer = setInterval(() => {
               const elapsed = Date.now() - start;

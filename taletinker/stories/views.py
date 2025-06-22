@@ -53,7 +53,7 @@ def story_list(request):
 
     stories, form = _filtered_stories(request)
 
-    selected_language = request.GET.get("language")
+    selected_language = request.GET.get("lang")
 
     for story in stories:
         lang = selected_language or (

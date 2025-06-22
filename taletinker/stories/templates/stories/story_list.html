@@ -78,7 +78,7 @@
       const language = statusEl.dataset.language;
       const bar = statusEl.querySelector('.progress-bar');
       if (bar) {
-        const duration = parseInt(bar.dataset.duration, 10) || 30000;
+        const duration = parseInt(bar.dataset.duration, 10) || 60000;
         const start = Date.now();
         const timer = setInterval(() => {
           const elapsed = Date.now() - start;
@@ -162,7 +162,7 @@
           action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}">
       {% csrf_token %}
       <!-- remove w-100 so it shrinks to its natural width -->
-      <button type="submit" class="btn btn-link">Add listed stories to playlist</button>
+      <button type="submit" class="btn btn-link">Add all listed stories to the playlist</button>
     </form>
   </div>
 
@@ -199,7 +199,7 @@
             </figcaption>
 
         <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
-
+{{ story.display_audio }}
         {% if story.display_audio %}
           <div id="audio-container-{{ story.id }}" class="mt-auto">
             <audio controls class="w-100">
@@ -209,7 +209,7 @@
         {% else %}
           <div id="audio-status-{{ story.id }}" data-create-audio data-story-id="{{ story.id }}" data-language="{{ story.display_language }}" class="mt-auto">
             <div class="progress">
-              <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="30000" style="width: 0%">Creating audio...</div>
+              <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="60000" style="width: 0%">Creating audio...</div>
             </div>
           </div>
         {% endif %}
