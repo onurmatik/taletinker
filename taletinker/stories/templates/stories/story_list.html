@@ -131,9 +131,11 @@
 
     const grid = document.getElementById('story-grid');
     let nextPage = parseInt(grid.dataset.nextPage, 10);
+    let loading = false;
 
     async function loadNext() {
-      if (!nextPage) return;
+      if (!nextPage || loading) return;
+      loading = true;
       const params = new URLSearchParams(window.location.search);
       params.set('page', nextPage);
       const resp = await fetch('?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
@@ -145,6 +147,7 @@
         const hasNext = resp.headers.get('X-Has-Next') === 'true';
         nextPage = hasNext ? nextPage + 1 : null;
       }
+      loading = false;
     }
 
     window.addEventListener('scroll', () => {
