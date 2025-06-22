@@ -181,7 +181,11 @@ def create_translation(request, payload: TranslationPayload):
             title=result.get("title") or base_text.title,
             text=result.get("text") or base_text.text,
         )
-        return {"text_id": story_text.id}
+        return {
+            "text_id": story_text.id,
+            "title": story_text.title,
+            "text": story_text.text,
+        }
     except openai.OpenAIError as exc:
         logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)

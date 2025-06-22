@@ -50,16 +50,32 @@
             const start = Date.now();
             const timer = setInterval(() => {
               const elapsed = Date.now() - start;
-              const percent = Math.min(100, (elapsed / duration) * 100);
-              bar.style.width = percent + '%';
-              if (percent >= 100) clearInterval(timer);
+              const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
+              bar.style.width = Math.min(99, progress) + '%';
             }, 200);
           }
           fetch('/api/create_image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ story_id: {{ story.id }} })
-          }).then(resp => { if (resp.ok) location.reload(); });
+          }).then(async resp => {
+            if (resp.ok) {
+              const data = await resp.json();
+              const statusEl = document.getElementById('image-status');
+              if (statusEl) {
+                const container = document.createElement('div');
+                container.id = 'image-container';
+                container.className = 'w-50 m-2';
+                container.style.float = 'right';
+                const img = document.createElement('img');
+                img.src = '/media/images/cover_{{ story.id }}.png?' + Date.now();
+                img.className = 'img-fluid mb-3 rounded';
+                img.alt = 'Cover image';
+                container.appendChild(img);
+                statusEl.replaceWith(container);
+              }
+            }
+          });
         });
       </script>
       {% endif %}
@@ -84,16 +100,33 @@
             const start = Date.now();
             const timer = setInterval(() => {
               const elapsed = Date.now() - start;
-              const percent = Math.min(100, (elapsed / duration) * 100);
-              bar.style.width = percent + '%';
-              if (percent >= 100) clearInterval(timer);
+              const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
+              bar.style.width = Math.min(99, progress) + '%';
             }, 200);
           }
           fetch('/api/create_audio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ story_id: {{ story.id }}, language: '{{ selected_language }}' })
-          }).then(resp => { if (resp.ok) location.reload(); });
+          }).then(async resp => {
+            if (resp.ok) {
+              const data = await resp.json();
+              const statusEl = document.getElementById('audio-status');
+              if (statusEl) {
+                const container = document.createElement('div');
+                container.id = 'audio-container';
+                container.className = 'my-3';
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                const source = document.createElement('source');
+                source.src = '/media/audio/speech{{ story.id }}.mp3?' + Date.now();
+                source.type = 'audio/mpeg';
+                audio.appendChild(source);
+                container.appendChild(audio);
+                statusEl.replaceWith(container);
+              }
+            }
+          });
         });
       </script>
       {% endif %}
@@ -114,16 +147,29 @@
             const start = Date.now();
             const timer = setInterval(() => {
               const elapsed = Date.now() - start;
-              const percent = Math.min(100, (elapsed / duration) * 100);
-              bar.style.width = percent + '%';
-              if (percent >= 100) clearInterval(timer);
+              const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
+              bar.style.width = Math.min(99, progress) + '%';
             }, 200);
           }
           fetch('/api/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ story_id: {{ story.id }}, language: '{{ selected_language }}' })
-          }).then(resp => { if (resp.ok) location.reload(); });
+          }).then(async resp => {
+            if (resp.ok) {
+              const data = await resp.json();
+              const statusEl = document.getElementById('text-status');
+              if (statusEl) {
+                const para = document.createElement('p');
+                para.innerHTML = data.text.replace(/\n/g, '<br>');
+                statusEl.replaceWith(para);
+              }
+              const titleEl = document.querySelector('h2');
+              if (titleEl) {
+                titleEl.textContent = data.title;
+              }
+            }
+          });
         });
       </script>
       {% endif %}
