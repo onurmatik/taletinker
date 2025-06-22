@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "widget_tweaks",
+    'django_recaptcha',
+    'django_ses',
     # Project apps
     "taletinker.accounts",
     "taletinker.stories",
@@ -186,3 +188,12 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "create_story"
 LOGOUT_REDIRECT_URL = "login"
+
+# Email login
+EMAIL_BACKEND = 'django_ses.SESBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@genelizleyici.com'
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
+]
+SESAME_MAX_AGE = 300
