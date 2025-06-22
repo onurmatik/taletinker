@@ -19,46 +19,16 @@
     </p>
 </div>
 
-<p><strong>Languages:</strong>
+<p>
   {% for lang in languages %}
-    <a href="?lang={{ lang }}"{% if lang == selected_language %} class="fw-bold"{% endif %}>{{ lang }}</a>{% if not forloop.last %}, {% endif %}
+    {% if lang == selected_language %}
+      <span class="badge text-bg-success">{{ lang|upper }}</span>
+    {% else %}
+      <a href="?lang={{ lang }}" class="badge text-bg-secondary text-decoration-none">{{ lang|upper }}</a>
+    {% endif %}
   {% endfor %}
 </p>
 
-{% if user.is_authenticated and new_language_choices %}
-<form id="translate-form" class="row g-2 mb-3">
-  <div class="col-auto">
-    <label for="new-language" class="form-label">Add language</label>
-    <select id="new-language" class="form-select">
-      {% for code, label in new_language_choices %}
-      <option value="{{ code }}">{{ label }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-auto align-self-end">
-    <button type="submit" class="btn btn-secondary">Create</button>
-  </div>
-</form>
-<script>
-  document.getElementById('translate-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const lang = document.getElementById('new-language').value;
-    fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ story_id: {{ story.id }}, language: lang })
-    }).then(resp => {
-      if (resp.ok) {
-        fetch('/api/create_audio', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ story_id: {{ story.id }}, language: lang })
-        }).then(() => { window.location = '?lang=' + lang; });
-      }
-    });
-  });
-</script>
-{% endif %}
 
 <div>
 
