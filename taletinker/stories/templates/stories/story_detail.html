@@ -21,7 +21,7 @@
 
 <p><strong>Languages:</strong>
   {% for lang in languages %}
-    <a href="?lang={{ lang }}">{{ lang }}</a>{% if not forloop.last %}, {% endif %}
+    <a href="?lang={{ lang }}"{% if lang == selected_language %} class="fw-bold"{% endif %}>{{ lang }}</a>{% if not forloop.last %}, {% endif %}
   {% endfor %}
 </p>
 
@@ -98,7 +98,20 @@
       </script>
     {% endif %}
 
-    <p>{{ text.text|linebreaks }}</p>
+    {% if text %}
+      <p>{{ text.text|linebreaks }}</p>
+    {% else %}
+      <p id="text-status">Creating text...</p>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ story_id: {{ story.id }}, language: '{{ selected_language }}' })
+          }).then(resp => { if (resp.ok) location.reload(); });
+        });
+      </script>
+    {% endif %}
 
 </div>
 
