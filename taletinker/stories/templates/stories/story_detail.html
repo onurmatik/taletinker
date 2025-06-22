@@ -37,7 +37,11 @@
         <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3 rounded" alt="Cover image" />
       </div>
     {% else %}
-      <p id="image-status">Creating image...</p>
+      <div id="image-status" class="w-50 m-2" style="float: right;">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating image...</div>
+        </div>
+      </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
           fetch('/api/create_image', {
@@ -47,7 +51,7 @@
           }).then(resp => { if (resp.ok) location.reload(); });
         });
       </script>
-    {% endif %}
+      {% endif %}
 
     {% if audio %}
       <div id="audio-container" class="my-3">
@@ -56,7 +60,11 @@
         </audio>
       </div>
     {% else %}
-      <p id="audio-status">Creating audio...</p>
+      <div id="audio-status" class="my-3">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating audio...</div>
+        </div>
+      </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
           fetch('/api/create_audio', {
@@ -66,12 +74,16 @@
           }).then(resp => { if (resp.ok) location.reload(); });
         });
       </script>
-    {% endif %}
+      {% endif %}
 
     {% if text %}
       <p>{{ text.text|linebreaks }}</p>
     {% else %}
-      <p id="text-status">Creating text...</p>
+      <div id="text-status" class="my-3">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Creating text...</div>
+        </div>
+      </div>
       <script>
         document.addEventListener('DOMContentLoaded', () => {
           fetch('/api/translate', {
@@ -81,7 +93,7 @@
           }).then(resp => { if (resp.ok) location.reload(); });
         });
       </script>
-    {% endif %}
+      {% endif %}
 
 </div>
 
