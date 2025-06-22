@@ -193,6 +193,19 @@ class StoryListAndDetailTests(TestCase):
         self.assertContains(resp, "ES")
         self.assertNotContains(resp, "EN")
 
+    def test_titles_use_selected_language(self):
+        story = Story.objects.create(
+            author=self.user,
+            is_published=True,
+            parameters={"age": 5, "themes": []},
+        )
+        story.texts.create(language="en", title="Hello", text="x")
+        story.texts.create(language="es", title="Hola", text="x")
+
+        resp = self.client.get(reverse("story_list") + "?lang=es")
+        self.assertContains(resp, "Hola")
+        self.assertNotContains(resp, "Hello")
+
     def test_sort_by_popularity(self):
         s1 = self._create_story(title="One", published=True)
         s2 = self._create_story(title="Two", published=True)
