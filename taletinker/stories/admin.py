@@ -36,5 +36,6 @@ class StoryImageAdmin(admin.ModelAdmin):
 class StoryAudioAdmin(admin.ModelAdmin):
     list_display = [
         "story",
+        "language",
         "created_at",
     ]
