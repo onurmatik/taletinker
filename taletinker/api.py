@@ -262,8 +262,9 @@ def create_audio(request, payload: AudioPayload):
             audio_data = b"".join(response.iter_bytes())
 
         story_audio = StoryAudio(story=story, language=target_language)
-        story_audio.mp3.save(f"speech{story.pk}.mp3", ContentFile(audio_data))
-        return {"audio_id": story_audio.id}
+        filename = f"speech{story.pk}_{target_language}.mp3"
+        story_audio.mp3.save(filename, ContentFile(audio_data))
+        return {"audio_id": story_audio.id, "file": story_audio.mp3.name}
     except openai.OpenAIError as exc:
         logger.exception("OpenAI API error")
         return api.create_response(request, {"detail": str(exc)}, status=503)

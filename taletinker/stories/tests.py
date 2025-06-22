@@ -288,6 +288,11 @@ class CreateAudioApiTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.story.audios.count(), 1)
+        data = resp.json()
+        self.assertIn("audio_id", data)
+        self.assertIn("file", data)
+        self.assertIn(f"speech{self.story.id}_en", data["file"])
+        self.assertIn(f"speech{self.story.id}_en", self.story.audios.first().mp3.name)
 
     @patch("taletinker.api.openai.OpenAI")
     def test_generate_audio_specific_language(self, mock_openai):
@@ -321,6 +326,10 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.story.audios.count(), 1)
         self.assertEqual(self.story.audios.first().language, "es")
+        data = resp.json()
+        self.assertIn("file", data)
+        self.assertIn(f"speech{self.story.id}_es", data["file"])
+        self.assertIn(f"speech{self.story.id}_es", self.story.audios.first().mp3.name)
         create_mock.assert_called_with(
             model="tts-1",
             voice="shimmer",
@@ -375,6 +384,10 @@ class CreateAudioApiTests(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("file", data)
+        self.assertIn(f"speech{self.story.id}_es", data["file"])
+        self.assertIn(f"speech{self.story.id}_es", self.story.audios.first().mp3.name)
         # translation should have been saved
         self.assertEqual(self.story.texts.filter(language="es").count(), 1)
         self.assertEqual(self.story.audios.filter(language="es").count(), 1)

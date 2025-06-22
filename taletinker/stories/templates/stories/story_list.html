@@ -92,6 +92,7 @@
         body: JSON.stringify({ story_id: storyId, language: language })
       }).then(async resp => {
         if (resp.ok) {
+          const data = await resp.json();
           const container = document.createElement('div');
           container.id = 'audio-container-' + storyId;
           container.className = 'mt-auto';
@@ -99,7 +100,7 @@
           audio.controls = true;
           audio.className = 'w-100';
           const source = document.createElement('source');
-          source.src = '/media/audio/speech' + storyId + '.mp3?' + Date.now();
+          source.src = '/media/' + data.file + '?' + Date.now();
           source.type = 'audio/mpeg';
           audio.appendChild(source);
           container.appendChild(audio);
