@@ -199,7 +199,7 @@
             </figcaption>
 
         <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
-{{ story.display_audio }}
+
         {% if story.display_audio %}
           <div id="audio-container-{{ story.id }}" class="mt-auto">
             <audio controls class="w-100">
