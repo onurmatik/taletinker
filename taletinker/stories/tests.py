@@ -327,6 +327,58 @@ class CreateAudioApiTests(TestCase):
             input="S\n...\nhola",
         )
 
+    @patch("taletinker.api.openai.OpenAI")
+    def test_generate_audio_with_auto_translation(self, mock_openai):
+        """Audio creation should translate text when missing."""
+
+        class DummyResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                pass
+
+            def iter_bytes(self, chunk_size=None):
+                return [b"mp3"]
+
+        dummy = DummyResp()
+        mock_client = mock_openai.return_value
+        # mock audio generation
+        create_mock = MagicMock(return_value=dummy)
+        mock_client.audio = SimpleNamespace(
+            speech=SimpleNamespace(
+                with_streaming_response=SimpleNamespace(create=create_mock)
+            )
+        )
+        # mock translation
+        mock_client.chat = SimpleNamespace(
+            completions=SimpleNamespace(
+                create=MagicMock(
+                    return_value=SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                message=SimpleNamespace(
+                                    content='{"title": "Hola", "text": "hola"}'
+                                )
+                            )
+                        ]
+                    )
+                )
+            )
+        )
+
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/create_audio",
+            {"story_id": self.story.id, "language": "es"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        # translation should have been saved
+        self.assertEqual(self.story.texts.filter(language="es").count(), 1)
+        self.assertEqual(self.story.audios.filter(language="es").count(), 1)
+
     def test_audio_already_exists(self):
         self.story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
         self.client.force_login(self.user)
