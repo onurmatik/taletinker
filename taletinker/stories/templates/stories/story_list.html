@@ -72,6 +72,58 @@
       setActive(0);
       updateSummary();
     }
+
+    document.querySelectorAll('[data-create-audio]').forEach(statusEl => {
+      const storyId = statusEl.dataset.storyId;
+      const language = statusEl.dataset.language;
+      const bar = statusEl.querySelector('.progress-bar');
+      if (bar) {
+        const duration = parseInt(bar.dataset.duration, 10) || 30000;
+        const start = Date.now();
+        const timer = setInterval(() => {
+          const elapsed = Date.now() - start;
+          const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
+          bar.style.width = Math.min(99, progress) + '%';
+        }, 200);
+      }
+      fetch('/api/create_audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ story_id: storyId, language: language })
+      }).then(async resp => {
+        if (resp.ok) {
+          const container = document.createElement('div');
+          container.id = 'audio-container-' + storyId;
+          container.className = 'mt-auto';
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.className = 'w-100';
+          const source = document.createElement('source');
+          source.src = '/media/audio/speech' + storyId + '.mp3?' + Date.now();
+          source.type = 'audio/mpeg';
+          audio.appendChild(source);
+          container.appendChild(audio);
+          statusEl.replaceWith(container);
+          const btn = document.getElementById('add-btn-' + storyId);
+          if (btn) btn.removeAttribute('disabled');
+          const pItem = document.querySelector('#playlist [data-story-id="' + storyId + '"]');
+          if (pItem) {
+            pItem.dataset.url = source.src;
+            const durSpan = pItem.querySelector('.duration');
+            const meta = pItem.querySelector('.metadata-audio');
+            if (meta) {
+              meta.querySelector('source').src = source.src;
+              meta.load();
+              meta.addEventListener('loadedmetadata', () => {
+                const dur = meta.duration;
+                if (durSpan && !isNaN(dur)) durSpan.textContent = formatTime(dur);
+                updateSummary();
+              });
+            }
+          }
+        }
+      });
+    });
   });
 </script>
 {% endblock %}
@@ -148,10 +200,18 @@
 
         <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
 
-        {% if story.audios.first %}
-          <audio controls class="w-100 mt-auto">
-            <source src="{{ story.audios.first.mp3.url }}" type="audio/mpeg" />
-          </audio>
+        {% if story.display_audio %}
+          <div id="audio-container-{{ story.id }}" class="mt-auto">
+            <audio controls class="w-100">
+              <source src="{{ story.display_audio.mp3.url }}" type="audio/mpeg" />
+            </audio>
+          </div>
+        {% else %}
+          <div id="audio-status-{{ story.id }}" data-create-audio data-story-id="{{ story.id }}" data-language="{{ story.display_language }}" class="mt-auto">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="30000" style="width: 0%">Creating audio...</div>
+            </div>
+          </div>
         {% endif %}
 
       </div>
@@ -161,8 +221,9 @@
           {% if user.is_authenticated %}
           <form method="post" action="{% url 'add_to_playlist' story.id %}" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-link text-dark p-0 fw-bolder"
+            <button id="add-btn-{{ story.id }}" type="submit" class="btn btn-link text-dark p-0 fw-bolder"
                     data-bs-toggle="tooltip" data-bs-title="Add to Playlist"
+                    {% if not story.display_audio %}disabled{% endif %}
             ><i class="bi bi-plus-circle"></i></button>
           </form>
           {% endif %}
@@ -196,9 +257,9 @@
         </div>
 
       <ul class="list-group mb-3" id="playlist">
-        {% for item in playlist.stories.all %}
-          {% with audio=item.audios.first %}
-          <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center playlist-item" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
+        {% for item in playlist_stories %}
+          {% with audio=item.display_audio %}
+          <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center playlist-item" data-story-id="{{ item.id }}" {% if audio %}data-url="{{ audio.mp3.url }}"{% endif %}>
             <span class="text-decoration-none small">{{ item.texts.first.title }}</span>
             <div class="d-flex align-items-center">
               {% if audio %}
