@@ -102,13 +102,14 @@ def story_detail(request, story_id: int):
     text_obj = None
     if lang:
         text_obj = story.texts.filter(language=lang).first()
-    if not text_obj:
+    else:
         text_obj = story.texts.first()
         lang = text_obj.language if text_obj else None
 
     audio_obj = story.audios.filter(language=lang).first() if lang else None
 
     available_langs = story.languages
+    supported_langs = [code for code, _ in settings.LANGUAGES]
     new_language_choices = [
         (code, label)
         for code, label in settings.LANGUAGES
@@ -119,7 +120,7 @@ def story_detail(request, story_id: int):
         "story": story,
         "text": text_obj,
         "audio": audio_obj,
-        "languages": available_langs,
+        "languages": supported_langs,
         "selected_language": lang,
         "new_language_choices": new_language_choices,
     }

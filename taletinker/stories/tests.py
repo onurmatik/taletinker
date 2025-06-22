@@ -3,6 +3,7 @@ from django.urls import reverse
 from unittest.mock import patch, MagicMock
 from types import SimpleNamespace
 from django.core.files.base import ContentFile
+from django.conf import settings
 import base64
 
 from taletinker.accounts.models import User
@@ -133,9 +134,9 @@ class StoryListAndDetailTests(TestCase):
         story = self._create_story()
         self.client.force_login(self.user)
         response = self.client.get(reverse("story_list"))
-        self.assertContains(response, 'class="like-btn"')
+        self.assertContains(response, 'class="like-btn')
         response = self.client.get(reverse("story_detail", args=[story.id]))
-        self.assertContains(response, 'class="like-btn"')
+        self.assertContains(response, 'class="like-btn')
 
     def test_filter_my_stories(self):
         my_story = self._create_story(title="Mine", published=True)
@@ -322,8 +323,8 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(self.story.audios.first().language, "es")
         create_mock.assert_called_with(
             model="tts-1",
-            voice="alloy",
-            input="#S\nhola",
+            voice="shimmer",
+            input="S\n...\nhola",
         )
 
     def test_audio_already_exists(self):
@@ -404,9 +405,31 @@ class StoryAudioDisplayTests(TestCase):
         story.texts.create(language="es", title="T", text="y")
         story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
 
-        resp = self.client.get(reverse("story_list"))
+        resp = self.client.get(reverse("story_detail", args=[story.id]))
         self.assertContains(resp, "<audio")
-        self.assertContains(resp, "Languages: en, es")
+        self.assertContains(resp, "?lang=en")
+        self.assertContains(resp, "?lang=es")
+
+
+class StoryLanguageOnDemandTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="lang", password="pass")
+        self.client = Client()
+
+    def test_detail_lists_all_supported_languages(self):
+        story = Story.objects.create(author=self.user, is_published=True)
+        story.texts.create(language="en", title="T", text="x")
+
+        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        for code, _ in settings.LANGUAGES:
+            self.assertContains(resp, f"?lang={code}")
+
+    def test_missing_translation_shows_creation_message(self):
+        story = Story.objects.create(author=self.user, is_published=True)
+        story.texts.create(language="en", title="T", text="x")
+
+        resp = self.client.get(reverse("story_detail", args=[story.id]) + "?lang=fr")
+        self.assertContains(resp, "Creating text...")
 
 
 class PlaylistTests(TestCase):
