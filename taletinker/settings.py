@@ -190,13 +190,20 @@ LOGIN_REDIRECT_URL = "create_story"
 LOGOUT_REDIRECT_URL = "login"
 
 # Email login
-EMAIL_BACKEND = 'django_ses.SESBackend'
-DEFAULT_FROM_EMAIL = 'no-reply@genelizleyici.com'
+DEFAULT_FROM_EMAIL = 'hello@taletinker.com'
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
 ]
 SESAME_MAX_AGE = 300
 
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = 'django_ses.SESBackend'
+
+
 # Silence recaptcha test key warning in dev/test
 SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
+
