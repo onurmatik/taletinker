@@ -197,3 +197,6 @@ AUTHENTICATION_BACKENDS = [
     "sesame.backends.ModelBackend",
 ]
 SESAME_MAX_AGE = 300
+
+# Silence recaptcha test key warning in dev/test
+SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]

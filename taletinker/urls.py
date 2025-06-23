@@ -15,8 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.urls import path
+from sesame.views import LoginView as SesameLoginView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -30,12 +30,14 @@ from taletinker.stories.views import (
     remove_from_playlist,
     play_playlist,
 )
-from taletinker.accounts.views import LogoutView
+from taletinker.accounts.views import LogoutView, SignupView, EmailLoginView
 from taletinker.api import api as ninja_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('signup/', SignupView.as_view(), name='signup'),
+    path('login/', EmailLoginView.as_view(), name='login'),
+    path('login/token/', SesameLoginView.as_view(next_page="create_story"), name='login_token'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('create/', create_story, name='create_story'),
     path('story/<int:story_id>/', story_detail, name='story_detail'),
