@@ -31,6 +31,7 @@ from taletinker.stories.views import (
     reorder_playlist,
     play_playlist,
 )
+from taletinker.stories.feeds import LatestStoriesByLanguage
 from taletinker.accounts.views import LogoutView, SignupView, EmailLoginView
 from taletinker.api import api as ninja_api
 
@@ -47,6 +48,7 @@ urlpatterns = [
     path('playlist/remove/<int:story_id>/', remove_from_playlist, name='remove_from_playlist'),
     path('playlist/reorder/', reorder_playlist, name='reorder_playlist'),
     path('playlist/play/', play_playlist, name='play_playlist'),
+    path('rss/<str:language>/', LatestStoriesByLanguage(), name='story_feed'),
     path('api/', ninja_api.urls),
     path('', story_list, name='story_list'),
 ]
