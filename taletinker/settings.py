@@ -186,7 +186,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 # Auth settings
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "story_list"
+LOGIN_REDIRECT_URL = "create_story"
 LOGOUT_REDIRECT_URL = "login"
 
 # Email login
