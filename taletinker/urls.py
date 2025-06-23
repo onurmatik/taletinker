@@ -28,6 +28,7 @@ from taletinker.stories.views import (
     add_to_playlist,
     add_filtered_to_playlist,
     remove_from_playlist,
+    reorder_playlist,
     play_playlist,
 )
 from taletinker.accounts.views import LogoutView, SignupView, EmailLoginView
@@ -44,6 +45,7 @@ urlpatterns = [
     path('playlist/add/<int:story_id>/', add_to_playlist, name='add_to_playlist'),
     path('playlist/add_all/', add_filtered_to_playlist, name='add_filtered_to_playlist'),
     path('playlist/remove/<int:story_id>/', remove_from_playlist, name='remove_from_playlist'),
+    path('playlist/reorder/', reorder_playlist, name='reorder_playlist'),
     path('playlist/play/', play_playlist, name='play_playlist'),
     path('api/', ninja_api.urls),
     path('', story_list, name='story_list'),

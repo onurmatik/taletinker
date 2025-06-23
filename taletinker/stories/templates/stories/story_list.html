@@ -69,6 +69,7 @@
     const player = document.getElementById('playlist-player');
     const summaryEl = document.getElementById('playlist-summary');
     const durations = Array(items.length).fill(0);
+    const durationMap = {};
     let index = 0;
 
     function formatTime(sec) {
@@ -91,6 +92,7 @@
         metaAudio.addEventListener('loadedmetadata', () => {
           const dur = metaAudio.duration;
           durations[idx] = isNaN(dur) ? 0 : dur;
+          durationMap[item.dataset.storyId] = durations[idx];
           const span = item.querySelector('.duration');
           if (span && !isNaN(dur)) span.textContent = formatTime(dur);
           updateSummary();
@@ -126,6 +128,36 @@
     if (items.length) {
       setActive(0);
     }
+
+    items.forEach(item => {
+      item.draggable = true;
+      item.addEventListener('dragstart', () => {
+        item.classList.add('opacity-50');
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('opacity-50');
+      });
+    });
+
+    const listEl = document.getElementById('playlist');
+    listEl.addEventListener('dragover', e => {
+      e.preventDefault();
+      const dragging = document.querySelector('.playlist-item.opacity-50');
+      const siblings = Array.from(listEl.querySelectorAll('.playlist-item:not(.opacity-50)'));
+      const next = siblings.find(el => e.clientY < el.getBoundingClientRect().top + el.offsetHeight / 2);
+      listEl.insertBefore(dragging, next);
+    });
+
+    listEl.addEventListener('drop', () => {
+      items = Array.from(listEl.querySelectorAll('.playlist-item'));
+      const order = items.map(el => el.dataset.storyId);
+      fetch('{% url "reorder_playlist" %}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(order.map(id => ['order', id]))
+      });
+      updateSummary();
+    });
 
     initAudioGeneration(document);
 

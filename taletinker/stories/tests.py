@@ -561,3 +561,14 @@ class PlaylistTests(TestCase):
         resp = self.client.get(reverse("story_list"))
         self.assertContains(resp, "playlist-player")
 
+    def test_reorder_playlist(self):
+        s1 = self._create_story("A")
+        s2 = self._create_story("B")
+        s3 = self._create_story("C")
+        for s in (s1, s2, s3):
+            self.client.post(reverse("add_to_playlist", args=[s.id]))
+        resp = self.client.post(reverse("reorder_playlist"), {"order": [s3.id, s1.id, s2.id]})
+        self.assertEqual(resp.status_code, 200)
+        playlist_stories = list(self.user.playlist.ordered_stories())
+        self.assertEqual(playlist_stories, [s3, s1, s2])
+
