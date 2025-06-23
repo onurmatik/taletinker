@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
+from django.http import JsonResponse
 from django.db.models import Count
 from django.core.paginator import Paginator
 
@@ -79,6 +80,9 @@ def story_list(request):
         playlist_stories = list(
             playlist.stories.prefetch_related("audios", "texts")
         )
+        if playlist.order:
+            ordering = {sid: idx for idx, sid in enumerate(playlist.order)}
+            playlist_stories.sort(key=lambda s: ordering.get(s.id, len(ordering)))
         for item in playlist_stories:
             lang = selected_language or (
                 item.texts.first().language if item.texts.exists() else None
@@ -181,6 +185,9 @@ def add_to_playlist(request, story_id: int):
     playlist, _ = Playlist.objects.get_or_create(user=request.user)
     story = get_object_or_404(Story, pk=story_id)
     playlist.stories.add(story)
+    if story_id not in playlist.order:
+        playlist.order.append(story_id)
+        playlist.save(update_fields=["order"])
     return redirect("story_list")
 
 
@@ -189,6 +196,10 @@ def add_filtered_to_playlist(request):
     stories, _ = _filtered_stories(request)
     playlist, _ = Playlist.objects.get_or_create(user=request.user)
     playlist.stories.add(*stories)
+    for story in stories:
+        if story.id not in playlist.order:
+            playlist.order.append(story.id)
+    playlist.save(update_fields=["order"])
     return redirect("story_list")
 
 
@@ -197,12 +208,27 @@ def remove_from_playlist(request, story_id: int):
     playlist, _ = Playlist.objects.get_or_create(user=request.user)
     story = get_object_or_404(Story, pk=story_id)
     playlist.stories.remove(story)
+    if story_id in playlist.order:
+        playlist.order.remove(story_id)
+        playlist.save(update_fields=["order"])
     return redirect("story_list")
+
+
+@login_required
+def reorder_playlist(request):
+    playlist, _ = Playlist.objects.get_or_create(user=request.user)
+    order_ids = request.POST.getlist("order[]") or request.POST.getlist("order")
+    playlist.order = [int(sid) for sid in order_ids]
+    playlist.save(update_fields=["order"])
+    return JsonResponse({"status": "ok"})
 
 
 @login_required
 def play_playlist(request):
     playlist, _ = Playlist.objects.get_or_create(user=request.user)
-    stories = playlist.stories.prefetch_related("audios", "texts")
+    stories = list(playlist.stories.prefetch_related("audios", "texts"))
+    if playlist.order:
+        ordering = {sid: idx for idx, sid in enumerate(playlist.order)}
+        stories.sort(key=lambda s: ordering.get(s.id, len(ordering)))
     context = {"playlist": playlist, "stories": stories}
     return render(request, "stories/playlist_play.html", context)

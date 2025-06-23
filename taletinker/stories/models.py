@@ -84,6 +84,16 @@ class Playlist(models.Model):
         related_name="playlist",
     )
     stories = models.ManyToManyField(Story, related_name="playlists", blank=True)
+    order = models.JSONField(default=list, blank=True)
 
     def __str__(self):  # pragma: no cover - trivial
         return f"{self.user}'s playlist"
+
+    def ordered_stories(self):
+        """Return stories ordered by the stored order list."""
+        qs = list(self.stories.all())
+        if not self.order:
+            return qs
+        ordering = {sid: idx for idx, sid in enumerate(self.order)}
+        qs.sort(key=lambda s: ordering.get(s.id, len(ordering)))
+        return qs
