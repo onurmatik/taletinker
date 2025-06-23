@@ -22,7 +22,8 @@ class LogoutView(auth_views.LogoutView):
 class SignupView(View):
     def get(self, request):
         form = SignupForm()
-        return render(request, "registration/signup.html", {"form": form})
+        context = {"form": form, "next": request.GET.get("next", "")}
+        return render(request, "registration/signup.html", context)
 
     def post(self, request):
         form = SignupForm(request.POST)
@@ -32,9 +33,13 @@ class SignupView(View):
                 username=form.cleaned_data["username"],
                 email=form.cleaned_data["email"],
             )
-            login_url = request.build_absolute_uri(
-                reverse("login_token") + get_query_string(user)
-            )
+            qs = get_query_string(user)
+            next_url = request.POST.get("next")
+            login_url = request.build_absolute_uri(reverse("login_token") + qs)
+            if next_url:
+                from urllib.parse import quote
+
+                login_url += "&next=" + quote(next_url)
             send_mail(
                 "Your TaleTinker login link",
                 f"Click here to log in: {login_url}",
@@ -42,13 +47,15 @@ class SignupView(View):
                 [form.cleaned_data["email"]],
             )
             return render(request, "registration/signup_done.html")
-        return render(request, "registration/signup.html", {"form": form})
+        context = {"form": form, "next": request.POST.get("next", "")}
+        return render(request, "registration/signup.html", context)
 
 
 class EmailLoginView(View):
     def get(self, request):
         form = EmailLoginForm()
-        return render(request, "registration/login_email.html", {"form": form})
+        context = {"form": form, "next": request.GET.get("next", "")}
+        return render(request, "registration/login_email.html", context)
 
     def post(self, request):
         form = EmailLoginForm(request.POST)
@@ -59,9 +66,13 @@ class EmailLoginView(View):
             except User.DoesNotExist:
                 form.add_error("email", "Unknown email")
             else:
-                login_url = request.build_absolute_uri(
-                    reverse("login_token") + get_query_string(user)
-                )
+                qs = get_query_string(user)
+                next_url = request.POST.get("next")
+                login_url = request.build_absolute_uri(reverse("login_token") + qs)
+                if next_url:
+                    from urllib.parse import quote
+
+                    login_url += "&next=" + quote(next_url)
                 send_mail(
                     "Your TaleTinker login link",
                     f"Click here to log in: {login_url}",
@@ -69,4 +80,5 @@ class EmailLoginView(View):
                     [form.cleaned_data["email"]],
                 )
                 return render(request, "registration/login_email_sent.html")
-        return render(request, "registration/login_email.html", {"form": form})
+        context = {"form": form, "next": request.POST.get("next", "")}
+        return render(request, "registration/login_email.html", context)

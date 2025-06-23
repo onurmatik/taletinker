@@ -37,7 +37,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/', SignupView.as_view(), name='signup'),
     path('login/', EmailLoginView.as_view(), name='login'),
-    path('login/token/', SesameLoginView.as_view(next_page="create_story"), name='login_token'),
+    path('login/token/', SesameLoginView.as_view(), name='login_token'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('create/', create_story, name='create_story'),
     path('story/<int:story_id>/', story_detail, name='story_detail'),
