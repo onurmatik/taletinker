@@ -60,16 +60,16 @@
       }
     });
 
+    updateSummary();
     if (items.length) {
       setActive(0);
-      updateSummary();
     }
   });
 </script>
 {% endblock %}
 {% block content %}
 <h2 class="mb-3">My Playlist</h2>
-<p id="playlist-summary" class="small text-muted"></p>
+<p id="playlist-summary" class="small text-muted">0 stories – 0:00</p>
 <ul class="list-group mb-3" id="playlist">
   {% for story in stories %}
     {% with audio=story.audios.first %}

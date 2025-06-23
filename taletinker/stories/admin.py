@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Story, StoryAudio, StoryImage, StoryText
+from .models import Story, StoryAudio, StoryImage, StoryText, Playlist
 
 
 @admin.register(Story)
@@ -39,3 +39,9 @@ class StoryAudioAdmin(admin.ModelAdmin):
         "language",
         "created_at",
     ]
+
+
+@admin.register(Playlist)
+class PlaylistAdmin(admin.ModelAdmin):
+    list_display = ["user"]
+    filter_horizontal = ["stories"]
