@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Email Login{% endblock %}
+{% block content %}
+<h2>Email Login</h2>
+<form method="post" class="mb-3">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="mb-3">
+    {{ form.email.label_tag }}
+    {{ form.email }}
+  </div>
+  <div class="mb-3">
+    {{ form.captcha }}
+  </div>
+  <button type="submit" class="btn btn-primary">Send Login Link</button>
+</form>
+{% endblock %}
