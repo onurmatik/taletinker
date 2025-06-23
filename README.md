@@ -17,6 +17,7 @@ TaleTinker lets parents craft personalized tales in seconds—tuning realism, th
 * **Rich Controls** – Sliders for realism vs. fantasy, didactic vs. fun, target age (3 – 10+), themes, emotional purpose, language, length, and custom prompts.
 * **On‑Demand Translations** – Base stories can be automatically translated into multiple languages with matching narration.
 * **Public Library** – Browse, search, like, and bookmark stories; filter by age, theme, language, or popularity.
+* **RSS Feeds** – Subscribe to new stories in any supported language.
 * **Freemium Model** – Monthly quota for free users; premium subscribers unlock higher limits, audio downloads, and narrator voice options.
 * **Moderation & Privacy** – OpenAI moderation checks every story; authors may publish under a nickname or anonymously.
 * **Modern Tech Stack** – Django + Django REST Framework, React (or Django templates), PostgreSQL, Celery, AWS S3, Stripe billing.

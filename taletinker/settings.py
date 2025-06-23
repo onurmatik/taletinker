@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.syndication",
     "widget_tweaks",
     'django_recaptcha',
     'django_ses',

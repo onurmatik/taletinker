@@ -572,3 +572,23 @@ class PlaylistTests(TestCase):
         playlist_stories = list(self.user.playlist.ordered_stories())
         self.assertEqual(playlist_stories, [s3, s1, s2])
 
+
+class RSSFeedTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="feed", password="pass")
+        self.client = Client()
+        self.story = Story.objects.create(author=self.user, is_published=True)
+        self.story.texts.create(language="en", title="Hello", text="x")
+        self.story.texts.create(language="es", title="Hola", text="y")
+
+    def test_feed_filters_by_language(self):
+        resp = self.client.get(reverse("story_feed", args=["es"]))
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode()
+        self.assertIn("Hola", content)
+        self.assertNotIn("Hello", content)
+
+    def test_unknown_language_returns_404(self):
+        resp = self.client.get(reverse("story_feed", args=["xx"]))
+        self.assertEqual(resp.status_code, 404)
+
