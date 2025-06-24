@@ -28,11 +28,14 @@ def _filtered_stories(request):
         theme = form.cleaned_data.get("theme")
         language = form.cleaned_data.get("language")
         sort = form.cleaned_data.get("sort") or "newest"
+        search = form.cleaned_data.get("search")
 
         if age:
             stories = stories.filter(parameters__age=int(age))
         if language:
             stories = stories.filter(texts__language=language)
+        if search:
+            stories = stories.filter(texts__title__icontains=search).distinct()
 
         stories = stories.annotate(num_likes=Count("liked_by"))
         stories = stories.order_by("-created_at")

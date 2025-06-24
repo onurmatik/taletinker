@@ -206,6 +206,14 @@ class StoryListAndDetailTests(TestCase):
         self.assertContains(resp, "Hola")
         self.assertNotContains(resp, "Hello")
 
+    def test_search_by_title(self):
+        self._create_story(title="Red Apple", published=True)
+        self._create_story(title="Blue Banana", published=True)
+
+        resp = self.client.get(reverse("story_list") + "?search=red")
+        self.assertContains(resp, "Red Apple")
+        self.assertNotContains(resp, "Blue Banana")
+
     def test_sort_by_popularity(self):
         s1 = self._create_story(title="One", published=True)
         s2 = self._create_story(title="Two", published=True)
