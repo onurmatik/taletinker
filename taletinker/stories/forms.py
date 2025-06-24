@@ -131,3 +131,11 @@ class StoryFilterForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
         label="Sort By",
     )
+
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Search"}
+        ),
+        label="Search",
+    )
