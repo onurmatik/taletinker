@@ -10,6 +10,18 @@
           integrity="sha256-zRgmWB5PK4CvTx4FiXsxbHaYRBBjz/rvu97sOC7kzXI=" crossorigin="anonymous"
     >
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <!-- Alternate language versions -->
+    <link rel="alternate" hreflang="en" href="{{ request.path }}?lang=en" />
+    <link rel="alternate" hreflang="es" href="{{ request.path }}?lang=es" />
+    <link rel="alternate" hreflang="fr" href="{{ request.path }}?lang=fr" />
+    <link rel="alternate" hreflang="de" href="{{ request.path }}?lang=de" />
+    <link rel="alternate" hreflang="tr" href="{{ request.path }}?lang=tr" />
+    <!-- RSS feeds for each language -->
+    <link rel="alternate" type="application/rss+xml" title="Latest stories in English" href="{% url 'story_feed' 'en' %}" />
+    <link rel="alternate" type="application/rss+xml" title="Latest stories in Spanish" href="{% url 'story_feed' 'es' %}" />
+    <link rel="alternate" type="application/rss+xml" title="Latest stories in French" href="{% url 'story_feed' 'fr' %}" />
+    <link rel="alternate" type="application/rss+xml" title="Latest stories in German" href="{% url 'story_feed' 'de' %}" />
+    <link rel="alternate" type="application/rss+xml" title="Latest stories in Turkish" href="{% url 'story_feed' 'tr' %}" />
 
     {% block extra_head %}{% endblock %}
 </head>
