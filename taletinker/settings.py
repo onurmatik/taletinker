@@ -192,7 +192,7 @@ LOGIN_REDIRECT_URL = "create_story"
 LOGOUT_REDIRECT_URL = "login"
 
 # Email login
-DEFAULT_FROM_EMAIL = 'hello@taletinker.com'
+DEFAULT_FROM_EMAIL = 'hello@taletinker.org'
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
