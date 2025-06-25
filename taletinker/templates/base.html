@@ -49,7 +49,7 @@ h1, h2, h3, h4, h5, h6 {
           {% if user.is_authenticated %}
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'create_story' %}">View Stories</a>
+              <a class="nav-link" href="{% url 'story_list' %}">View Stories</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'create_story' %}">Create Your Story</a>
