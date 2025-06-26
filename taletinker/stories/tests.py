@@ -271,6 +271,8 @@ class CreateImageApiTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.story.images.count(), 1)
+        self.story.refresh_from_db()
+        self.assertTrue(self.story.is_published)
 
 
 class CreateAudioApiTests(TestCase):

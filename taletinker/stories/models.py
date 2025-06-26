@@ -60,6 +60,14 @@ class StoryImage(models.Model):
     def __str__(self):
         return f"Cover photo for story {self.story.pk}"
 
+    def save(self, *args, **kwargs):
+        """Save image and automatically publish the related story."""
+        result = super().save(*args, **kwargs)
+        if not self.story.is_published:
+            self.story.is_published = True
+            self.story.save(update_fields=["is_published"])
+        return result
+
 
 class StoryAudio(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="audios")
