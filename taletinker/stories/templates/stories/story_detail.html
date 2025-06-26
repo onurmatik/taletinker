@@ -68,7 +68,7 @@
                 container.className = 'w-50 m-2';
                 container.style.float = 'right';
                 const img = document.createElement('img');
-                img.src = '/media/images/cover_{{ story.id }}.png?' + Date.now();
+                img.src = '{{ MEDIA_URL }}images/cover_{{ story.id }}.png?' + Date.now();
                 img.className = 'img-fluid mb-3 rounded';
                 img.alt = 'Cover image';
                 container.appendChild(img);
@@ -119,7 +119,7 @@
                 const audio = document.createElement('audio');
                 audio.controls = true;
                 const source = document.createElement('source');
-                source.src = '/media/' + data.file + '?' + Date.now();
+                source.src = '{{ MEDIA_URL }}' + data.file + '?' + Date.now();
                 source.type = 'audio/mpeg';
                 audio.appendChild(source);
                 container.appendChild(audio);
