@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-*^-ox&1)_r578k)%!2(eoj)@rp3yr9rz!ws9qvaoz6=5@c+!k8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = [
     os.getenv("HOST", "localhost"),
@@ -48,8 +48,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.syndication",
     "widget_tweaks",
-    'django_recaptcha',
-    'django_ses',
+    "django_recaptcha",
+    "django_ses",
+    "storages",
     # Project apps
     "taletinker.accounts",
     "taletinker.stories",
@@ -144,7 +145,7 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 if AWS_STORAGE_BUCKET_NAME:
     STORAGES = {
-        "default": {  # user uploaded media files
+        "default": {  # generated media files
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "location": "media",
