@@ -207,6 +207,11 @@ else:
     EMAIL_BACKEND = 'django_ses.SESBackend'
 
 
+# reCAPTCHA v2
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
+
+
 # Silence recaptcha test key warning in dev/test
 SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
 
