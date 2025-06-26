@@ -43,7 +43,7 @@
             audio.controls = true;
             audio.className = 'w-100';
             const source = document.createElement('source');
-            source.src = '/media/' + data.file + '?' + Date.now();
+            source.src = '{{ MEDIA_URL }}' + data.file + '?' + Date.now();
             source.type = 'audio/mpeg';
             audio.appendChild(source);
             container.appendChild(audio);
