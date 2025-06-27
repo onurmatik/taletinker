@@ -138,6 +138,11 @@ class StoryListAndDetailTests(TestCase):
         response = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertContains(response, 'class="like-btn')
 
+    def test_share_button_present(self):
+        story = self._create_story()
+        response = self.client.get(reverse("story_detail", args=[story.uuid]))
+        self.assertContains(response, 'class="share-btn')
+
     def test_filter_my_stories(self):
         my_story = self._create_story(title="Mine", published=True)
         other = User.objects.create_user(username="bob", password="pass")

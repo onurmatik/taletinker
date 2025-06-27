@@ -145,8 +145,37 @@ h1, h2, h3, h4, h5, h6 {
         });
       }
 
+      function attachShareHandlers(root = document) {
+        root.querySelectorAll('.share-btn').forEach(el => {
+          if (el.dataset.bound) return;
+          el.dataset.bound = '1';
+          el.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const url = el.dataset.url || window.location.href;
+            const title = el.dataset.title || document.title;
+            if (navigator.share) {
+              try {
+                await navigator.share({title, url});
+                return;
+              } catch (err) {
+                /* fallthrough to copy */
+              }
+            }
+            try {
+              await navigator.clipboard.writeText(url);
+              const orig = el.innerHTML;
+              el.innerHTML = '<i class="bi bi-check2"></i>';
+              setTimeout(() => { el.innerHTML = orig; }, 2000);
+            } catch (err) {
+              window.prompt('Copy this link:', url);
+            }
+          });
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
         attachLikeHandlers(document);
+        attachShareHandlers(document);
       });
     </script>
 </body>

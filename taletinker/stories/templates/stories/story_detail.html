@@ -16,6 +16,9 @@
           {% endif %}
       </span>
       <span class="like-count text-secondary">{{ story.liked_by.count }}</span>
+      <a href="#" class="share-btn fs-4 ms-3" data-url="{{ request.build_absolute_uri }}" data-title="{{ text.title }}" data-bs-toggle="tooltip" data-bs-title="Share Story">
+          <i class="bi bi-share"></i>
+      </a>
     </p>
 </div>
 
