@@ -43,19 +43,24 @@ cp .env.example .env         # fill in secrets
 
 ### 2. Local Development
 
-| Service             | URL                                                      |
-| ------------------- | -------------------------------------------------------- |
-| Django API          | [http://localhost:8000/api/](http://localhost:8000/api/) |
-| Frontend (if React) | [http://localhost:5173/](http://localhost:5173/)         |
-| PGAdmin (optional)  | [http://localhost:5050/](http://localhost:5050/)         |
+Run the server locally using Django's built-in SQLite database (no PostgreSQL setup needed):
+
+```bash
+python manage.py runserver
+```
+
+| Service    | URL |
+| ---------- | ------------------------------------------- |
+| Django app | [http://localhost:8000/](http://localhost:8000/) |
+
 
 > 💡 **Costs:** Every story generation hits OpenAI APIs. In local dev the quota is disabled, but you’ll pay standard OpenAI rates. Consider using the `OPENAI_API_TYPE=mock` setting during tests.
 
 ### 3. Run Migrations & Create Superuser
 
 ```bash
-docker compose exec web python manage.py migrate
-docker compose exec web python manage.py createsuperuser
+python manage.py migrate
+python manage.py createsuperuser
 ```
 
 ---
