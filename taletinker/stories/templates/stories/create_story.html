@@ -54,7 +54,7 @@ form.addEventListener('submit', async e=>{
         purposes: [...form.querySelectorAll('input[name="purposes"]:checked')].map(el=>el.value),
         extra_instructions: form.extra_instructions.value,
         story_length: form.story_length.value,
-        language: form.language.value,
+        language: "{{ LANGUAGE_CODE }}",
     };
 
     try{
@@ -122,7 +122,6 @@ form.addEventListener('submit', async e=>{
 
   <div class="mb-3">{{ form.extra_instructions.label_tag }} {{ form.extra_instructions }}</div>
   <div class="mb-3">{{ form.story_length.label_tag }} {{ form.story_length }}</div>
-  <div class="mb-3">{{ form.language.label_tag }} {{ form.language }}</div>
 
   <button type="submit" class="btn btn-primary">Generate Story</button>
   <div id="spinner">Generating…</div>

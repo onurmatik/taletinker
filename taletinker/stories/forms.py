@@ -9,6 +9,8 @@ THEME_CHOICES = [
     ("animals", "Animals"),
     ("courage", "Courage"),
     ("technology", "Technology"),
+    ("dinosaurs", "Dinosaurs"),
+    ("machines", "Machines"),
 ]
 
 PURPOSE_CHOICES = [
@@ -18,9 +20,11 @@ PURPOSE_CHOICES = [
 ]
 
 LENGTH_CHOICES = [
-    ("short", "Short"),
-    ("medium", "Medium"),
-    ("long", "Long"),
+    ("1", "1 minute"),
+    ("2", "2 minutes"),
+    ("3", "3 minutes"),
+    ("4", "4 minutes"),
+    ("5", "5 minutes"),
 ]
 
 
@@ -92,9 +96,6 @@ class StoryCreationForm(forms.Form):
         choices=LENGTH_CHOICES,
         label="Story Length",
         widget=forms.Select(attrs={"class": "form-select"}),
-    )
-    language = forms.ChoiceField(
-        choices=settings.LANGUAGES, widget=forms.Select(attrs={"class": "form-select"})
     )
 
 

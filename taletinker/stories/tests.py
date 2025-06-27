@@ -31,8 +31,7 @@ class CreateStoryViewTests(TestCase):
             "purposes": ["joyful"],
             "characters": "Jane",
             "extra_instructions": "A test story.",
-            "story_length": "short",
-            "language": "en",
+            "story_length": "1",
             "story_text": "Once upon a time",
             "story_title": "My Story",
         }
@@ -55,8 +54,7 @@ class CreateStoryViewTests(TestCase):
             "purposes": ["joyful"],
             "characters": "Jane",
             "extra_instructions": "A test story.",
-            "story_length": "short",
-            "language": "en",
+            "story_length": "1",
             "story_text": "Once upon a time",
             "story_title": "My Story",
         }
@@ -86,7 +84,7 @@ class NinjaCreateApiTests(TestCase):
                 "realism": 3,
                 "didactic": 3,
                 "age": 5,
-                "story_length": "short",
+                "story_length": 1,
             },
             content_type="application/json",
         )
@@ -464,8 +462,7 @@ class ImageCreationFlowTests(TestCase):
             "purposes": ["joyful"],
             "characters": "Jane",
             "extra_instructions": "A test story.",
-            "story_length": "short",
-            "language": "en",
+            "story_length": "1",
             "story_text": "Once",
             "story_title": "T",
         }
