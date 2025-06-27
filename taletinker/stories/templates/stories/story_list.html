@@ -210,23 +210,23 @@
   <!-- FILTER FORM -->
   <div class="col">
     <form method="get" class="row gy-1 gx-2 align-items-end">
-      <div class="col-auto">
+      <div class="col-6 col-md-auto">
         {{ form.age.label_tag }}{{ form.age }}
       </div>
 
-      <div class="col-auto">
+      <div class="col-6 col-md-auto">
         {{ form.theme.label_tag }}{{ form.theme }}
       </div>
 
-      <div class="col-auto">
+      <div class="col-6 col-md-auto">
         {{ form.sort.label_tag }}{{ form.sort }}
       </div>
 
-      <div class="col-auto">
+      <div class="col-6 col-md-auto">
         {{ form.search.label_tag }}{{ form.search }}
       </div>
 
-      <div class="col-auto">
+      <div class="col-6 col-md-auto">
         <button type="submit" class="btn btn-secondary">Apply</button>
       </div>
     </form>
@@ -249,7 +249,7 @@
 <div class="row">
   <div class="col-md-9">
     {% if stories %}
-    <div id="story-grid" class="row row-cols-1 row-cols-md-3 g-4" data-next-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% endif %}">
+    <div id="story-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" data-next-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% endif %}">
       {% include 'stories/story_cards.html' with stories=stories %}
     </div>
     {% else %}
@@ -257,7 +257,7 @@
     {% endif %}
   </div>
 
-  <div class="col-md-3">
+  <div class="col-6 col-md-3">
 
     <div id="playlist-panel" class="bg-light border p-3 rounded">
 
