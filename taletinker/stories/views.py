@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.utils.translation import get_language
 from django.db.models import Count
 from django.core.paginator import Paginator
+from django.core.cache import cache
 
 from .forms import StoryCreationForm, StoryFilterForm
 from .models import Story, StoryText, Playlist
@@ -13,43 +14,57 @@ from .models import Story, StoryText, Playlist
 def _filtered_stories(request):
     """Return stories and bound filter form applying GET parameters."""
 
-    stories = Story.objects.filter(is_published=True).prefetch_related(
-        "texts", "author", "images"
-    )
-
-    filter_param = request.GET.get("filter")
-    if filter_param == "mine" and request.user.is_authenticated:
-        stories = stories.filter(author=request.user)
-    elif filter_param == "favorites" and request.user.is_authenticated:
-        stories = stories.filter(liked_by=request.user)
-
     form = StoryFilterForm(request.GET)
-    if form.is_valid():
-        age = form.cleaned_data.get("age")
-        theme = form.cleaned_data.get("theme")
-        language = form.cleaned_data.get("language")
-        sort = form.cleaned_data.get("sort") or "newest"
-        search = form.cleaned_data.get("search")
+    cache_key = (
+        f"story_list:"
+        f"{request.user.id if request.user.is_authenticated else 'anon'}:"
+        f"{request.GET.urlencode()}"
+    )
+    stories = cache.get(cache_key)
 
-        if age:
-            stories = stories.filter(parameters__age=int(age))
-        if language:
-            stories = stories.filter(texts__language=language)
-        if search:
-            stories = stories.filter(texts__title__icontains=search).distinct()
+    if stories is None:
+        stories_qs = Story.objects.filter(is_published=True).prefetch_related(
+            "texts", "author", "images"
+        )
 
-        stories = stories.annotate(num_likes=Count("liked_by"))
-        stories = stories.order_by("-created_at")
+        filter_param = request.GET.get("filter")
+        if filter_param == "mine" and request.user.is_authenticated:
+            stories_qs = stories_qs.filter(author=request.user)
+        elif filter_param == "favorites" and request.user.is_authenticated:
+            stories_qs = stories_qs.filter(liked_by=request.user)
 
-        stories = list(stories)
+        if form.is_valid():
+            age = form.cleaned_data.get("age")
+            theme = form.cleaned_data.get("theme")
+            language = form.cleaned_data.get("language")
+            sort = form.cleaned_data.get("sort") or "newest"
+            search = form.cleaned_data.get("search")
 
-        if theme:
-            stories = [s for s in stories if theme in s.parameters.get("themes", [])]
+            if age:
+                stories_qs = stories_qs.filter(parameters__age=int(age))
+            if language:
+                stories_qs = stories_qs.filter(texts__language=language)
+            if search:
+                stories_qs = stories_qs.filter(texts__title__icontains=search).distinct()
 
-        if sort == "popular":
-            stories.sort(key=lambda s: (-s.num_likes, -s.created_at.timestamp()))
+            stories_qs = stories_qs.annotate(num_likes=Count("liked_by"))
+            stories_qs = stories_qs.order_by("-created_at")
+
+            stories = list(stories_qs)
+
+            if theme:
+                stories = [s for s in stories if theme in s.parameters.get("themes", [])]
+
+            if sort == "popular":
+                stories.sort(key=lambda s: (-s.num_likes, -s.created_at.timestamp()))
+        else:
+            stories = list(
+                stories_qs.order_by("-created_at").annotate(num_likes=Count("liked_by"))
+            )
+
+        cache.set(cache_key, stories, 300)
     else:
-        stories = list(stories.order_by("-created_at").annotate(num_likes=Count("liked_by")))
+        form.is_valid()  # bind data for consistency
 
     return stories, form
 

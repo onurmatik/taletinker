@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 from types import SimpleNamespace
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.core.cache import cache
 import base64
 
 from taletinker.accounts.models import User
@@ -12,6 +13,7 @@ from taletinker.stories.models import Story
 
 class CreateStoryViewTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="test", password="pass")
         self.client = Client()
 
@@ -63,6 +65,7 @@ class CreateStoryViewTests(TestCase):
 
 class NinjaCreateApiTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = Client()
 
     @patch("taletinker.api.openai.OpenAI")
@@ -93,6 +96,7 @@ class NinjaCreateApiTests(TestCase):
 
 class StoryListAndDetailTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="alice", password="pass")
         self.client = Client()
 
@@ -222,6 +226,7 @@ class StoryListAndDetailTests(TestCase):
 
 class LikeApiTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="john", password="pass")
         self.client = Client()
         self.story = Story.objects.create(author=self.user)
@@ -244,6 +249,7 @@ class LikeApiTests(TestCase):
 
 class CreateImageApiTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="pic", password="pass")
         self.client = Client()
         self.story = Story.objects.create(author=self.user)
@@ -273,6 +279,7 @@ class CreateImageApiTests(TestCase):
 
 class CreateAudioApiTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="snd", password="pass")
         self.client = Client()
         self.story = Story.objects.create(author=self.user)
@@ -425,6 +432,7 @@ class CreateAudioApiTests(TestCase):
 
 class StoryImageDisplayTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="img", password="pass")
         self.client = Client()
 
@@ -447,6 +455,7 @@ class StoryImageDisplayTests(TestCase):
 
 class ImageCreationFlowTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="flow", password="pass")
         self.client = Client()
 
@@ -470,6 +479,7 @@ class ImageCreationFlowTests(TestCase):
 
 class StoryAudioDisplayTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="aud", password="pass")
         self.client = Client()
 
@@ -495,6 +505,7 @@ class StoryAudioDisplayTests(TestCase):
 
 class StoryLanguageOnDemandTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="lang", password="pass")
         self.client = Client()
 
@@ -516,6 +527,7 @@ class StoryLanguageOnDemandTests(TestCase):
 
 class PlaylistTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="plist", password="pass")
         self.client = Client()
         self.client.force_login(self.user)
@@ -579,6 +591,7 @@ class PlaylistTests(TestCase):
 
 class RSSFeedTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username="feed", password="pass")
         self.client = Client()
         self.story = Story.objects.create(author=self.user, is_published=True)
