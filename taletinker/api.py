@@ -24,7 +24,6 @@ class StoryParams(BaseModel):
     didactic: int = Field(50, ge=0, le=100)
     age: int = Field(5, ge=3, le=10)
     themes: List[str] = Field(default_factory=list)
-    purposes: List[str] = Field(default_factory=list)
     characters: str = ""
     story_length: int = Field(1, ge=1, le=5)
     extra_instructions: str = ""
@@ -39,8 +38,6 @@ def build_prompt(params: StoryParams) -> str:
     ]
     if params.themes:
         parts.append("Themes: " + ", ".join(params.themes) + ".")
-    if params.purposes:
-        parts.append("Purpose: " + ", ".join(params.purposes) + ".")
     if params.characters:
         parts.append("Characters: " + params.characters + ".")
     if params.extra_instructions:

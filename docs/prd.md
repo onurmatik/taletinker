@@ -16,7 +16,7 @@ TaleTinker is a web application that lets parents instantly generate **personali
 ## 3. User Stories
 
 1. **As a parent**, I want to set my child’s age (e.g., 6) and pick themes like *friendship & animals* so the story feels relevant at bedtime.
-2. **As a parent**, I want to toggle a *soothing* emotional stance so the narration calms my child before sleep.
+2. **As a parent**, I want to select a *soothing* theme so the narration calms my child before sleep.
 3. **As a parent (free tier)**, I want to generate a short story so I can evaluate the service without paying.
 4. **As a premium parent**, I want to choose a narrator voice (male, female, childlike) and download the MP3 so we can listen offline.
 5. **As a visitor**, I want to browse published tales filtered by age, theme, and language so I can quickly find something suitable.
@@ -37,10 +37,9 @@ TaleTinker is a web application that lets parents instantly generate **personali
    * Didactic ↔ Just‑for‑Fun
    * Target age (3-, 3, 4, ..., 9, 10, 10+ slider)
    * Story length (Short ≈ 300 words, Medium ≈ 600 words, Long ≈ 1000 words; Medium & Long => premium only)
-   * Language dropdown (default: user’s locale)
-   * Themes multi‑select (family, friendship, nature, animals, sharing, courage, technology, environment, etc.)
-   * Emotional stance / purpose (joyful, soothing, psychological support, etc.)
-   * Character(s): "superhero name generator" style 3-column selector
+  * Language dropdown (default: user’s locale)
+  * Themes multi‑select (family, friendship, nature, animals, sharing, courage, technology, environment, joyful, soothing, supportive, etc.)
+  * Character(s): "superhero name generator" style 3-column selector
 
    2.2  The UI *must* allow free‑text prompt and display inspiring examples to choose from.
 

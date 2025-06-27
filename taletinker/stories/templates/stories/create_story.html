@@ -51,7 +51,6 @@ form.addEventListener('submit', async e=>{
         didactic: +form.didactic.value,
         age: +form.age.value,
         themes: [...form.querySelectorAll('input[name="themes"]:checked')].map(el=>el.value),
-        purposes: [...form.querySelectorAll('input[name="purposes"]:checked')].map(el=>el.value),
         extra_instructions: form.extra_instructions.value,
         story_length: form.story_length.value,
         language: "{{ LANGUAGE_CODE }}",
@@ -115,10 +114,6 @@ form.addEventListener('submit', async e=>{
     <div class="chips">{% for cb in form.themes %}<div class="chip">{{ cb }}</div>{% endfor %}</div>
   </div>
 
-  <div class="mb-3">
-    <label class="form-label">Purpose</label>
-    <div class="chips">{% for cb in form.purposes %}<div class="chip">{{ cb }}</div>{% endfor %}</div>
-  </div>
 
   <div class="mb-3">{{ form.extra_instructions.label_tag }} {{ form.extra_instructions }}</div>
   <div class="mb-3">

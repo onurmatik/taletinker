@@ -130,7 +130,6 @@ def create_story(request):
                     "didactic": form.cleaned_data["didactic"],
                     "age": form.cleaned_data["age"],
                     "themes": form.cleaned_data["themes"],
-                    "purposes": form.cleaned_data["purposes"],
                     "story_length": form.cleaned_data["story_length"],
                 },
                 prompt=form.cleaned_data["extra_instructions"],

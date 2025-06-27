@@ -14,7 +14,7 @@ TaleTinker lets parents craft personalized tales in seconds—tuning realism, th
 ## ✨ Key Features
 
 * **Story Generator** – OpenAI-powered pipeline produces text, cover image, and MP3 narration.
-* **Rich Controls** – Sliders for realism vs. fantasy, didactic vs. fun, target age (3 – 10+), themes, emotional purpose, language, length, and custom prompts.
+* **Rich Controls** – Sliders for realism vs. fantasy, didactic vs. fun, target age (3 – 10+), themes (including joyful or soothing tones), language, length, and custom prompts.
 * **On‑Demand Translations** – Base stories can be automatically translated into multiple languages with matching narration.
 * **Public Library** – Browse, search, like, and bookmark stories; filter by age, theme, language, or popularity.
 * **RSS Feeds** – Subscribe to new stories in any supported language.

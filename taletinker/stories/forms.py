@@ -11,9 +11,6 @@ THEME_CHOICES = [
     ("technology", "Technology"),
     ("dinosaurs", "Dinosaurs"),
     ("machines", "Machines"),
-]
-
-PURPOSE_CHOICES = [
     ("joyful", "Joyful"),
     ("soothing", "Soothing"),
     ("support", "Supportive"),
@@ -69,13 +66,6 @@ class StoryCreationForm(forms.Form):
         choices=THEME_CHOICES,
         required=False,
         widget=forms.CheckboxSelectMultiple,
-    )
-
-    purposes = forms.MultipleChoiceField(
-        choices=PURPOSE_CHOICES,
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-        label="Purpose",
     )
 
     extra_instructions = forms.CharField(
