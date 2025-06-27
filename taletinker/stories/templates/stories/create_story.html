@@ -35,8 +35,8 @@ document.querySelectorAll('.chip').forEach(chip=>{
 /* ───── 3. RANDOM IDEA GENERATOR ───── */
 const ideaBtn = document.getElementById('random-idea-btn');
 if (ideaBtn) {
-    const adjectives = ['Silly','Brave','Curious','Sleepy','Hungry'];
-    const creatures  = ['Dragon','Robot','Wizard','Panda','Unicorn'];
+    const adjectives = ['Silly','Brave','Curious','Sleepy','Hungry','Zippy'];
+    const creatures  = ['Dragon','Robot','Wizard','Panda','Unicorn','Spark','Noodle'];
     const actions    = [
         'finds a lost treasure',
         'learns to dance',
@@ -46,7 +46,7 @@ if (ideaBtn) {
     ];
     function pick(list){ return list[Math.floor(Math.random()*list.length)]; }
     ideaBtn.addEventListener('click',()=>{
-        const idea = `${pick(adjectives)} ${pick(creatures)} ${pick(actions)}.`;
+        const idea = `${pick(adjectives)} ${pick(creatures)} ${pick(actions)}`;
         document.getElementById('id_extra_instructions').value = idea;
     });
 }
