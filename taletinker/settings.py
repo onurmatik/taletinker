@@ -199,7 +199,7 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': '',
+            'LOCATION': BASE_DIR / 'cache',
         }
     }
 
