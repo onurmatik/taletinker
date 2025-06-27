@@ -159,14 +159,14 @@ def create_story(request):
                     title=title or (text.splitlines()[0][:255] if text.strip() else "Story"),
                     text=text,
                 )
-            return redirect("story_detail", story_id=story.id)
+            return redirect("story_detail", story_uuid=story.uuid)
     else:
         form = StoryCreationForm()
     return render(request, "stories/create_story.html", {"form": form})
 
 
-def story_detail(request, story_id: int):
-    story = get_object_or_404(Story, pk=story_id)
+def story_detail(request, story_uuid: str):
+    story = get_object_or_404(Story, uuid=story_uuid)
 
     lang = request.GET.get("lang")
     text_obj = None

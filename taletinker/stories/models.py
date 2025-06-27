@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+import uuid
 
 
 class Story(models.Model):
@@ -8,6 +9,8 @@ class Story(models.Model):
         on_delete=models.CASCADE,
         related_name="stories",
     )
+
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     parameters = models.JSONField(default=dict, blank=True)
     prompt = models.TextField(blank=True)

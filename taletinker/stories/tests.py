@@ -60,7 +60,7 @@ class CreateStoryViewTests(TestCase):
         }
         response = self.client.post(reverse("create_story"), data)
         story = Story.objects.first()
-        self.assertRedirects(response, reverse("story_detail", args=[story.id]))
+        self.assertRedirects(response, reverse("story_detail", args=[story.uuid]))
 
 
 class NinjaCreateApiTests(TestCase):
@@ -127,7 +127,7 @@ class StoryListAndDetailTests(TestCase):
 
     def test_story_detail_accessible_anonymously(self):
         story = self._create_story()
-        response = self.client.get(reverse("story_detail", args=[story.id]))
+        response = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertEqual(response.status_code, 200)
 
     def test_like_button_present(self):
@@ -135,7 +135,7 @@ class StoryListAndDetailTests(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(reverse("story_list"))
         self.assertContains(response, 'class="like-btn')
-        response = self.client.get(reverse("story_detail", args=[story.id]))
+        response = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertContains(response, 'class="like-btn')
 
     def test_filter_my_stories(self):
@@ -441,7 +441,7 @@ class StoryImageDisplayTests(TestCase):
         story.texts.create(language="en", title="T", text="x")
         story.images.create(image=ContentFile(b"im", "c.png"), thumbnail=ContentFile(b"im", "c.png"))
 
-        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        resp = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertContains(resp, "<img")
 
     def test_list_shows_image(self):
@@ -488,7 +488,7 @@ class StoryAudioDisplayTests(TestCase):
         story.texts.create(language="en", title="T", text="x")
         story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
 
-        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        resp = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertContains(resp, "<audio")
 
     def test_list_shows_audio_and_languages(self):
@@ -497,7 +497,7 @@ class StoryAudioDisplayTests(TestCase):
         story.texts.create(language="es", title="T", text="y")
         story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")
 
-        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        resp = self.client.get(reverse("story_detail", args=[story.uuid]))
         self.assertContains(resp, "<audio")
         self.assertContains(resp, "?lang=en")
         self.assertContains(resp, "?lang=es")
@@ -513,7 +513,7 @@ class StoryLanguageOnDemandTests(TestCase):
         story = Story.objects.create(author=self.user, is_published=True)
         story.texts.create(language="en", title="T", text="x")
 
-        resp = self.client.get(reverse("story_detail", args=[story.id]))
+        resp = self.client.get(reverse("story_detail", args=[story.uuid]))
         for code, _ in settings.LANGUAGES:
             self.assertContains(resp, f"?lang={code}")
 
@@ -521,7 +521,7 @@ class StoryLanguageOnDemandTests(TestCase):
         story = Story.objects.create(author=self.user, is_published=True)
         story.texts.create(language="en", title="T", text="x")
 
-        resp = self.client.get(reverse("story_detail", args=[story.id]) + "?lang=fr")
+        resp = self.client.get(reverse("story_detail", args=[story.uuid]) + "?lang=fr")
         self.assertContains(resp, "Creating text...")
 
 

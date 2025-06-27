@@ -3,14 +3,14 @@
   <div class="card h-100">
     {% with img=story.images.first %}
       {% if img %}
-        <a href="{% url 'story_detail' story.id %}">
+        <a href="{% url 'story_detail' story.uuid %}">
           <img src="{{ img.thumbnail.url }}" class="card-img-top" alt="Cover image" />
         </a>
       {% endif %}
     {% endwith %}
     <div class="card-body  d-flex flex-column">
       <blockquote class="blockquote">
-        <a href="{% url 'story_detail' story.id %}{% if story.display_language %}?lang={{ story.display_language }}{% endif %}" class="text-reset text-decoration-none">
+        <a href="{% url 'story_detail' story.uuid %}{% if story.display_language %}?lang={{ story.display_language }}{% endif %}" class="text-reset text-decoration-none">
             {% if story.display_text %}
               {{ story.display_text.title }}
             {% else %}
@@ -27,7 +27,7 @@
           {% endif %}
       </figcaption>
 
-      <h5 class="card-title"><a href="{% url 'story_detail' story.id %}"></a></h5>
+      <h5 class="card-title"><a href="{% url 'story_detail' story.uuid %}"></a></h5>
 
       {% if story.display_audio %}
         <div id="audio-container-{{ story.id }}" class="mt-auto">

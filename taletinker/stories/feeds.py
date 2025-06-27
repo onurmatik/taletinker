@@ -42,4 +42,4 @@ class LatestStoriesByLanguage(Feed):
         return item.text
 
     def item_link(self, item: StoryText) -> str:  # pragma: no cover - simple
-        return reverse("story_detail", args=[item.story_id]) + f"?lang={item.language}"
+        return reverse("story_detail", args=[item.story.uuid]) + f"?lang={item.language}"
