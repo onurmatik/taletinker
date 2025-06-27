@@ -3,6 +3,13 @@ from django.db import models
 import uuid
 
 
+def _normalize_lang(code: str | None) -> str | None:
+    """Return the top-level language for codes like ``en-us``."""
+    if not code:
+        return code
+    return code.split("-")[0]
+
+
 class Story(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -34,6 +41,11 @@ class Story(models.Model):
     def __str__(self):
         return f"Story by {self.author} @{self.created_at} in {self.original_language}"
 
+    def save(self, *args, **kwargs):
+        if self.original_language:
+            self.original_language = _normalize_lang(self.original_language)
+        return super().save(*args, **kwargs)
+
     @property
     def languages(self) -> list[str]:
         """Return list of language codes available for this story."""
@@ -52,6 +64,11 @@ class StoryText(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.language:
+            self.language = _normalize_lang(self.language)
+        return super().save(*args, **kwargs)
 
 
 class StoryImage(models.Model):
@@ -84,6 +101,11 @@ class StoryAudio(models.Model):
 
     def __str__(self):
         return f"Naration of story {self.story.pk} in {self.language}"
+
+    def save(self, *args, **kwargs):
+        if self.language:
+            self.language = _normalize_lang(self.language)
+        return super().save(*args, **kwargs)
 
 
 class Playlist(models.Model):

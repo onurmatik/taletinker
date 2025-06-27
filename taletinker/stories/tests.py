@@ -62,6 +62,26 @@ class CreateStoryViewTests(TestCase):
         story = Story.objects.first()
         self.assertRedirects(response, reverse("story_detail", args=[story.uuid]))
 
+    def test_language_normalized(self):
+        self.client.force_login(self.user)
+        from django.utils.translation import activate, deactivate
+
+        activate("en-us")
+        data = {
+            "realism": 3,
+            "didactic": 3,
+            "age": 5,
+            "themes": ["family"],
+            "story_length": "1",
+        }
+        try:
+            self.client.post(reverse("create_story"), data)
+        finally:
+            deactivate()
+        story = Story.objects.first()
+        self.assertEqual(story.original_language, "en")
+        self.assertEqual(story.texts.first().language, "en")
+
 
 class NinjaCreateApiTests(TestCase):
     def setUp(self):
