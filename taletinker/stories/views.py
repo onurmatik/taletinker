@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.http import JsonResponse
+from django.utils.translation import get_language
 from django.db.models import Count
 from django.core.paginator import Paginator
 
@@ -133,14 +134,14 @@ def create_story(request):
                     "story_length": form.cleaned_data["story_length"],
                 },
                 prompt=form.cleaned_data["extra_instructions"],
-                original_language=form.cleaned_data["language"],
+                original_language=get_language(),
             )
             text = request.POST.get("story_text")
             title = request.POST.get("story_title")
             if text:
                 StoryText.objects.create(
                     story=story,
-                    language=form.cleaned_data["language"],
+                    language=get_language(),
                     title=title or (text.splitlines()[0][:255] if text.strip() else "Story"),
                     text=text,
                 )

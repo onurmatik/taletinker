@@ -26,14 +26,14 @@ class StoryParams(BaseModel):
     themes: List[str] = Field(default_factory=list)
     purposes: List[str] = Field(default_factory=list)
     characters: str = ""
-    story_length: str = "short"
+    story_length: int = Field(1, ge=1, le=5)
     extra_instructions: str = ""
     language: str = "en"
 
 
 def build_prompt(params: StoryParams) -> str:
     parts = [
-        f"Write a {params.story_length} children's story suitable for a {params.age}-year-old child.",
+        f"Write a {params.story_length}-minute children's story suitable for a {params.age}-year-old child.",
         f"Balance realism vs fantasy at {params.realism}/100.",
         f"Balance didactic vs fun at {params.didactic}/100.",
     ]
