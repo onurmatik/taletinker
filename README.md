@@ -4,10 +4,10 @@ Create, share, and discover **AI-generated children’s stories** complete with 
 
 TaleTinker lets parents craft personalized tales in seconds—tuning realism, themes, character ideas, language, tone, and length—then publishes each story to a public library so other families can enjoy it too.
 
-| Service           | Status                                                                                              |
-| ----------------- | --------------------------------------------------------------------------------------------------- |
-| GitHub Actions CI | ![CI](https://img.shields.io/github/actions/workflow/status/your-org/taletinker/ci.yml?branch=main) |
-| License           | ![MIT](https://img.shields.io/badge/license-MIT-green)                                              |
+| Service           | Status                                                                                               |
+| ----------------- |------------------------------------------------------------------------------------------------------|
+| GitHub Actions CI | ![CI](https://img.shields.io/github/actions/workflow/status/onurmatik/taletinker/ci.yml?branch=main) |
+| License           | ![MIT](https://img.shields.io/badge/license-MIT-green)                                               |
 
 ---
 
@@ -18,26 +18,7 @@ TaleTinker lets parents craft personalized tales in seconds—tuning realism, th
 * **On‑Demand Translations** – Base stories can be automatically translated into multiple languages with matching narration.
 * **Public Library** – Browse, search, like, and bookmark stories; filter by age, theme, language, or popularity.
 * **RSS Feeds** – Subscribe to new stories in any supported language.
-* **Freemium Model** – Monthly quota for free users; premium subscribers unlock higher limits, audio downloads, and narrator voice options.
 * **Moderation & Privacy** – OpenAI moderation checks every story; authors may publish under a nickname or anonymously.
-* **Modern Tech Stack** – Django + Django REST Framework, React (or Django templates), PostgreSQL, Celery, AWS S3, Stripe billing.
-* **Docker-First** – One-command local setup with Docker Compose.
-
----
-
-## 🗺️ Project Structure
-
-```
-taletinker/
-├── accounts/          # auth, profiles, subscription data
-├── stories/           # story models, generation services, API
-├── subscriptions/     # Stripe plans, quota enforcement
-├── frontend/          # React SPA (optional)
-├── scripts/           # helper scripts (seed data, etc.)
-├── tests/             # pytest test suite
-├── Dockerfile
-└── docker-compose.yml
-```
 
 ---
 
@@ -46,7 +27,7 @@ taletinker/
 ### 1. Clone & Configure
 
 ```bash
-git clone https://github.com/your-org/taletinker.git
+git clone https://github.com/onurmatik/taletinker.git
 cd taletinker
 cp .env.example .env         # fill in secrets
 ```
@@ -58,15 +39,9 @@ cp .env.example .env         # fill in secrets
 | `OPENAI_API_KEY`                              | OpenAI key for text, TTS, image, and moderation |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | S3 credentials for media storage                |
 | `AWS_S3_BUCKET_NAME`                          | S3 bucket for static & media                    |
-| `STRIPE_SECRET_KEY`                           | Stripe secret for billing                       |
-| `DATABASE_URL`                                | PostgreSQL connection string                    |
 | *See `.env.example` for the full list*        |                                                 |
 
-### 2. Local Development (Docker)
-
-```bash
-docker compose up --build
-```
+### 2. Local Development
 
 | Service             | URL                                                      |
 | ------------------- | -------------------------------------------------------- |
@@ -82,23 +57,6 @@ docker compose up --build
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
-
-### 4. Execute Tests
-
-```bash
-docker compose exec web pytest
-```
-
----
-
-## 🛠️ Architecture Highlights
-
-* **Celery + Redis** – Off-loads story generation and media processing to background workers.
-* **S3-backed Storage** – Durable media hosting with pre-signed URLs for audio downloads.
-* **Stripe Webhooks** – Keeps subscription status and monthly quotas in sync.
-* **OpenAI Moderation** – Blocks stories containing disallowed content before publishing.
-
-For detailed implementation steps, see [`/tasks/tasks-prd.md`](./tasks/tasks-prd.md).
 
 ---
 
