@@ -4,10 +4,10 @@ Create, share, and discover **AI-generated children’s stories** complete with 
 
 TaleTinker lets parents craft personalized tales in seconds—tuning realism, themes, character ideas, language, tone, and length—then publishes each story to a public library so other families can enjoy it too.
 
-| Service           | Status                                                                                               |
-| ----------------- |------------------------------------------------------------------------------------------------------|
-| GitHub Actions CI | ![CI](https://img.shields.io/github/actions/workflow/status/onurmatik/taletinker/ci.yml?branch=main) |
-| License           | ![MIT](https://img.shields.io/badge/license-MIT-green)                                               |
+| Service           | Status                                                                                                       |
+| ----------------- |--------------------------------------------------------------------------------------------------------------|
+| GitHub Actions CI | ![Deploy](https://img.shields.io/github/actions/workflow/status/onurmatik/taletinker/deploy.yml?branch=main) |
+| License           | ![MIT](https://img.shields.io/badge/license-MIT-green)                                                       |
 
 ---
 
@@ -34,12 +34,12 @@ cp .env.example .env         # fill in secrets
 
 **Required environment variables**
 
-| Key                                           | Description                                     |
-| --------------------------------------------- | ----------------------------------------------- |
-| `OPENAI_API_KEY`                              | OpenAI key for text, TTS, image, and moderation |
-| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | S3 credentials for media storage                |
-| `AWS_S3_BUCKET_NAME`                          | S3 bucket for static & media                    |
-| *See `.env.example` for the full list*        |                                                 |
+| Key                                              | Description                                     |
+|--------------------------------------------------| ----------------------------------------------- |
+| `OPENAI_API_KEY`                                 | OpenAI key for text, TTS, image, and moderation |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` | S3 credentials for media storage                |
+| `AWS_STORAGE_BUCKET_NAME`                             | S3 bucket for static & media                    |
+| *See `.env.example` for the full list*           |                                                 |
 
 ### 2. Local Development
 
@@ -53,8 +53,6 @@ python manage.py runserver
 | ---------- | ------------------------------------------- |
 | Django app | [http://localhost:8000/](http://localhost:8000/) |
 
-
-> 💡 **Costs:** Every story generation hits OpenAI APIs. In local dev the quota is disabled, but you’ll pay standard OpenAI rates. Consider using the `OPENAI_API_TYPE=mock` setting during tests.
 
 ### 3. Run Migrations & Create Superuser
 
