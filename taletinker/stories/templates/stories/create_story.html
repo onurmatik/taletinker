@@ -32,12 +32,25 @@ document.querySelectorAll('.chip').forEach(chip=>{
 });
 
 
-/* ───── 3. EXAMPLE QUICK-FILL ───── */
-document.querySelectorAll('.example-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        document.getElementById('id_extra_instructions').value = btn.dataset.text;
+/* ───── 3. RANDOM IDEA GENERATOR ───── */
+const ideaBtn = document.getElementById('random-idea-btn');
+if (ideaBtn) {
+    const adjectives = ['Silly','Brave','Curious','Sleepy','Hungry'];
+    const names      = ['Zippy','Bubbles','Munch','Spark','Noodle'];
+    const creatures  = ['Dragon','Robot','Wizard','Panda','Unicorn'];
+    const actions    = [
+        'finds a lost treasure',
+        'learns to dance',
+        'builds a sandcastle',
+        'joins a circus',
+        'flies to the moon'
+    ];
+    function pick(list){ return list[Math.floor(Math.random()*list.length)]; }
+    ideaBtn.addEventListener('click',()=>{
+        const idea = `${pick(adjectives)} ${pick(names)} the ${pick(creatures)} ${pick(actions)}.`;
+        document.getElementById('id_extra_instructions').value = idea;
     });
-});
+}
 
 /* ───── 4. AJAX GENERATE STORY ───── */
 const form    = document.querySelector('form');
@@ -115,7 +128,13 @@ form.addEventListener('submit', async e=>{
   </div>
 
 
-  <div class="mb-3">{{ form.extra_instructions.label_tag }} {{ form.extra_instructions }}</div>
+  <div class="mb-3">
+    {{ form.extra_instructions.label_tag }}
+    <div class="input-group">
+      {{ form.extra_instructions }}
+      <button type="button" class="btn btn-outline-secondary" id="random-idea-btn">Surprise Me</button>
+    </div>
+  </div>
   <div class="mb-3">
     {{ form.story_length.label_tag }} (1–5 min)
     {{ form.story_length }}
@@ -131,11 +150,4 @@ form.addEventListener('submit', async e=>{
   <button type="submit" class="btn btn-primary">Generate Story</button>
   <div id="spinner">Generating…</div>
 </form>
-
-<div class="content-narrow mb-3 examples">
-  <strong>Inspire me:</strong>
-  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="A shy dragon finding its roar.">Shy dragon finds roar</button>
-  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="Robots learning to share toys.">Robots share toys</button>
-  <button class="btn btn-sm btn-outline-secondary example-btn" data-text="A magical forest picnic adventure.">Forest picnic</button>
-</div>
 {% endblock %}
