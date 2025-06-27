@@ -19,14 +19,6 @@ PURPOSE_CHOICES = [
     ("support", "Supportive"),
 ]
 
-LENGTH_CHOICES = [
-    ("1", "1 minute"),
-    ("2", "2 minutes"),
-    ("3", "3 minutes"),
-    ("4", "4 minutes"),
-    ("5", "5 minutes"),
-]
-
 
 class StoryCreationForm(forms.Form):
 
@@ -92,10 +84,19 @@ class StoryCreationForm(forms.Form):
         label="Extra Instructions",
     )
 
-    story_length = forms.ChoiceField(
-        choices=LENGTH_CHOICES,
+    story_length = forms.IntegerField(
+        min_value=1,
+        max_value=5,
+        initial=1,
+        widget=forms.NumberInput(
+            attrs={
+                "type": "range",
+                "step": 1,
+                "class": "form-range",
+                "list": "length-ticks",
+            }
+        ),
         label="Story Length",
-        widget=forms.Select(attrs={"class": "form-select"}),
     )
 
 

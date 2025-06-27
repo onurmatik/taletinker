@@ -121,7 +121,17 @@ form.addEventListener('submit', async e=>{
   </div>
 
   <div class="mb-3">{{ form.extra_instructions.label_tag }} {{ form.extra_instructions }}</div>
-  <div class="mb-3">{{ form.story_length.label_tag }} {{ form.story_length }}</div>
+  <div class="mb-3">
+    {{ form.story_length.label_tag }} (1–5 min)
+    {{ form.story_length }}
+    <datalist id="length-ticks">
+      {% for i in '1234' %}<option value="{{ i }}"></option>{% endfor %}
+      <option value="5"></option>
+    </datalist>
+    <div class="d-flex justify-content-between small text-muted px-1">
+      <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+    </div>
+  </div>
 
   <button type="submit" class="btn btn-primary">Generate Story</button>
   <div id="spinner">Generating…</div>
