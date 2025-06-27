@@ -152,16 +152,22 @@ def create_story(request):
             )
             text = request.POST.get("story_text")
             title = request.POST.get("story_title")
-            if text:
-                StoryText.objects.create(
-                    story=story,
-                    language=get_language(),
-                    title=title or (text.splitlines()[0][:255] if text.strip() else "Story"),
-                    text=text,
-                )
+            StoryText.objects.create(
+                story=story,
+                language=get_language(),
+                title=title or (text.splitlines()[0][:255] if text and text.strip() else "Story"),
+                text=text or "",
+            )
             return redirect("story_detail", story_uuid=story.uuid)
     else:
-        form = StoryCreationForm()
+        initial = {}
+        age = request.GET.get("age")
+        theme = request.GET.get("themes") or request.GET.get("theme")
+        if age and age.isdigit():
+            initial["age"] = int(age)
+        if theme:
+            initial["themes"] = [theme]
+        form = StoryCreationForm(initial=initial)
     return render(request, "stories/create_story.html", {"form": form})
 
 

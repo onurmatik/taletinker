@@ -254,6 +254,11 @@
     </div>
     {% else %}
     <p>No stories yet.</p>
+
+          {% if request.GET.age or request.GET.theme %}
+            <a class="btn btn-lg btn-success my-3" href="{% url 'create_story' %}?{% if request.GET.age %}age={{ request.GET.age }}{% endif %}{% if request.GET.theme %}{% if request.GET.age %}&amp;{% endif %}themes={{ request.GET.theme }}{% endif %}">Create this story</a>
+          {% endif %}
+
     {% endif %}
   </div>
 

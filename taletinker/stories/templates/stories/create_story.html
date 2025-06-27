@@ -24,8 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ───── 1. CHIPS ───── */
 document.querySelectorAll('.chip').forEach(chip=>{
+    const input = chip.querySelector('input');
+    chip.classList.toggle('selected', input.checked);
     chip.addEventListener('click', () => {
-        const input = chip.querySelector('input');
         input.checked = !input.checked;
         chip.classList.toggle('selected', input.checked);
     });

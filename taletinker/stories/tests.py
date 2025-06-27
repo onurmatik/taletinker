@@ -634,3 +634,23 @@ class RSSFeedTests(TestCase):
         resp = self.client.get(reverse("story_feed", args=["xx"]))
         self.assertEqual(resp.status_code, 404)
 
+
+class CreateStoryFromFiltersTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(username="sam", password="pass")
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_create_this_story_link_present(self):
+        url = reverse("story_list") + "?age=5&theme=dinosaurs"
+        resp = self.client.get(url)
+        create_url = reverse("create_story") + "?age=5&amp;themes=dinosaurs"
+        self.assertContains(resp, create_url)
+
+    def test_create_page_prefilled(self):
+        resp = self.client.get(reverse("create_story") + "?age=5&themes=dinosaurs")
+        form = resp.context["form"]
+        self.assertEqual(form["age"].value(), 5)
+        self.assertIn("dinosaurs", form["themes"].value())
+
