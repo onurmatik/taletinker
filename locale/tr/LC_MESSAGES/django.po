@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-28 11:44+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: taletinker/settings.py:115
+msgid "English"
+msgstr "İngilizce"
+
+msgid "German"
+msgstr "Almanca"
+
+msgid "French"
+msgstr "Fransızca"
+
+msgid "Spanish"
+msgstr "İspanyolca"
+
+msgid "Turkish"
+msgstr "Türkçe"
+
+msgid "Create Story"
+msgstr "Hikaye Oluştur"
+
+msgid "Tone &amp; Audience"
+msgstr "Ton &amp; Hedef Kitle"
+
+msgid "realistic"
+msgstr "gerçekçi"
+
+msgid "moderately realistic"
+msgstr "orta derecede gerçekçi"
+
+msgid "balanced"
+msgstr "dengeli"
+
+msgid "moderately fantastic"
+msgstr "orta derecede fantastik"
+
+msgid "fantastic"
+msgstr "fantastik"
+
+msgid "didactic"
+msgstr "öğretici"
+
+msgid "mostly didactic"
+msgstr "çoğunlukla öğretici"
+
+msgid "mostly fun"
+msgstr "çoğunlukla eğlenceli"
+
+msgid "just for fun"
+msgstr "sadece eğlence için"
+
+msgid "Themes"
+msgstr "Temalar"
+
+msgid "Surprise Me"
+msgstr "Beni Şaşırt"
+
+msgid "Generate Story"
+msgstr "Hikayeyi Oluştur"
+
+msgid "Generating…"
+msgstr "Oluşturuluyor…"
+
+msgid "Play Playlist"
+msgstr "Çalma Listesini Oynat"
+
+msgid "My Playlist"
+msgstr "Listem"
+
+msgid "No audio"
+msgstr "Ses yok"
+
+msgid "No stories."
+msgstr "Hikaye yok."
+
+msgid "Back"
+msgstr "Geri"
+
+msgid "Anonymous"
+msgstr "Anonim"
+
+msgid "Creating audio..."
+msgstr "Ses oluşturuluyor..."
+
+msgid "Add to Playlist"
+msgstr "Listeye Ekle"
+
+msgid "Story Detail"
+msgstr "Hikaye Detayı"
+
+msgid "Share Story"
+msgstr "Hikayeyi Paylaş"
+
+msgid "Creating image..."
+msgstr "Görsel oluşturuluyor..."
+
+msgid "Creating text..."
+msgstr "Metin oluşturuluyor..."
+
+msgid "Story Library"
+msgstr "Hikaye Kütüphanesi"
+
+msgid "Stories"
+msgstr "Hikayeler"
+
+msgid "Apply"
+msgstr "Uygula"
+
+msgid "Add listed stories to the playlist"
+msgstr "Listelenen hikayeleri çalma listesine ekle"
+
+msgid "No stories yet."
+msgstr "Henüz hikaye yok."
+
+msgid "Create this story"
+msgstr "Bu hikayeyi oluştur"
+
+msgid "Create your story"
+msgstr "Kendi hikayeni oluştur"
+
+msgid "Story"
+msgstr "Hikaye"
+
+msgid ""
+"TaleTinker lets you craft and share AI-generated children's stories with "
+"audio narration and cover art."
+msgstr ""
+"TaleTinker, sesli anlatım ve kapak görseliyle birlikte yapay zeka destekli "
+"çocuk hikayeleri oluşturup paylaşmanıza olanak tanır."
+
+msgid "View Stories"
+msgstr "Hikayeleri Görüntüle"
+
+msgid "Create Your Story"
+msgstr "Kendi Hikayeni Oluştur"
+
+msgid "My Stories"
+msgstr "Hikayelerim"
+
+msgid "My Favorites"
+msgstr "Favorilerim"
+
+msgid "Logout"
+msgstr "Çıkış Yap"
+
+msgid "Login"
+msgstr "Giriş Yap"
+
+msgid "Sign Up"
+msgstr "Kayıt Ol"
+
+msgid "Email Login"
+msgstr "E-posta ile Giriş"
+
+msgid "Send Login Link"
+msgstr "Giriş Linki Gönder"
+
+msgid "Not registered?"
+msgstr "Kayıtlı değil misiniz?"
+
+msgid "Check Your Email"
+msgstr "E-postanızı Kontrol Edin"
+
+msgid "We sent you a login link. Please check your email."
+msgstr "Size bir giriş bağlantısı gönderdik. Lütfen e-postanızı kontrol edin."
+
+msgid "Already have an account?"
+msgstr "Zaten bir hesabınız var mı?"
+
+msgid "Thank you for signing up! We've sent you a login link."
+msgstr "Kayıt olduğunuz için teşekkürler! Size bir giriş bağlantısı gönderdik."
