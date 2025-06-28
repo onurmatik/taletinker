@@ -53,7 +53,7 @@ if (ideaBtn) {
 }
 
 /* ───── 4. AJAX GENERATE STORY ───── */
-const form    = document.querySelector('form');
+const form    = document.getElementById('create-form');
 const spinner = document.getElementById('spinner');
 
 form.addEventListener('submit', async e=>{
@@ -87,7 +87,7 @@ form.addEventListener('submit', async e=>{
 {% endblock %}
 
 {% block content %}
-<form method="post" class="content-narrow mb-4">
+<form method="post" id="create-form" class="content-narrow mb-4">
   {% csrf_token %}
   <input type="hidden" name="story_text"  id="story_text">
   <input type="hidden" name="story_title" id="story_title">
