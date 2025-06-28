@@ -11,6 +11,7 @@ import logging
 
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
+from django.utils.translation import gettext_lazy as _
 
 from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 
@@ -63,7 +64,7 @@ def create_story(request, params: StoryParams):
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception as exc:  # noqa: PIE786
         logger.exception("Unexpected error")
-        return api.create_response(request, {"detail": "internal error"}, status=500)
+        return api.create_response(request, {"detail": _("internal error")}, status=500)
 
 
 class LikePayload(BaseModel):
@@ -73,7 +74,7 @@ class LikePayload(BaseModel):
 @api.post("/like")
 def like_story(request, payload: LikePayload):
     if not request.user.is_authenticated:
-        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+        return api.create_response(request, {"detail": _("unauthorized")}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
@@ -96,7 +97,7 @@ THUMB_MAX_SIZE = (256, 256)
 @api.post("/create_image")
 def create_image(request, payload: ImagePayload):
     if not request.user.is_authenticated:
-        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+        return api.create_response(request, {"detail": _("unauthorized")}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
     prompt = "cover image for a children's story"
@@ -147,16 +148,16 @@ class TranslationPayload(BaseModel):
 @api.post("/translate")
 def create_translation(request, payload: TranslationPayload):
     if not request.user.is_authenticated:
-        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+        return api.create_response(request, {"detail": _("unauthorized")}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
     if story.texts.filter(language=payload.language).exists():
-        return api.create_response(request, {"detail": "exists"}, status=400)
+        return api.create_response(request, {"detail": _("exists")}, status=400)
 
     base_text = story.texts.first()
     if not base_text:
-        return api.create_response(request, {"detail": "no story text"}, status=400)
+        return api.create_response(request, {"detail": _("no story text")}, status=400)
 
     prompt = (
         f"Translate the following children's story to {payload.language}. "
@@ -200,17 +201,17 @@ class AudioPayload(BaseModel):
 @api.post("/create_audio")
 def create_audio(request, payload: AudioPayload):
     if not request.user.is_authenticated:
-        return api.create_response(request, {"detail": "unauthorized"}, status=401)
+        return api.create_response(request, {"detail": _("unauthorized")}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
     target_language = payload.language or (story.texts.first().language if story.texts.exists() else None)
 
     if not target_language:
-        return api.create_response(request, {"detail": "no story text"}, status=400)
+        return api.create_response(request, {"detail": _("no story text")}, status=400)
 
     if story.audios.filter(language=target_language).exists():
-        return api.create_response(request, {"detail": "exists"}, status=400)
+        return api.create_response(request, {"detail": _("exists")}, status=400)
 
     text_obj = story.texts.filter(language=target_language).first()
 
@@ -219,7 +220,7 @@ def create_audio(request, payload: AudioPayload):
     if not text_obj and payload.language:
         base_text = story.texts.first()
         if not base_text:
-            return api.create_response(request, {"detail": "no story text"}, status=400)
+            return api.create_response(request, {"detail": _("no story text")}, status=400)
         prompt = (
             f"Translate the following children's story to {payload.language}. "
             "Return the result strictly as JSON with keys 'title' and 'text'.\n"
@@ -243,10 +244,10 @@ def create_audio(request, payload: AudioPayload):
             return api.create_response(request, {"detail": str(exc)}, status=503)
         except Exception:  # noqa: PIE786
             logger.exception("Unexpected error")
-            return api.create_response(request, {"detail": "internal error"}, status=500)
+            return api.create_response(request, {"detail": _("internal error")}, status=500)
 
     if not text_obj:
-        return api.create_response(request, {"detail": "no story text"}, status=400)
+        return api.create_response(request, {"detail": _("no story text")}, status=400)
 
     try:
         with client.audio.speech.with_streaming_response.create(
@@ -267,4 +268,4 @@ def create_audio(request, payload: AudioPayload):
         return api.create_response(request, {"detail": str(exc)}, status=503)
     except Exception:  # noqa: PIE786
         logger.exception("Unexpected error")
-        return api.create_response(request, {"detail": "internal error"}, status=500)
+        return api.create_response(request, {"detail": _("internal error")}, status=500)

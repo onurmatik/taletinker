@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load widget_tweaks %}
-{% block title %}Email Login{% endblock %}
+{% load widget_tweaks i18n %}
+{% block title %}{% trans "Email Login" %}{% endblock %}
 {% block content %}
-<h2 class="text-center mb-4">Email Login</h2>
+<h2 class="text-center mb-4">{% trans "Email Login" %}</h2>
 <div class="row justify-content-center">
   <div class="col-md-6 col-lg-4">
     <form method="post" class="mb-3">
@@ -24,9 +24,9 @@
       {% if next %}
         <input type="hidden" name="next" value="{{ next }}" />
       {% endif %}
-      <button type="submit" class="btn btn-primary w-100">Send Login Link</button>
+      <button type="submit" class="btn btn-primary w-100">{% trans "Send Login Link" %}</button>
     </form>
-    <p class="mt-3 text-center">Not registered? <a href="{% url 'signup' %}">Sign Up</a></p>
+    <p class="mt-3 text-center">{% trans "Not registered?" %} <a href="{% url 'signup' %}">{% trans "Sign Up" %}</a></p>
   </div>
 </div>
 {% endblock %}

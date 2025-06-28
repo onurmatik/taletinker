@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Story Library{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Story Library" %}{% endblock %}
 {% block extra_head %}
 <style>
   #playlist-panel {
@@ -201,7 +202,7 @@
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="mb-0 fs-2">Stories</h1>
+  <h1 class="mb-0 fs-2">{% trans "Stories" %}</h1>
 </div>
 
 <!-- one flex row, everything bottoms-out on the same line -->
@@ -228,7 +229,7 @@
         {{ form.search }}
       </div>
       <div class="col-12 col-lg-auto">
-        <button type="submit" class="btn btn-secondary w-100 w-lg-auto">Apply</button>
+        <button type="submit" class="btn btn-secondary w-100 w-lg-auto">{% trans "Apply" %}</button>
       </div>
     </form>
   </div>
@@ -236,7 +237,7 @@
   <div class="col-12 col-lg-auto align-self-end">
     <form method="post" action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}">
       {% csrf_token %}
-      <button type="submit" class="btn btn-link p-0">Add listed stories to the playlist</button>
+      <button type="submit" class="btn btn-link p-0">{% trans "Add listed stories to the playlist" %}</button>
     </form>
   </div>
 </div>
@@ -252,10 +253,10 @@
       {% include 'stories/story_cards.html' with stories=stories %}
     </div>
     {% else %}
-    <p>No stories yet.</p>
+    <p>{% trans "No stories yet." %}</p>
 
           {% if request.GET.age or request.GET.theme %}
-            <a class="btn btn-lg btn-success my-3" href="{% url 'create_story' %}?{% if request.GET.age %}age={{ request.GET.age }}{% endif %}{% if request.GET.theme %}{% if request.GET.age %}&amp;{% endif %}themes={{ request.GET.theme }}{% endif %}">Create this story</a>
+            <a class="btn btn-lg btn-success my-3" href="{% url 'create_story' %}?{% if request.GET.age %}age={{ request.GET.age }}{% endif %}{% if request.GET.theme %}{% if request.GET.age %}&amp;{% endif %}themes={{ request.GET.theme }}{% endif %}">{% trans "Create this story" %}</a>
           {% endif %}
 
     {% endif %}
@@ -266,7 +267,7 @@
     <div id="playlist-panel" class="bg-light border p-3 rounded my-0">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">My Playlist</h5>
+          <h5 class="mb-0">{% trans "My Playlist" %}</h5>
           <p id="playlist-summary" class="small text-muted mb-0">0 stories – 0:00</p>
         </div>
 
@@ -288,7 +289,7 @@
                   <source src="{{ audio.mp3.url }}" type="audio/mpeg" />
                 </audio>
               {% else %}
-                <span class="text-muted small me-2">No audio</span>
+                <span class="text-muted small me-2">{% trans "No audio" %}</span>
               {% endif %}
               <form method="post" action="{% url 'remove_from_playlist' item.id %}" class="ms-2">
                 {% csrf_token %}
@@ -298,13 +299,13 @@
           </li>
           {% endwith %}
         {% empty %}
-          <li class="list-group-item">No stories yet.</li>
+          <li class="list-group-item">{% trans "No stories yet." %}</li>
         {% endfor %}
       </ul>
       <audio id="playlist-player" controls class="w-100"></audio>
     </div>
 
-      <a class="btn btn-lg btn-outline-success my-3 w-100" href="{% url 'create_story' %}">Create your story</a>
+      <a class="btn btn-lg btn-outline-success my-3 w-100" href="{% url 'create_story' %}">{% trans "Create your story" %}</a>
 
   </div>
 </div>

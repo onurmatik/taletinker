@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.http import JsonResponse
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 from django.db.models import Count
 from django.core.paginator import Paginator
 from django.core.cache import cache
@@ -155,7 +155,7 @@ def create_story(request):
             StoryText.objects.create(
                 story=story,
                 language=get_language(),
-                title=title or (text.splitlines()[0][:255] if text and text.strip() else "Story"),
+                title=title or (text.splitlines()[0][:255] if text and text.strip() else _("Story")),
                 text=text or "",
             )
             return redirect("story_detail", story_uuid=story.uuid)

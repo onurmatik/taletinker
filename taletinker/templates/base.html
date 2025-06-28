@@ -1,9 +1,9 @@
-{% load static %}<!DOCTYPE html>
+{% load static i18n %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TaleTinker lets you craft and share AI-generated children's stories with audio narration and cover art." />
+    <meta name="description" content="{% trans "TaleTinker lets you craft and share AI-generated children's stories with audio narration and cover art." %}" />
     <title>{% block title %}TaleTinker{% endblock %}</title>
 
     <link rel="icon" type="image/x-icon" href="{% static 'fav.png' %}">
@@ -59,10 +59,10 @@ h1, h2, h3, h4, h5, h6 {
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'story_list' %}">View Stories</a>
+                  <a class="nav-link" href="{% url 'story_list' %}">{% trans "View Stories" %}</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'create_story' %}">Create Your Story</a>
+                  <a class="nav-link" href="{% url 'create_story' %}">{% trans "Create Your Story" %}</a>
                 </li>
               </ul>
               <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -78,11 +78,11 @@ h1, h2, h3, h4, h5, h6 {
                     <i class="bi bi-translate"></i>
                   </a>
                   <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                    <li><a class="dropdown-item" href="?lang=en">English</a></li>
-                    <li><a class="dropdown-item" href="?lang=es">Spanish</a></li>
-                    <li><a class="dropdown-item" href="?lang=fr">French</a></li>
-                    <li><a class="dropdown-item" href="?lang=de">German</a></li>
-                    <li><a class="dropdown-item" href="?lang=tr">Turkish</a></li>
+                    <li><a class="dropdown-item" href="?lang=en">{% trans "English" %}</a></li>
+                    <li><a class="dropdown-item" href="?lang=es">{% trans "Spanish" %}</a></li>
+                    <li><a class="dropdown-item" href="?lang=fr">{% trans "French" %}</a></li>
+                    <li><a class="dropdown-item" href="?lang=de">{% trans "German" %}</a></li>
+                    <li><a class="dropdown-item" href="?lang=tr">{% trans "Turkish" %}</a></li>
                   </ul>
                 </li>
                 {% if user.is_authenticated %}
@@ -98,18 +98,18 @@ h1, h2, h3, h4, h5, h6 {
                       {{ user.username }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="storyDropdown">
-                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=mine">My Stories</a></li>
-                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=favorites">My Favorites</a></li>
+                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=mine">{% trans "My Stories" %}</a></li>
+                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=favorites">{% trans "My Favorites" %}</a></li>
                       <li class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                      <li><a class="dropdown-item" href="{% url 'logout' %}">{% trans "Logout" %}</a></li>
                     </ul>
                   </li>
                 {% else %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                    <a class="nav-link" href="{% url 'signup' %}">{% trans "Sign Up" %}</a>
                   </li>
                 {% endif %}
               </ul>

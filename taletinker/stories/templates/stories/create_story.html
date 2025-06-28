@@ -1,8 +1,8 @@
 {# templates/create_story.html #}
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Create Story{% endblock %}
+{% block title %}{% trans "Create Story" %}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -92,21 +92,21 @@ form.addEventListener('submit', async e=>{
   <input type="hidden" name="story_text"  id="story_text">
   <input type="hidden" name="story_title" id="story_title">
 
-  <h5 class="mt-3">Tone &amp; Audience</h5>
+  <h5 class="mt-3">{% trans "Tone &amp; Audience" %}</h5>
 
   <div class="mb-3">
     {{ form.realism.label_tag }} {{ form.realism }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>realistic</span><span>moderately realistic</span><span>balanced</span>
-      <span>moderately fantastic</span><span>fantastic</span>
+      <span>{% trans "realistic" %}</span><span>{% trans "moderately realistic" %}</span><span>{% trans "balanced" %}</span>
+      <span>{% trans "moderately fantastic" %}</span><span>{% trans "fantastic" %}</span>
     </div>
   </div>
 
   <div class="mb-3">
     {{ form.didactic.label_tag }} {{ form.didactic }}
     <div class="d-flex justify-content-between small text-muted px-1">
-      <span>didactic</span><span>mostly didactic</span><span>balanced</span>
-      <span>mostly fun</span><span>just for fun</span>
+      <span>{% trans "didactic" %}</span><span>{% trans "mostly didactic" %}</span><span>{% trans "balanced" %}</span>
+      <span>{% trans "mostly fun" %}</span><span>{% trans "just for fun" %}</span>
     </div>
   </div>
 
@@ -123,7 +123,7 @@ form.addEventListener('submit', async e=>{
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Themes</label>
+    <label class="form-label">{% trans "Themes" %}</label>
     <div class="chips">{% for cb in form.themes %}<div class="chip">{{ cb }}</div>{% endfor %}</div>
   </div>
 
@@ -132,7 +132,7 @@ form.addEventListener('submit', async e=>{
     {{ form.extra_instructions.label_tag }}
     <div class="input-group">
       {{ form.extra_instructions }}
-      <button type="button" class="btn btn-outline-secondary" id="random-idea-btn">Surprise Me</button>
+      <button type="button" class="btn btn-outline-secondary" id="random-idea-btn">{% trans "Surprise Me" %}</button>
     </div>
   </div>
   <div class="mb-3">
@@ -147,7 +147,7 @@ form.addEventListener('submit', async e=>{
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary">Generate Story</button>
-  <div id="spinner">Generating…</div>
+  <button type="submit" class="btn btn-primary">{% trans "Generate Story" %}</button>
+  <div id="spinner">{% trans "Generating…" %}</div>
 </form>
 {% endblock %}
