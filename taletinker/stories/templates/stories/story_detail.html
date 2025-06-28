@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Story Detail{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Story Detail" %}{% endblock %}
 
 {% block extra_head %}
 <script type="application/ld+json">
@@ -33,7 +34,7 @@
           {% endif %}
       </span>
       <span class="like-count text-secondary">{{ story.liked_by.count }}</span>
-      <a href="#" class="share-btn fs-4 ms-3" data-url="{{ request.build_absolute_uri }}" data-title="{{ text.title }}" data-bs-toggle="tooltip" data-bs-title="Share Story">
+      <a href="#" class="share-btn fs-4 ms-3" data-url="{{ request.build_absolute_uri }}" data-title="{{ text.title }}" data-bs-toggle="tooltip" data-bs-title="{% trans 'Share Story' %}">
           <i class="bi bi-share"></i>
       </a>
     </p>
@@ -59,7 +60,7 @@
     {% else %}
       <div id="image-status" class="w-50 m-2" style="float: right;">
         <div class="progress">
-          <div id="image-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="20000" style="width: 0%">Creating image...</div>
+          <div id="image-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="20000" style="width: 0%">{% trans 'Creating image...' %}</div>
         </div>
       </div>
       <script>
@@ -109,7 +110,7 @@
     {% else %}
       <div id="audio-status" class="my-3">
         <div class="progress">
-          <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="60000" style="width: 0%">Creating audio...</div>
+          <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="60000" style="width: 0%">{% trans 'Creating audio...' %}</div>
         </div>
       </div>
       <script>
@@ -156,7 +157,7 @@
     {% else %}
       <div id="text-status" class="my-3">
         <div class="progress">
-          <div id="text-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="10000" style="width: 0%">Creating text...</div>
+          <div id="text-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="10000" style="width: 0%">{% trans 'Creating text...' %}</div>
         </div>
       </div>
       <script>

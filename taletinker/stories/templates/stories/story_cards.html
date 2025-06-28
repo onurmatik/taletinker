@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for story in stories %}
 <div class="col">
   <div class="card h-100">
@@ -21,7 +22,7 @@
 
       <figcaption class="blockquote-footer">
           {% if story.is_anonymous %}
-              Anonymous
+              {% trans "Anonymous" %}
           {% else %}
               {{ story.author.username }}
           {% endif %}
@@ -38,7 +39,7 @@
       {% else %}
         <div id="audio-status-{{ story.id }}" data-create-audio data-story-id="{{ story.id }}" data-language="{{ story.display_language }}" class="mt-auto">
           <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="60000" style="width: 0%">Creating audio...</div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="audio-progress-{{ story.id }}" data-duration="60000" style="width: 0%">{% trans "Creating audio..." %}</div>
           </div>
         </div>
       {% endif %}
@@ -53,7 +54,7 @@
             <form method="post" action="{% url 'add_to_playlist' story.id %}" class="d-inline">
               {% csrf_token %}
               <button id="add-btn-{{ story.id }}" type="submit" class="btn btn-link text-dark p-0 fw-bolder"
-                      data-bs-toggle="tooltip" data-bs-title="Add to Playlist"
+                      data-bs-toggle="tooltip" data-bs-title="{% trans 'Add to Playlist' %}"
                       {% if not story.display_audio %}disabled{% endif %}
               ><i class="bi bi-plus-circle"></i></button>
             </form>
@@ -62,7 +63,7 @@
 
             <a href="{% url 'signup' %}"
                     class="btn btn-link text-dark p-0 fw-bolder text-reset text-decoration-none"
-                  data-bs-toggle="tooltip" data-bs-title="Add to Playlist"
+                  data-bs-toggle="tooltip" data-bs-title="{% trans 'Add to Playlist' %}"
             ><i class="bi bi-plus-circle"></i></a>
 
         {% endif %}

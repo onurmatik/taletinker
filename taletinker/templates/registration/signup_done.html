@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Check Your Email{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Check Your Email" %}{% endblock %}
 {% block content %}
-<h1>Check Your Email</h1>
-<p>Thank you for signing up! We've sent you a login link.</p>
+<h1>{% trans "Check Your Email" %}</h1>
+<p>{% trans "Thank you for signing up! We've sent you a login link." %}</p>
 {% endblock %}
