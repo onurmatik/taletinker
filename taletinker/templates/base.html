@@ -88,11 +88,11 @@ h1, h2, h3, h4, h5, h6 {
                     <i class="bi bi-translate"></i>
                   </a>
 
-                  <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                      {% for lang_code, lang_name in LANGUAGES %}
-                          <li><a class="dropdown-item" href="?lang={{ lang_code }}">{% trans lang_name %}</a></li>
-                      {% endfor %}
-                  </ul>
+                    <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                        {% for lang_code, lang_name in LANGUAGES %}
+                            <li><a class="dropdown-item lang-option" data-lang="{{ lang_code }}" href="?lang={{ lang_code }}">{% trans lang_name %}</a></li>
+                        {% endfor %}
+                    </ul>
 
                 </li>
                 {% if user.is_authenticated %}
@@ -196,6 +196,12 @@ h1, h2, h3, h4, h5, h6 {
       document.addEventListener('DOMContentLoaded', () => {
         attachLikeHandlers(document);
         attachShareHandlers(document);
+        document.querySelectorAll('.lang-option').forEach(el => {
+          el.addEventListener('click', () => {
+            const lang = el.dataset.lang;
+            document.cookie = 'django_language=' + encodeURIComponent(lang) + ';path=/;max-age=' + 60*60*24*365;
+          });
+        });
       });
     </script>
 </body>
