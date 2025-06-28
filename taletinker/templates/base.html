@@ -47,7 +47,6 @@ h1, h2, h3, h4, h5, h6 {
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          {% if user.is_authenticated %}
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link" href="{% url 'story_list' %}">View Stories</a>
@@ -56,7 +55,6 @@ h1, h2, h3, h4, h5, h6 {
               <a class="nav-link" href="{% url 'create_story' %}">Create Your Story</a>
             </li>
           </ul>
-          {% endif %}
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
               <a

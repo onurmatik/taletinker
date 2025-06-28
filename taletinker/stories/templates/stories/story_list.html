@@ -238,7 +238,7 @@
           action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}">
       {% csrf_token %}
       <!-- remove w-100 so it shrinks to its natural width -->
-      <button type="submit" class="btn btn-link">Add all listed stories to the playlist</button>
+      <button type="submit" class="btn btn-link">Add listed stories to the playlist</button>
     </form>
   </div>
 
@@ -247,9 +247,9 @@
 
 
 <div class="row">
-  <div class="col-md-9">
+  <div class="col-sm-6 col-lg-8 col-xl-9">
     {% if stories %}
-    <div id="story-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" data-next-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% endif %}">
+    <div id="story-grid" class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-4" data-next-page="{% if page_obj.has_next %}{{ page_obj.next_page_number }}{% endif %}">
       {% include 'stories/story_cards.html' with stories=stories %}
     </div>
     {% else %}
@@ -262,9 +262,9 @@
     {% endif %}
   </div>
 
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-lg-4 col-xl-3">
 
-    <div id="playlist-panel" class="bg-light border p-3 rounded">
+    <div id="playlist-panel" class="bg-light border p-3 rounded my-0">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="mb-0">My Playlist</h5>
