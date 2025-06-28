@@ -24,7 +24,6 @@ class StoryParams(BaseModel):
     didactic: int = Field(50, ge=0, le=100)
     age: int = Field(5, ge=3, le=10)
     themes: List[str] = Field(default_factory=list)
-    characters: str = ""
     story_length: int = Field(1, ge=1, le=5)
     extra_instructions: str = ""
     language: str = "en"
@@ -33,17 +32,15 @@ class StoryParams(BaseModel):
 def build_prompt(params: StoryParams) -> str:
     parts = [
         f"Write a {params.story_length}-minute children's story suitable for a {params.age}-year-old child.",
-        f"Balance realism vs fantasy at {params.realism}/100.",
-        f"Balance didactic vs fun at {params.didactic}/100.",
+        f"Balance realism vs fantasy at {params.realism}/5.",
+        f"Balance didactic vs fun at {params.didactic}/5.",
     ]
     if params.themes:
         parts.append("Themes: " + ", ".join(params.themes) + ".")
-    if params.characters:
-        parts.append("Characters: " + params.characters + ".")
     if params.extra_instructions:
-        parts.append(params.extra_instructions)
+        parts.append("Topic: " + params.extra_instructions)
     parts.append("Return the result strictly as JSON with keys 'title' and 'text'.")
-    return " ".join(parts)
+    return "\n".join(parts)
 
 
 @api.post("/create")
