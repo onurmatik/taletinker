@@ -8,7 +8,7 @@
 <style>
 /* ───────── Layout ───────── */
 .content-narrow    { max-width: 720px; margin: 0 auto; }
-#spinner           { display:none; margin:1rem 0; font-weight:bold; }
+#spinner           { display:none; margin-left:1rem; font-weight:bold; }
 
 /* ───────── Chips (checkbox pills) ───────── */
 .chips             { display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; }
@@ -57,7 +57,7 @@ const form    = document.getElementById('create-form');
 const spinner = document.getElementById('spinner');
 
 form.addEventListener('submit', async e=>{
-    e.preventDefault(); spinner.style.display='block';
+    e.preventDefault(); spinner.style.display='inline-block';
 
     const data = {
         realism: +form.realism.value,
@@ -148,6 +148,6 @@ form.addEventListener('submit', async e=>{
   </div>
 
   <button type="submit" class="btn btn-primary">{% trans "Generate Story" %}</button>
-  <div id="spinner">{% trans "Generating…" %}</div>
+  <span id="spinner">{% trans "Generating…" %}</span>
 </form>
 {% endblock %}
