@@ -77,13 +77,13 @@ h1, h2, h3, h4, h5, h6 {
                   >
                     <i class="bi bi-translate"></i>
                   </a>
+
                   <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                    <li><a class="dropdown-item" href="?lang=en">{% trans "English" %}</a></li>
-                    <li><a class="dropdown-item" href="?lang=es">{% trans "Spanish" %}</a></li>
-                    <li><a class="dropdown-item" href="?lang=fr">{% trans "French" %}</a></li>
-                    <li><a class="dropdown-item" href="?lang=de">{% trans "German" %}</a></li>
-                    <li><a class="dropdown-item" href="?lang=tr">{% trans "Turkish" %}</a></li>
+                      {% for lang_code, lang_name in LANGUAGES %}
+                          <li><a class="dropdown-item" href="?lang={{ lang_code }}">{% trans lang_name %}</a></li>
+                      {% endfor %}
                   </ul>
+
                 </li>
                 {% if user.is_authenticated %}
                   <li class="nav-item dropdown">
