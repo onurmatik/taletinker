@@ -207,40 +207,39 @@
 <!-- one flex row, everything bottoms-out on the same line -->
 <div class="row g-2 align-items-end mb-3">
 
+<div class="row g-2 align-items-end">
   <!-- FILTER FORM -->
   <div class="col">
-    <form method="get" class="row gy-1 gx-2 align-items-end">
-      <div class="col-6 col-md-auto">
-        {{ form.age.label_tag }}{{ form.age }}
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-6 col-lg-auto">
+        {{ form.age.label_tag }}
+        {{ form.age }}
       </div>
-
-      <div class="col-6 col-md-auto">
-        {{ form.theme.label_tag }}{{ form.theme }}
+      <div class="col-6 col-lg-auto">
+        {{ form.theme.label_tag }}
+        {{ form.theme }}
       </div>
-
-      <div class="col-6 col-md-auto">
-        {{ form.sort.label_tag }}{{ form.sort }}
+      <div class="col-6 col-lg-auto">
+        {{ form.sort.label_tag }}
+        {{ form.sort }}
       </div>
-
-      <div class="col-6 col-md-auto">
-        {{ form.search.label_tag }}{{ form.search }}
+      <div class="col-6 col-lg-auto">
+        {{ form.search.label_tag }}
+        {{ form.search }}
       </div>
-
-      <div class="col-6 col-md-auto">
-        <button type="submit" class="btn btn-secondary">Apply</button>
+      <div class="col-12 col-lg-auto">
+        <button type="submit" class="btn btn-secondary w-100 w-lg-auto">Apply</button>
       </div>
     </form>
   </div>
-
-  <!-- “ADD ALL” FORM -->
-  <div class="col-auto">
-    <form method="post"
-          action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}">
+  <!-- ADD ALL FORM -->
+  <div class="col-12 col-lg-auto align-self-end">
+    <form method="post" action="{% url 'add_filtered_to_playlist' %}?{{ request.GET.urlencode }}">
       {% csrf_token %}
-      <!-- remove w-100 so it shrinks to its natural width -->
-      <button type="submit" class="btn btn-link">Add listed stories to the playlist</button>
+      <button type="submit" class="btn btn-link p-0">Add listed stories to the playlist</button>
     </form>
   </div>
+</div>
 
 </div>
 
