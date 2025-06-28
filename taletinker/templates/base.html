@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaleTinker lets you craft and share AI-generated children's stories with audio narration and cover art." />
     <title>{% block title %}TaleTinker{% endblock %}</title>
 
     <link rel="icon" type="image/x-icon" href="{% static 'fav.png' %}">
@@ -17,6 +18,14 @@
     >
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TaleTinker",
+        "url": "https://taletinker.org/"
+    }
+    </script>
     <!-- Alternate language versions -->
     {% for code, name in LANGUAGES %}
     <link rel="alternate" hreflang="{{ code }}" href="{{ request.path }}?lang={{ code }}" />
@@ -32,84 +41,86 @@ h1, h2, h3, h4, h5, h6 {
     {% block extra_head %}{% endblock %}
 </head>
 <body style="padding-top: 5rem;">
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-success-subtle mb-4">
-      <div class="container">
-        <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" style="height: 35px;"></a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'story_list' %}">View Stories</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'create_story' %}">Create Your Story</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="languageDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i class="bi bi-translate"></i>
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                <li><a class="dropdown-item" href="?lang=en">English</a></li>
-                <li><a class="dropdown-item" href="?lang=es">Spanish</a></li>
-                <li><a class="dropdown-item" href="?lang=fr">French</a></li>
-                <li><a class="dropdown-item" href="?lang=de">German</a></li>
-                <li><a class="dropdown-item" href="?lang=tr">Turkish</a></li>
+    <header>
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-success-subtle mb-4">
+          <div class="container">
+            <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" style="height: 35px;"></a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'story_list' %}">View Stories</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'create_story' %}">Create Your Story</a>
+                </li>
               </ul>
-            </li>
-            {% if user.is_authenticated %}
-              <li class="nav-item dropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  id="userDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {{ user.username }}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="storyDropdown">
-                  <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=mine">My Stories</a></li>
-                  <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=favorites">My Favorites</a></li>
-                  <li class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
-                </ul>
-              </li>
-            {% else %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
-              </li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-    </nav>
+              <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="languageDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="bi bi-translate"></i>
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                    <li><a class="dropdown-item" href="?lang=en">English</a></li>
+                    <li><a class="dropdown-item" href="?lang=es">Spanish</a></li>
+                    <li><a class="dropdown-item" href="?lang=fr">French</a></li>
+                    <li><a class="dropdown-item" href="?lang=de">German</a></li>
+                    <li><a class="dropdown-item" href="?lang=tr">Turkish</a></li>
+                  </ul>
+                </li>
+                {% if user.is_authenticated %}
+                  <li class="nav-item dropdown">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="#"
+                      id="userDropdown"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="storyDropdown">
+                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=mine">My Stories</a></li>
+                      <li><a class="dropdown-item" href="{% url 'story_list' %}?filter=favorites">My Favorites</a></li>
+                      <li class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                    </ul>
+                  </li>
+                {% else %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </nav>
+    </header>
 
-    <div class="container">
+    <main class="container">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
             integrity="sha256-NfRUfZNkERrKSFA0c1a8VmCplPDYtpTYj5lQmKe1R/o="

@@ -1,9 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Story Detail{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ text.title|default:story.texts.first.title|escapejs }}",
+  "image": "{{ story.images.first.image.url|default:'' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{% if story.is_anonymous %}Anonymous{% else %}{{ story.author.username }}{% endif %}"
+  },
+  "datePublished": "{{ story.created_at|date:'c' }}"
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between">
-    <h2>{{ text.title }}</h2>
+    <h1>{{ text.title }}</h1>
     <p>
       <span
         class="like-btn fs-4"
@@ -37,7 +54,7 @@
 
     {% if story.images.first %}
       <div id="image-container" class="w-50 m-2" style="float: right;">
-        <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3 rounded" alt="Cover image" />
+        <img src="{{ story.images.first.image.url }}" class="img-fluid mb-3 rounded" alt="{{ text.title|default:story.texts.first.title }} cover" />
       </div>
     {% else %}
       <div id="image-status" class="w-50 m-2" style="float: right;">
@@ -73,7 +90,7 @@
                 const img = document.createElement('img');
                 img.src = '{{ MEDIA_URL }}images/cover_{{ story.id }}.png?' + Date.now();
                 img.className = 'img-fluid mb-3 rounded';
-                img.alt = 'Cover image';
+                img.alt = '{{ text.title|default:story.texts.first.title }} cover';
                 container.appendChild(img);
                 statusEl.replaceWith(container);
               }

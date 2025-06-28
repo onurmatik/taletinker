@@ -4,7 +4,7 @@
     {% with img=story.images.first %}
       {% if img %}
         <a href="{% url 'story_detail' story.uuid %}">
-          <img src="{{ img.thumbnail.url }}" class="card-img-top" alt="Cover image" />
+          <img src="{{ img.thumbnail.url }}" class="card-img-top" alt="{{ story.texts.first.title }} cover" />
         </a>
       {% endif %}
     {% endwith %}
