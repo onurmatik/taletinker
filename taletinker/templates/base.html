@@ -90,9 +90,14 @@ h1, h2, h3, h4, h5, h6 {
 
                     <ul class="dropdown-menu" aria-labelledby="languageDropdown">
                         {% for lang_code, lang_name in LANGUAGES %}
-                            <li><a class="dropdown-item lang-option" data-lang="{{ lang_code }}" href="?lang={{ lang_code }}">{% trans lang_name %}</a></li>
+                            <li><a class="dropdown-item lang-option" data-lang="{{ lang_code }}" href="#">{% trans lang_name %}</a></li>
                         {% endfor %}
                     </ul>
+                    <form id="lang-form" method="post" action="{% url 'set_language' %}" style="display:none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="language" id="lang-input">
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    </form>
 
                 </li>
                 {% if user.is_authenticated %}
@@ -196,10 +201,13 @@ h1, h2, h3, h4, h5, h6 {
       document.addEventListener('DOMContentLoaded', () => {
         attachLikeHandlers(document);
         attachShareHandlers(document);
+        const langForm = document.getElementById('lang-form');
+        const langInput = document.getElementById('lang-input');
         document.querySelectorAll('.lang-option').forEach(el => {
-          el.addEventListener('click', () => {
-            const lang = el.dataset.lang;
-            document.cookie = 'django_language=' + encodeURIComponent(lang) + ';path=/;max-age=' + 60*60*24*365;
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+            langInput.value = el.dataset.lang;
+            langForm.submit();
           });
         });
       });

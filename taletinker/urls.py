@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from sesame.views import LoginView as SesameLoginView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -49,6 +49,7 @@ urlpatterns = [
     path('playlist/reorder/', reorder_playlist, name='reorder_playlist'),
     path('playlist/play/', play_playlist, name='play_playlist'),
     path('rss/<str:language>/', LatestStoriesByLanguage(), name='story_feed'),
+    path('i18n/', include('django.conf.urls.i18n')),
     path('api/', ninja_api.urls),
     path('', story_list, name='story_list'),
 ]
