@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.i18n import JavaScriptCatalog
 from sesame.views import LoginView as SesameLoginView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -35,6 +36,7 @@ urlpatterns = [
     path('playlist/play/', play_playlist, name='play_playlist'),
     path('rss/<str:language>/', LatestStoriesByLanguage(), name='story_feed'),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     path('api/', ninja_api.urls),
     path('search/', filter_stories, name='filter_stories'),
     path('', story_list, name='story_list'),
