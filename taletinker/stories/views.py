@@ -178,9 +178,6 @@ def story_detail(request, story_uuid: str):
 
     lang = request.GET.get("lang") or get_language()
     text_obj = story.texts.filter(language=lang).first()
-    if not text_obj:
-        text_obj = story.texts.first()
-        lang = text_obj.language if text_obj else None
 
     audio_obj = story.audios.filter(language=lang).first() if lang else None
 
