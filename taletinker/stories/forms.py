@@ -113,12 +113,6 @@ class StoryFilterForm(forms.Form):
         label=_("Theme"),
     )
 
-    language = forms.ChoiceField(
-        choices=[("", _("Any Language"))] + settings.LANGUAGES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"}),
-        label=_("Language"),
-    )
 
     sort = forms.ChoiceField(
         choices=[("newest", _("Newest")), ("popular", _("Most Liked"))],
