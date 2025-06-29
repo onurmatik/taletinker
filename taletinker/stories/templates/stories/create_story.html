@@ -19,6 +19,8 @@
 
 </style>
 
+<script src="{% url 'javascript-catalog' %}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -36,14 +38,29 @@ document.querySelectorAll('.chip').forEach(chip=>{
 /* ───── 3. RANDOM IDEA GENERATOR ───── */
 const ideaBtn = document.getElementById('random-idea-btn');
 if (ideaBtn) {
-    const adjectives = ['Silly','Brave','Curious','Sleepy','Hungry','Zippy'];
-    const creatures  = ['Dragon','Robot','Wizard','Panda','Unicorn','Spark','Noodle'];
+    const adjectives = [
+        gettext('Silly'),
+        gettext('Brave'),
+        gettext('Curious'),
+        gettext('Sleepy'),
+        gettext('Hungry'),
+        gettext('Zippy')
+    ];
+    const creatures  = [
+        gettext('Dragon'),
+        gettext('Robot'),
+        gettext('Wizard'),
+        gettext('Panda'),
+        gettext('Unicorn'),
+        gettext('Spark'),
+        gettext('Noodle')
+    ];
     const actions    = [
-        'finds a lost treasure',
-        'learns to dance',
-        'builds a sandcastle',
-        'joins a circus',
-        'flies to the moon'
+        gettext('finds a lost treasure'),
+        gettext('learns to dance'),
+        gettext('builds a sandcastle'),
+        gettext('joins a circus'),
+        gettext('flies to the moon')
     ];
     function pick(list){ return list[Math.floor(Math.random()*list.length)]; }
     ideaBtn.addEventListener('click',()=>{
