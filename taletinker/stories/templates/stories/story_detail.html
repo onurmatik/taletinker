@@ -16,6 +16,25 @@
   "datePublished": "{{ story.created_at|date:'c' }}"
 }
 </script>
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ text.title|default:story.texts.first.title }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if story.images.first %}
+<meta property="og:image" content="{{ story.images.first.image.url }}">
+{% endif %}
+{% if text.text or story.texts.first.text %}
+<meta property="og:description" content="{{ text.text|default:story.texts.first.text|truncatechars:160 }}">
+{% endif %}
+<meta property="og:site_name" content="TaleTinker">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ text.title|default:story.texts.first.title }}">
+{% if story.images.first %}
+<meta name="twitter:image" content="{{ story.images.first.image.url }}">
+{% endif %}
+{% if text.text or story.texts.first.text %}
+<meta name="twitter:description" content="{{ text.text|default:story.texts.first.text|truncatechars:200 }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
