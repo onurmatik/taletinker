@@ -48,9 +48,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 </style>
 
-    {% block extra_head %}{% endblock %}
+{% block extra_head %}{% endblock %}
+
 </head>
-<body style="padding-top: 5rem;">
+
+<body style="padding-top: 5rem;" class="pb-5 pb-sm-0">
     <header>
         <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-success-subtle mb-4">
           <div class="container">
@@ -136,6 +138,16 @@ h1, h2, h3, h4, h5, h6 {
     <main class="container">
         {% block content %}{% endblock %}
     </main>
+
+    <nav class="navbar fixed-bottom navbar-light bg-success-subtle border-top d-sm-none">
+        <div class="container-fluid justify-content-around">
+            <a class="nav-link text-center" href="{% url 'play_playlist' %}"><i class="bi bi-music-note-list fs-4"></i></a>
+            <a class="nav-link text-center" href="{% url 'filter_stories' %}"><i class="bi bi-search fs-4"></i></a>
+            <a class="nav-link text-center" href="{% url 'create_story' %}"><i class="bi bi-plus-lg fs-4"></i></a>
+            <a class="nav-link text-center" href="{% url 'story_list' %}"><i class="bi bi-book fs-4"></i></a>
+        </div>
+    </nav>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
             integrity="sha256-NfRUfZNkERrKSFA0c1a8VmCplPDYtpTYj5lQmKe1R/o="

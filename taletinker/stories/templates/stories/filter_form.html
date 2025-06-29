@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Search and filter" %}{% endblock %}
+
+{% block content %}
+
+    <h2 class="mb-3">{% trans "Find stories" %}</h2>
+
+    <div class="row g-2 align-items-end">
+      <!-- FILTER FORM -->
+      <div class="col">
+        <form method="get" action="{%  url 'story_list' %}" class="row g-2 align-items-end">
+          <div class="col-6 col-lg-auto">
+            {{ form.age.label_tag }}
+            {{ form.age }}
+          </div>
+          <div class="col-6 col-lg-auto">
+            {{ form.theme.label_tag }}
+            {{ form.theme }}
+          </div>
+          <div class="col-6 col-lg-auto">
+            {{ form.sort.label_tag }}
+            {{ form.sort }}
+          </div>
+          <div class="col-6 col-lg-auto">
+            {{ form.search.label_tag }}
+            {{ form.search }}
+          </div>
+          <div class="col-12 col-lg-auto">
+            <button type="submit" class="btn btn-secondary w-100 w-lg-auto">{% trans "Search" %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+{% endblock %}

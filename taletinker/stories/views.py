@@ -133,6 +133,14 @@ def story_list(request):
     return render(request, "stories/story_list.html", context)
 
 
+def filter_stories(request):
+    """A dedicated view for searching and filtering stories (linked from bottom navbar)"""
+
+    return render(request, "stories/filter_form.html", {
+        "form": StoryFilterForm(),
+    })
+
+
 @login_required
 def create_story(request):
     if request.method == "POST":
