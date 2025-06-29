@@ -34,6 +34,7 @@ def build_prompt(params: StoryParams) -> str:
         f"Write a {params.story_length}-minute children's story suitable for a {params.age}-year-old child.",
         f"Balance realism vs fantasy at {params.realism}/5.",
         f"Balance didactic vs fun at {params.didactic}/5.",
+        f"Respond in language {params.language.upper()}",
     ]
     if params.themes:
         parts.append("Themes: " + ", ".join(params.themes) + ".")
