@@ -1,19 +1,20 @@
 from django import forms
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 THEME_CHOICES = [
-    ("family", "Family"),
-    ("friendship", "Friendship"),
-    ("nature", "Nature"),
-    ("animals", "Animals"),
-    ("courage", "Courage"),
-    ("technology", "Technology"),
-    ("dinosaurs", "Dinosaurs"),
-    ("machines", "Machines"),
-    ("joyful", "Joyful"),
-    ("soothing", "Soothing"),
-    ("support", "Supportive"),
+    ("family", _("Family")),
+    ("friendship", _("Friendship")),
+    ("nature", _("Nature")),
+    ("animals", _("Animals")),
+    ("courage", _("Courage")),
+    ("technology", _("Technology")),
+    ("dinosaurs", _("Dinosaurs")),
+    ("machines", _("Machines")),
+    ("joyful", _("Joyful")),
+    ("soothing", _("Soothing")),
+    ("support", _("Supportive")),
 ]
 
 
@@ -30,7 +31,7 @@ class StoryCreationForm(forms.Form):
                 "step": 1,
             }
         ),
-        label="Realistic ↔ Fantastic",
+        label=_("Realistic ↔ Fantastic"),
     )
 
     didactic = forms.IntegerField(
@@ -44,7 +45,7 @@ class StoryCreationForm(forms.Form):
                 "step": 1,
             }
         ),
-        label="Didactic ↔ Fun",
+        label=_("Didactic ↔ Fun"),
     )
 
     age = forms.IntegerField(
@@ -59,7 +60,7 @@ class StoryCreationForm(forms.Form):
                 "list": "age-ticks",
             }
         ),
-        label="Target Age",
+        label=_("Target Age"),
     )
 
     themes = forms.MultipleChoiceField(
@@ -71,7 +72,7 @@ class StoryCreationForm(forms.Form):
     extra_instructions = forms.CharField(
         widget=forms.TextInput(attrs={"class": "form-control"}),
         required=False,
-        label="Extra Instructions",
+        label=_("Topic"),
     )
 
     story_length = forms.IntegerField(
@@ -86,11 +87,13 @@ class StoryCreationForm(forms.Form):
                 "list": "length-ticks",
             }
         ),
-        label="Story Length",
+        label=_("Story Length"),
     )
 
 
-AGE_FILTER_CHOICES = [("", "Any Age")] + [(str(i), str(i)) for i in range(3, 11)]
+AGE_FILTER_CHOICES = [("", _("Any Age"))] + [
+    (str(i), str(i)) for i in range(3, 11)
+]
 
 
 class StoryFilterForm(forms.Form):
@@ -100,34 +103,34 @@ class StoryFilterForm(forms.Form):
         choices=AGE_FILTER_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
-        label="Age",
+        label=_("Age"),
     )
 
     theme = forms.ChoiceField(
-        choices=[("", "Any Theme")] + THEME_CHOICES,
+        choices=[("", _("Any Theme"))] + THEME_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
-        label="Theme",
+        label=_("Theme"),
     )
 
     language = forms.ChoiceField(
-        choices=[("", "Any Language")] + settings.LANGUAGES,
+        choices=[("", _("Any Language"))] + settings.LANGUAGES,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
-        label="Language",
+        label=_("Language"),
     )
 
     sort = forms.ChoiceField(
-        choices=[("newest", "Newest"), ("popular", "Most Liked")],
+        choices=[("newest", _("Newest")), ("popular", _("Most Liked"))],
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
-        label="Sort By",
+        label=_("Sort By"),
     )
 
     search = forms.CharField(
         required=False,
         widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Search"}
+            attrs={"class": "form-control", "placeholder": _("Search")}
         ),
-        label="Search",
+        label=_("Search"),
     )

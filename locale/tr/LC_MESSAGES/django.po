@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-28 11:44+0000\n"
+"POT-Creation-Date: 2025-06-29 07:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,127 +17,294 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-#: taletinker/settings.py:115
+#: taletinker/accounts/forms.py:7
+msgid "Username"
+msgstr "Kullanıcı Adı"
+
+#: taletinker/accounts/forms.py:8 taletinker/accounts/forms.py:13
+msgid "Email"
+msgstr "E-posta"
+
+#: taletinker/accounts/forms.py:9 taletinker/accounts/forms.py:14
+msgid "CAPTCHA"
+msgstr "Güvenlik Kodu"
+
+#: taletinker/settings.py:116
 msgid "English"
 msgstr "İngilizce"
 
+#: taletinker/settings.py:117
 msgid "German"
 msgstr "Almanca"
 
+#: taletinker/settings.py:118
 msgid "French"
 msgstr "Fransızca"
 
+#: taletinker/settings.py:119
 msgid "Spanish"
 msgstr "İspanyolca"
 
+#: taletinker/settings.py:120
 msgid "Turkish"
 msgstr "Türkçe"
 
+#: taletinker/stories/forms.py:7
+msgid "Family"
+msgstr "Aile"
+
+#: taletinker/stories/forms.py:8
+msgid "Friendship"
+msgstr "Arkadaşlık"
+
+#: taletinker/stories/forms.py:9
+msgid "Nature"
+msgstr "Doğa"
+
+#: taletinker/stories/forms.py:10
+msgid "Animals"
+msgstr "Hayvanlar"
+
+#: taletinker/stories/forms.py:11
+msgid "Courage"
+msgstr "Cesaret"
+
+#: taletinker/stories/forms.py:12
+msgid "Technology"
+msgstr "Teknoloji"
+
+#: taletinker/stories/forms.py:13
+msgid "Dinosaurs"
+msgstr "Dinozorlar"
+
+#: taletinker/stories/forms.py:14
+msgid "Machines"
+msgstr "Makineler"
+
+#: taletinker/stories/forms.py:15
+msgid "Joyful"
+msgstr "Neşeli"
+
+#: taletinker/stories/forms.py:16
+msgid "Soothing"
+msgstr "Huzur Veren"
+
+#: taletinker/stories/forms.py:17
+msgid "Supportive"
+msgstr "Destekleyici"
+
+#: taletinker/stories/forms.py:34
+msgid "Realistic ↔ Fantastic"
+msgstr "Gerçekçi ↔ Fantastik"
+
+#: taletinker/stories/forms.py:48
+msgid "Didactic ↔ Fun"
+msgstr "Öğretici ↔ Eğlenceli"
+
+#: taletinker/stories/forms.py:63
+msgid "Target Age"
+msgstr "Hedef Yaş"
+
+#: taletinker/stories/forms.py:75
+msgid "Topic"
+msgstr "Konu"
+
+#: taletinker/stories/forms.py:90
+msgid "Story Length"
+msgstr "Hikaye Uzunluğu"
+
+#: taletinker/stories/forms.py:94
+msgid "Any Age"
+msgstr "Her Yaş"
+
+#: taletinker/stories/forms.py:106
+msgid "Age"
+msgstr "Yaş"
+
+#: taletinker/stories/forms.py:110
+msgid "Any Theme"
+msgstr "Her Tema"
+
+#: taletinker/stories/forms.py:113
+msgid "Theme"
+msgstr "Tema"
+
+#: taletinker/stories/forms.py:117
+msgid "Any Language"
+msgstr "Her Dil"
+
+#: taletinker/stories/forms.py:120
+msgid "Language"
+msgstr "Dil"
+
+#: taletinker/stories/forms.py:124
+msgid "Newest"
+msgstr "En Yeni"
+
+#: taletinker/stories/forms.py:124
+msgid "Most Liked"
+msgstr "En Beğenilen"
+
+#: taletinker/stories/forms.py:127
+msgid "Sort By"
+msgstr "Sırala"
+
+#: taletinker/stories/forms.py:133 taletinker/stories/forms.py:135
+#: taletinker/stories/templates/stories/filter_form.html:30
+msgid "Search"
+msgstr "Ara"
+
+#: taletinker/stories/templates/stories/create_story.html:5
 msgid "Create Story"
 msgstr "Hikaye Oluştur"
 
+#: taletinker/stories/templates/stories/create_story.html:95
 msgid "Tone &amp; Audience"
 msgstr "Ton &amp; Hedef Kitle"
 
+#: taletinker/stories/templates/stories/create_story.html:100
 msgid "realistic"
 msgstr "gerçekçi"
 
+#: taletinker/stories/templates/stories/create_story.html:100
 msgid "moderately realistic"
 msgstr "orta derecede gerçekçi"
 
+#: taletinker/stories/templates/stories/create_story.html:100
+#: taletinker/stories/templates/stories/create_story.html:108
 msgid "balanced"
 msgstr "dengeli"
 
+#: taletinker/stories/templates/stories/create_story.html:101
 msgid "moderately fantastic"
 msgstr "orta derecede fantastik"
 
+#: taletinker/stories/templates/stories/create_story.html:101
 msgid "fantastic"
 msgstr "fantastik"
 
+#: taletinker/stories/templates/stories/create_story.html:108
 msgid "didactic"
 msgstr "öğretici"
 
+#: taletinker/stories/templates/stories/create_story.html:108
 msgid "mostly didactic"
 msgstr "çoğunlukla öğretici"
 
+#: taletinker/stories/templates/stories/create_story.html:109
 msgid "mostly fun"
 msgstr "çoğunlukla eğlenceli"
 
+#: taletinker/stories/templates/stories/create_story.html:109
 msgid "just for fun"
 msgstr "sadece eğlence için"
 
+#: taletinker/stories/templates/stories/create_story.html:126
 msgid "Themes"
 msgstr "Temalar"
 
+#: taletinker/stories/templates/stories/create_story.html:135
 msgid "Surprise Me"
 msgstr "Beni Şaşırt"
 
+#: taletinker/stories/templates/stories/create_story.html:150
 msgid "Generate Story"
 msgstr "Hikayeyi Oluştur"
 
+#: taletinker/stories/templates/stories/create_story.html:151
 msgid "Generating…"
 msgstr "Oluşturuluyor…"
 
+#: taletinker/stories/templates/stories/filter_form.html:3
+msgid "Search and filter"
+msgstr "Ara ve filtrele"
+
+#: taletinker/stories/templates/stories/filter_form.html:7
+msgid "Find stories"
+msgstr "Hikaye bul"
+
+#: taletinker/stories/templates/stories/playlist_play.html:3
 msgid "Play Playlist"
 msgstr "Çalma Listesini Oynat"
 
+#: taletinker/stories/templates/stories/playlist_play.html:72
+#: taletinker/stories/templates/stories/story_list.html:271
 msgid "My Playlist"
 msgstr "Listem"
 
+#: taletinker/stories/templates/stories/playlist_play.html:86
+#: taletinker/stories/templates/stories/story_list.html:293
 msgid "No audio"
 msgstr "Ses yok"
 
+#: taletinker/stories/templates/stories/playlist_play.html:92
 msgid "No stories."
 msgstr "Hikaye yok."
 
-msgid "Back"
-msgstr "Geri"
-
+#: taletinker/stories/templates/stories/story_cards.html:25
 msgid "Anonymous"
 msgstr "Anonim"
 
+#: taletinker/stories/templates/stories/story_cards.html:42
+#: taletinker/stories/templates/stories/story_detail.html:113
 msgid "Creating audio..."
 msgstr "Ses oluşturuluyor..."
 
+#: taletinker/stories/templates/stories/story_cards.html:57
+#: taletinker/stories/templates/stories/story_cards.html:66
 msgid "Add to Playlist"
 msgstr "Listeye Ekle"
 
+#: taletinker/stories/templates/stories/story_detail.html:3
 msgid "Story Detail"
 msgstr "Hikaye Detayı"
 
+#: taletinker/stories/templates/stories/story_detail.html:37
 msgid "Share Story"
 msgstr "Hikayeyi Paylaş"
 
+#: taletinker/stories/templates/stories/story_detail.html:63
 msgid "Creating image..."
 msgstr "Görsel oluşturuluyor..."
 
+#: taletinker/stories/templates/stories/story_detail.html:160
 msgid "Creating text..."
 msgstr "Metin oluşturuluyor..."
 
+#: taletinker/stories/templates/stories/story_list.html:3
 msgid "Story Library"
 msgstr "Hikaye Kütüphanesi"
 
+#: taletinker/stories/templates/stories/story_list.html:206
 msgid "Stories"
 msgstr "Hikayeler"
 
+#: taletinker/stories/templates/stories/story_list.html:233
 msgid "Apply"
 msgstr "Uygula"
 
+#: taletinker/stories/templates/stories/story_list.html:241
 msgid "Add listed stories to the playlist"
 msgstr "Listelenen hikayeleri çalma listesine ekle"
 
+#: taletinker/stories/templates/stories/story_list.html:257
+#: taletinker/stories/templates/stories/story_list.html:303
 msgid "No stories yet."
 msgstr "Henüz hikaye yok."
 
+#: taletinker/stories/templates/stories/story_list.html:260
 msgid "Create this story"
 msgstr "Bu hikayeyi oluştur"
 
+#: taletinker/stories/templates/stories/story_list.html:309
 msgid "Create your story"
 msgstr "Kendi hikayeni oluştur"
 
+#: taletinker/stories/views.py:166
 msgid "Story"
 msgstr "Hikaye"
 
+#: taletinker/templates/base.html:16
 msgid ""
 "TaleTinker lets you craft and share AI-generated children's stories with "
 "audio narration and cover art."
@@ -145,44 +312,70 @@ msgstr ""
 "TaleTinker, sesli anlatım ve kapak görseliyle birlikte yapay zeka destekli "
 "çocuk hikayeleri oluşturup paylaşmanıza olanak tanır."
 
+#: taletinker/templates/base.html:74
 msgid "View Stories"
 msgstr "Hikayeleri Görüntüle"
 
+#: taletinker/templates/base.html:77
 msgid "Create Your Story"
 msgstr "Kendi Hikayeni Oluştur"
 
+#: taletinker/templates/base.html:118
 msgid "My Stories"
 msgstr "Hikayelerim"
 
+#: taletinker/templates/base.html:119
 msgid "My Favorites"
 msgstr "Favorilerim"
 
+#: taletinker/templates/base.html:121
 msgid "Logout"
 msgstr "Çıkış Yap"
 
+#: taletinker/templates/base.html:126
+#: taletinker/templates/registration/signup.html:27
 msgid "Login"
 msgstr "Giriş Yap"
 
+#: taletinker/templates/base.html:129
+#: taletinker/templates/registration/login_email.html:29
+#: taletinker/templates/registration/signup.html:3
+#: taletinker/templates/registration/signup.html:5
+#: taletinker/templates/registration/signup.html:25
 msgid "Sign Up"
 msgstr "Kayıt Ol"
 
+#: taletinker/templates/registration/login_email.html:3
+#: taletinker/templates/registration/login_email.html:5
 msgid "Email Login"
 msgstr "E-posta ile Giriş"
 
+#: taletinker/templates/registration/login_email.html:27
 msgid "Send Login Link"
 msgstr "Giriş Linki Gönder"
 
+#: taletinker/templates/registration/login_email.html:29
 msgid "Not registered?"
 msgstr "Kayıtlı değil misiniz?"
 
+#: taletinker/templates/registration/login_email_sent.html:3
+#: taletinker/templates/registration/login_email_sent.html:5
+#: taletinker/templates/registration/signup_done.html:3
+#: taletinker/templates/registration/signup_done.html:5
 msgid "Check Your Email"
 msgstr "E-postanızı Kontrol Edin"
 
+#: taletinker/templates/registration/login_email_sent.html:6
 msgid "We sent you a login link. Please check your email."
 msgstr "Size bir giriş bağlantısı gönderdik. Lütfen e-postanızı kontrol edin."
 
+#: taletinker/templates/registration/signup.html:27
 msgid "Already have an account?"
 msgstr "Zaten bir hesabınız var mı?"
 
+#: taletinker/templates/registration/signup_done.html:6
 msgid "Thank you for signing up! We've sent you a login link."
 msgstr "Kayıt olduğunuz için teşekkürler! Size bir giriş bağlantısı gönderdik."
+
+#~ msgid "Back"
+#~ msgstr "Geri"
