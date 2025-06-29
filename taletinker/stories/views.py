@@ -26,7 +26,7 @@ def _filtered_stories(request):
     if stories is None:
         stories_qs = Story.objects.filter(is_published=True).prefetch_related(
             "texts", "author", "images"
-        ).filter(texts__language=get_language())
+        )
 
         filter_param = request.GET.get("filter")
         if filter_param == "mine" and request.user.is_authenticated:
@@ -176,11 +176,9 @@ def create_story(request):
 def story_detail(request, story_uuid: str):
     story = get_object_or_404(Story, uuid=story_uuid)
 
-    lang = request.GET.get("lang")
-    text_obj = None
-    if lang:
-        text_obj = story.texts.filter(language=lang).first()
-    else:
+    lang = request.GET.get("lang") or get_language()
+    text_obj = story.texts.filter(language=lang).first()
+    if not text_obj:
         text_obj = story.texts.first()
         lang = text_obj.language if text_obj else None
 
