@@ -150,8 +150,13 @@ def create_translation(request, payload: TranslationPayload):
 
     story = get_object_or_404(Story, pk=payload.story_id)
 
-    if story.texts.filter(language=payload.language).exists():
-        return api.create_response(request, {"detail": "exists"}, status=400)
+    existing = story.texts.filter(language=payload.language).first()
+    if existing:
+        return {
+            "text_id": existing.id,
+            "title": existing.title,
+            "text": existing.text,
+        }
 
     base_text = story.texts.first()
     if not base_text:

@@ -513,6 +513,29 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(self.story.texts.filter(language="es").count(), 1)
 
 
+class TranslateApiTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(username="tr", password="pass")
+        self.client = Client()
+        self.story = Story.objects.create(author=self.user)
+        self.story.texts.create(language="en", title="S", text="hello")
+
+    def test_existing_translation_returned(self):
+        text = self.story.texts.create(language="es", title="Hola", text="hola")
+        self.client.force_login(self.user)
+        resp = self.client.post(
+            "/api/translate",
+            {"story_id": self.story.id, "language": "es"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertJSONEqual(
+            resp.content,
+            {"text_id": text.id, "title": text.title, "text": text.text},
+        )
+
+
 class StoryImageDisplayTests(TestCase):
     def setUp(self):
         cache.clear()
