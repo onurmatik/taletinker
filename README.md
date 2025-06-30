@@ -2,6 +2,7 @@
 
 Create, share, and discover **AI-generated children’s stories** complete with audio narration and a charming cover image.
 
+
 TaleTinker lets parents craft personalized tales in seconds—tuning realism, themes, character ideas, language, tone, and length—then publishes each story to a public library so other families can enjoy it too.
 
 | Service           | Status                                                                                                       |
@@ -53,13 +54,20 @@ python manage.py runserver
 | ---------- | ------------------------------------------- |
 | Django app | [http://localhost:8000/](http://localhost:8000/) |
 
-
 ### 3. Run Migrations & Create Superuser
 
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
+### Updating Translations
+
+
+Run JS extraction with:
+```bash
+python manage.py makemessages -d djangojs -l <language> --extension=js
+```
+
 
 ---
 
