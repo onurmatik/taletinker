@@ -5,10 +5,11 @@ from types import SimpleNamespace
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.core.cache import cache
+from django.db import IntegrityError
 import base64
 
 from taletinker.accounts.models import User
-from taletinker.stories.models import Story
+from taletinker.stories.models import Story, StoryText
 
 
 class CreateStoryViewTests(TestCase):
@@ -455,6 +456,61 @@ class CreateAudioApiTests(TestCase):
         )
         self.assertEqual(resp.status_code, 400)
         self.assertJSONEqual(resp.content, {"detail": "exists"})
+
+    @patch("taletinker.api.openai.OpenAI")
+    def test_audio_translation_race_handled(self, mock_openai):
+        """IntegrityError during translation creation should be handled."""
+
+        class DummyResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                pass
+
+            def iter_bytes(self, chunk_size=None):
+                return [b"mp3"]
+
+        dummy = DummyResp()
+        mock_client = mock_openai.return_value
+        create_mock = MagicMock(return_value=dummy)
+        mock_client.audio = SimpleNamespace(
+            speech=SimpleNamespace(
+                with_streaming_response=SimpleNamespace(create=create_mock)
+            )
+        )
+        mock_client.chat = SimpleNamespace(
+            completions=SimpleNamespace(
+                create=MagicMock(
+                    return_value=SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                message=SimpleNamespace(
+                                    content='{"title": "Hola", "text": "hola"}'
+                                )
+                            )
+                        ]
+                    )
+                )
+            )
+        )
+
+        orig_create = StoryText.objects.create
+
+        def side_effect(*args, **kwargs):
+            orig_create(*args, **kwargs)
+            raise IntegrityError
+
+        with patch("taletinker.api.StoryText.objects.create", side_effect=side_effect):
+            self.client.force_login(self.user)
+            resp = self.client.post(
+                "/api/create_audio",
+                {"story_id": self.story.id, "language": "es"},
+                content_type="application/json",
+            )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.story.texts.filter(language="es").count(), 1)
 
 
 class StoryImageDisplayTests(TestCase):

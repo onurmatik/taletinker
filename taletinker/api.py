@@ -11,6 +11,7 @@ import logging
 
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
+from django.db import IntegrityError
 
 from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 
@@ -230,12 +231,17 @@ def create_audio(request, payload: AudioPayload):
                 response_format={"type": "json_object"},
             )
             result = json.loads(response.choices[0].message.content)
-            text_obj = StoryText.objects.create(
-                story=story,
-                language=payload.language,
-                title=result.get("title") or base_text.title,
-                text=result.get("text") or base_text.text,
-            )
+            try:
+                text_obj = StoryText.objects.create(
+                    story=story,
+                    language=payload.language,
+                    title=result.get("title") or base_text.title,
+                    text=result.get("text") or base_text.text,
+                )
+            except IntegrityError:
+                text_obj = StoryText.objects.filter(
+                    story=story, language=payload.language
+                ).first()
         except openai.OpenAIError as exc:
             logger.exception("OpenAI API error")
             return api.create_response(request, {"detail": str(exc)}, status=503)
