@@ -21,8 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
             gettext('Curious'),
             gettext('Sleepy'),
             gettext('Hungry'),
-            gettext('Zippy')
+            gettext('Zippy'),
+            gettext('Playful'),
+            gettext('Kind'),
+            gettext('Cheerful'),
+            gettext('Adventurous'),
+            gettext('Gentle'),
+            gettext('Mischievous')
         ];
+
         const creatures = [
             gettext('Dragon'),
             gettext('Robot'),
@@ -30,14 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
             gettext('Panda'),
             gettext('Unicorn'),
             gettext('Spark'),
-            gettext('Noodle')
+            gettext('Noodle'),
+            gettext('Mermaid'),
+            gettext('Knight'),
+            gettext('Alien'),
+            gettext('Fairy'),
+            gettext('Monster'),
+            gettext('Pirate')
         ];
+
         const actions = [
             gettext('finds a lost treasure'),
             gettext('learns to dance'),
             gettext('builds a sandcastle'),
             gettext('joins a circus'),
-            gettext('flies to the moon')
+            gettext('flies to the moon'),
+            gettext('makes a new friend'),
+            gettext('explores a secret cave'),
+            gettext('learns to swim'),
+            gettext('plays in the rain'),
+            gettext('climbs a giant tree')
         ];
         function pick(list){ return list[Math.floor(Math.random()*list.length)]; }
         ideaBtn.addEventListener('click', () => {

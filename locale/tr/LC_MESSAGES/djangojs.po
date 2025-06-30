@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-29 18:07+0000\n"
+"POT-Creation-Date: 2025-06-30 09:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
 #: static/create_story.js:19
 msgid "Silly"
 msgstr "Şapşal"
@@ -41,50 +42,118 @@ msgstr "Aç"
 msgid "Zippy"
 msgstr "Atik"
 
+#: static/create_story.js:25
+msgid "Playful"
+msgstr "Oyunbaz"
+
+#: static/create_story.js:26
+msgid "Kind"
+msgstr "Nazik"
+
 #: static/create_story.js:27
+msgid "Cheerful"
+msgstr "Neşeli"
+
+#: static/create_story.js:28
+msgid "Adventurous"
+msgstr "Macera Sever"
+
+#: static/create_story.js:29
+msgid "Gentle"
+msgstr "Nazik"
+
+#: static/create_story.js:30
+msgid "Mischievous"
+msgstr "Yaramaz"
+
+#: static/create_story.js:34
 msgid "Dragon"
 msgstr "Ejderha"
 
-#: static/create_story.js:28
+#: static/create_story.js:35
 msgid "Robot"
 msgstr "Robot"
 
-#: static/create_story.js:29
+#: static/create_story.js:36
 msgid "Wizard"
 msgstr "Büyücü"
 
-#: static/create_story.js:30
+#: static/create_story.js:37
 msgid "Panda"
 msgstr "Panda"
 
-#: static/create_story.js:31
+#: static/create_story.js:38
 msgid "Unicorn"
 msgstr "Tekboynuz"
 
-#: static/create_story.js:32
+#: static/create_story.js:39
 msgid "Spark"
 msgstr "Kıvılcım"
 
-#: static/create_story.js:33
+#: static/create_story.js:40
 msgid "Noodle"
 msgstr "Erişte"
 
-#: static/create_story.js:36
+#: static/create_story.js:41
+msgid "Mermaid"
+msgstr "Denizkızı"
+
+#: static/create_story.js:42
+msgid "Knight"
+msgstr "Şövalye"
+
+#: static/create_story.js:43
+msgid "Alien"
+msgstr "Uzaylı"
+
+#: static/create_story.js:44
+msgid "Fairy"
+msgstr "Peri"
+
+#: static/create_story.js:45
+msgid "Monster"
+msgstr "Canavar"
+
+#: static/create_story.js:46
+msgid "Pirate"
+msgstr "Korsan"
+
+#: static/create_story.js:50
 msgid "finds a lost treasure"
 msgstr "kayıp bir hazine bulur"
 
-#: static/create_story.js:37
+#: static/create_story.js:51
 msgid "learns to dance"
 msgstr "dans etmeyi öğrenir"
 
-#: static/create_story.js:38
+#: static/create_story.js:52
 msgid "builds a sandcastle"
 msgstr "kumdan kale yapar"
 
-#: static/create_story.js:39
+#: static/create_story.js:53
 msgid "joins a circus"
 msgstr "bir sirke katılır"
 
-#: static/create_story.js:40
+#: static/create_story.js:54
 msgid "flies to the moon"
 msgstr "aya uçar"
+
+#: static/create_story.js:55
+msgid "makes a new friend"
+msgstr "yeni bir arkadaş edinir"
+
+#: static/create_story.js:56
+msgid "explores a secret cave"
+msgstr "gizli bir mağarayı keşfeder"
+
+#: static/create_story.js:57
+msgid "learns to swim"
+msgstr "yüzmeyi öğrenir"
+
+#: static/create_story.js:58
+msgid "plays in the rain"
+msgstr "yağmurda oynar"
+
+#: static/create_story.js:59
+msgid "climbs a giant tree"
+msgstr "dev bir ağaca tırmanır"
