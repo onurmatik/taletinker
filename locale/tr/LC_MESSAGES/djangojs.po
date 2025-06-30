@@ -19,72 +19,72 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 #: static/create_story.js:19
 msgid "Silly"
-msgstr ""
+msgstr "Şapşal"
 
 #: static/create_story.js:20
 msgid "Brave"
-msgstr ""
+msgstr "Cesur"
 
 #: static/create_story.js:21
 msgid "Curious"
-msgstr ""
+msgstr "Meraklı"
 
 #: static/create_story.js:22
 msgid "Sleepy"
-msgstr ""
+msgstr "Uykulu"
 
 #: static/create_story.js:23
 msgid "Hungry"
-msgstr ""
+msgstr "Aç"
 
 #: static/create_story.js:24
 msgid "Zippy"
-msgstr ""
+msgstr "Atik"
 
 #: static/create_story.js:27
 msgid "Dragon"
-msgstr ""
+msgstr "Ejderha"
 
 #: static/create_story.js:28
 msgid "Robot"
-msgstr ""
+msgstr "Robot"
 
 #: static/create_story.js:29
 msgid "Wizard"
-msgstr ""
+msgstr "Büyücü"
 
 #: static/create_story.js:30
 msgid "Panda"
-msgstr ""
+msgstr "Panda"
 
 #: static/create_story.js:31
 msgid "Unicorn"
-msgstr ""
+msgstr "Tekboynuz"
 
 #: static/create_story.js:32
 msgid "Spark"
-msgstr ""
+msgstr "Kıvılcım"
 
 #: static/create_story.js:33
 msgid "Noodle"
-msgstr ""
+msgstr "Erişte"
 
 #: static/create_story.js:36
 msgid "finds a lost treasure"
-msgstr ""
+msgstr "kayıp bir hazine bulur"
 
 #: static/create_story.js:37
 msgid "learns to dance"
-msgstr ""
+msgstr "dans etmeyi öğrenir"
 
 #: static/create_story.js:38
 msgid "builds a sandcastle"
-msgstr ""
+msgstr "kumdan kale yapar"
 
 #: static/create_story.js:39
 msgid "joins a circus"
-msgstr ""
+msgstr "bir sirke katılır"
 
 #: static/create_story.js:40
 msgid "flies to the moon"
-msgstr ""
+msgstr "aya uçar"
