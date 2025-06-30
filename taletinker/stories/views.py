@@ -18,6 +18,7 @@ def _filtered_stories(request):
     cache_key = (
         f"story_list:"
         f"{request.user.id if request.user.is_authenticated else 'anon'}:"
+        f"{get_language()}:"
         f"{request.GET.urlencode()}"
     )
     stories = cache.get(cache_key)
@@ -36,14 +37,11 @@ def _filtered_stories(request):
         if form.is_valid():
             age = form.cleaned_data.get("age")
             theme = form.cleaned_data.get("theme")
-            language = form.cleaned_data.get("language")
             sort = form.cleaned_data.get("sort") or "newest"
             search = form.cleaned_data.get("search")
 
             if age:
                 stories_qs = stories_qs.filter(parameters__age=int(age))
-            if language:
-                stories_qs = stories_qs.filter(texts__language=language)
             if search:
                 stories_qs = stories_qs.filter(texts__title__icontains=search).distinct()
 
@@ -79,19 +77,17 @@ def story_list(request):
     page_obj = paginator.get_page(page_number)
     stories_page = list(page_obj.object_list)
 
-    selected_language = request.GET.get("lang")
+    selected_language = request.GET.get("lang") or get_language()
 
     for story in stories_page:
-        lang = selected_language or (
-            story.texts.first().language if story.texts.exists() else None
-        )
+        lang = selected_language
+        text_obj = story.texts.filter(language=lang).first()
+        if not text_obj:
+            text_obj = story.texts.first()
+            lang = text_obj.language if text_obj else None
         story.display_language = lang
-        if lang:
-            story.display_audio = story.audios.filter(language=lang).first()
-            story.display_text = story.texts.filter(language=lang).first()
-        else:
-            story.display_audio = None
-            story.display_text = story.texts.first()
+        story.display_text = text_obj
+        story.display_audio = story.audios.filter(language=lang).first() if lang else None
 
     playlist = None
     if request.user.is_authenticated:
@@ -103,16 +99,14 @@ def story_list(request):
             ordering = {sid: idx for idx, sid in enumerate(playlist.order)}
             playlist_stories.sort(key=lambda s: ordering.get(s.id, len(ordering)))
         for item in playlist_stories:
-            lang = selected_language or (
-                item.texts.first().language if item.texts.exists() else None
-            )
+            lang = selected_language
+            text_obj = item.texts.filter(language=lang).first()
+            if not text_obj:
+                text_obj = item.texts.first()
+                lang = text_obj.language if text_obj else None
             item.display_language = lang
-            if lang:
-                item.display_audio = item.audios.filter(language=lang).first()
-                item.display_text = item.texts.filter(language=lang).first()
-            else:
-                item.display_audio = None
-                item.display_text = item.texts.first()
+            item.display_text = text_obj
+            item.display_audio = item.audios.filter(language=lang).first() if lang else None
     else:
         playlist_stories = []
 
@@ -182,13 +176,8 @@ def create_story(request):
 def story_detail(request, story_uuid: str):
     story = get_object_or_404(Story, uuid=story_uuid)
 
-    lang = request.GET.get("lang")
-    text_obj = None
-    if lang:
-        text_obj = story.texts.filter(language=lang).first()
-    else:
-        text_obj = story.texts.first()
-        lang = text_obj.language if text_obj else None
+    lang = request.GET.get("lang") or get_language()
+    text_obj = story.texts.filter(language=lang).first()
 
     audio_obj = story.audios.filter(language=lang).first() if lang else None
 

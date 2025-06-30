@@ -210,13 +210,15 @@ class StoryListAndDetailTests(TestCase):
         self.assertIn("Fam", titles)
         self.assertNotIn("Ani", titles)
 
-    def test_filter_by_language(self):
+    def test_stories_use_request_language(self):
+        from django.utils.translation import override
+
         self._create_story(title="EN", published=True, languages=["en"])
         self._create_story(title="ES", published=True, languages=["es"])
 
-        resp = self.client.get(reverse("story_list") + "?language=es")
-        self.assertContains(resp, "ES")
-        self.assertNotContains(resp, "EN")
+        resp = self.client.get(reverse("story_list"), HTTP_ACCEPT_LANGUAGE="es")
+
+        self.assertEqual(resp.context["selected_language"], "es")
 
     def test_titles_use_selected_language(self):
         story = Story.objects.create(
