@@ -127,18 +127,21 @@
         </audio>
       </div>
     {% else %}
-      <div id="audio-status" class="my-3">
+      <div id="audio-status" class="my-3{% if not text %} d-none{% endif %}">
         <div class="progress">
           <div id="audio-progress" class="progress-bar progress-bar-striped progress-bar-animated" data-duration="60000" style="width: 0%">{% trans 'Creating audio...' %}</div>
         </div>
       </div>
       <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        function startAudioCreation() {
+          const statusEl = document.getElementById('audio-status');
+          if (!statusEl) return;
+          statusEl.classList.remove('d-none');
           const bar = document.getElementById('audio-progress');
           if (bar) {
             const duration = parseInt(bar.dataset.duration, 10) || 60000;
             const start = Date.now();
-            const timer = setInterval(() => {
+            setInterval(() => {
               const elapsed = Date.now() - start;
               const progress = 100 * (1 - Math.exp(-3 * elapsed / duration));
               bar.style.width = Math.min(99, progress) + '%';
@@ -151,7 +154,6 @@
           }).then(async resp => {
             if (resp.ok) {
               const data = await resp.json();
-              const statusEl = document.getElementById('audio-status');
               if (statusEl) {
                 const container = document.createElement('div');
                 container.id = 'audio-container';
@@ -167,6 +169,9 @@
               }
             }
           });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+          {% if text %}startAudioCreation();{% endif %}
         });
       </script>
       {% endif %}
@@ -204,10 +209,11 @@
                 para.innerHTML = data.text.replace(/\n/g, '<br>');
                 statusEl.replaceWith(para);
               }
-              const titleEl = document.querySelector('h2');
+              const titleEl = document.querySelector('h1');
               if (titleEl) {
                 titleEl.textContent = data.title;
               }
+              startAudioCreation();
             }
           });
         });
