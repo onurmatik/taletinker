@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class StoryParams(BaseModel):
-    realism: int = Field(50, ge=0, le=100)
-    didactic: int = Field(50, ge=0, le=100)
+    realism: int = Field(50, ge=1, le=5)
+    didactic: int = Field(50, ge=1, le=5)
     age: int = Field(5, ge=3, le=10)
     themes: List[str] = Field(default_factory=list)
     story_length: int = Field(1, ge=1, le=5)
@@ -98,13 +98,19 @@ def create_image(request, payload: ImagePayload):
         return api.create_response(request, {"detail": "unauthorized"}, status=401)
 
     story = get_object_or_404(Story, pk=payload.story_id)
-    prompt = "cover image for a children's story"
-    if story.texts.exists():
-        prompt += f" called {story.texts.first().title}"
+
+    if not story.texts.exists():
+        return api.create_response(request, {"detail": "Story text does not exist"}, status=404)
+
+    prompt = (
+        f"Cover image for a children's story "
+        f'called "{story.texts.first().title}". \n'
+        f'Do not write anything on the image.'
+    )
 
     client = openai.OpenAI()
     try:
-        # 1) generate the cover once
+        # Generate the cover once
         result = client.images.generate(
             # model="dall-e-3",
             # style="vivid",
@@ -117,11 +123,11 @@ def create_image(request, payload: ImagePayload):
         b64 = result.data[0].b64_json
         image_data = base64.b64decode(b64)
 
-        # 2) save the full-size cover
+        # Save the full-size cover
         story_image = StoryImage(story=story)
         story_image.image.save(f"cover_{story.pk}.png", ContentFile(image_data))
 
-        # 3) build and save the thumbnail locally
+        # Build and save the thumbnail
         with Image.open(BytesIO(image_data)) as im:
             im.thumbnail(THUMB_MAX_SIZE, Image.LANCZOS)
             thumb_io = BytesIO()
