@@ -19,6 +19,9 @@ from taletinker.stories.models import Story, StoryImage, StoryAudio, StoryText
 api = NinjaAPI()
 logger = logging.getLogger(__name__)
 
+# Slightly higher temperature for more varied story outputs
+TEMPERATURE = 1.2
+
 
 class StoryParams(BaseModel):
     realism: int = Field(50, ge=1, le=5)
@@ -54,6 +57,7 @@ def create_story(request, params: StoryParams):
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
+            temperature=TEMPERATURE,
         )
         result = json.loads(response.choices[0].message.content)
         return {"title": result.get("title"), "text": result.get("text")}
