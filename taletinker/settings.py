@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,11 +37,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.syndication",
     "widget_tweaks",
-    "django_recaptcha",
-    "django_ses",
+
     "storages",
+    "django_ses",
+
     # Project apps
-    "taletinker.accounts",
     "taletinker.stories",
 ]
 
@@ -131,22 +132,28 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# Storage & Static Files
+# Decouple configuration from logic using environment variables
 
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_REGION_NAME = os.getenv('AWS_DEFAULT_REGION')
+
+AWS_S3_REGION_NAME = AWS_REGION_NAME
 
 if AWS_STORAGE_BUCKET_NAME:
+    # Production / Staging (S3)
     STORAGES = {
-        "default": {  # generated media files
-            "BACKEND": "storages.backends.s3.S3Storage",
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
             "OPTIONS": {
                 "location": "media",
-                "file_overwrite": False
+                "file_overwrite": False,
             },
         },
         "staticfiles": {
-            "BACKEND": "storages.backends.s3.S3Storage",
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
             "OPTIONS": {
                 "location": "static",
                 "file_overwrite": True,
@@ -163,15 +170,37 @@ if AWS_STORAGE_BUCKET_NAME:
     AWS_DEFAULT_ACL = None  # needed to avoid ACL errors
 
 else:
-    # Local dev setup
+    # Local Development (Filesystem)
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
     STATIC_URL = "/static/"
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
     MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Static files directory for development
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+# Static files (CSS, JavaScript, Images)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+
+
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+
+SESSION_COOKIE_AGE = 315360000  # 10 years
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 
 # Default primary key field type
@@ -179,41 +208,34 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom user model
-AUTH_USER_MODEL = "accounts.User"
 
-# Auth settings
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "create_story"
-LOGOUT_REDIRECT_URL = "login"
+# Email & Authentication
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@photoforge.io')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 
-# Email login
+ADMINS = [('Admin', 'onurmatik@gmail.com')]
+
+if EMAIL_BACKEND:
+    AWS_SES_REGION_NAME = AWS_REGION_NAME
+    AWS_SES_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+    AWS_SES_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
 DEFAULT_FROM_EMAIL = 'hello@taletinker.org'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
 ]
 SESAME_MAX_AGE = 300
 
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = 'django_ses.SESBackend'
-
+if not DEBUG:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
             'LOCATION': BASE_DIR / 'cache',
         }
     }
-
-
-# reCAPTCHA v2
-RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
-
-
-# Silence recaptcha test key warning in dev/test
-SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
-
-

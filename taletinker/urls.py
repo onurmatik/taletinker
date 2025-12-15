@@ -1,48 +1,29 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.views.i18n import JavaScriptCatalog
-from sesame.views import LoginView as SesameLoginView
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib import admin
+from django.urls import include, path, re_path
 
-from taletinker.stories.views import (
-    create_story,
-    story_detail,
-    story_list,
-    filter_stories,
-    add_to_playlist,
-    add_filtered_to_playlist,
-    remove_from_playlist,
-    reorder_playlist,
-    play_playlist,
-)
-from taletinker.stories.feeds import LatestStoriesByLanguage
-from taletinker.accounts.views import LogoutView, SignupView, EmailLoginView
-from taletinker.api import api as ninja_api
+from .api import api
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('signup/', SignupView.as_view(), name='signup'),
-    path('login/', EmailLoginView.as_view(), name='login'),
-    path('login/token/', SesameLoginView.as_view(), name='login_token'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-    path('create/', create_story, name='create_story'),
-    path('story/<uuid:story_uuid>/', story_detail, name='story_detail'),
-    path('playlist/add/<int:story_id>/', add_to_playlist, name='add_to_playlist'),
-    path('playlist/add_all/', add_filtered_to_playlist, name='add_filtered_to_playlist'),
-    path('playlist/remove/<int:story_id>/', remove_from_playlist, name='remove_from_playlist'),
-    path('playlist/reorder/', reorder_playlist, name='reorder_playlist'),
-    path('playlist/play/', play_playlist, name='play_playlist'),
-    path('rss/<str:language>/', LatestStoriesByLanguage(), name='story_feed'),
-    path('i18n/', include('django.conf.urls.i18n')),
-    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
-    path('api/', ninja_api.urls),
-    path('search/', filter_stories, name='filter_stories'),
-    path('', story_list, name='story_list'),
+#    path("", FrontendAppView.as_view(), name="frontend_app"),
+    path("admin**/", admin.site.urls),
+
+    path("api/", api.urls),
+
+    path("login/auth/", profile_views.login_view, name="email_auth"),
+    path("logout/", profile_views.CustomLogoutView.as_view(), name="logout"),
+
+    path("payment/session", profile_views.stripe_checkout_session, name="payment_session"),
+    path("payment/result", profile_views.stripe_payment_result, name="payment_result"),
+    path("payment/config", profile_views.get_stripe_config, name="get_stripe_config"),
 ]
 
 if settings.DEBUG:
-    urlpatterns += staticfiles_urlpatterns()
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+admin.site.index_title = 'Photo Forge'
+admin.site.site_header = 'Photo Forge administration'
+admin.site.site_title = 'Photo Forge'

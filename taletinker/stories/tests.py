@@ -113,6 +113,7 @@ class NinjaCreateApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["title"], "Hi")
         self.assertEqual(response.json()["text"], "Hello")
+        self.assertIn("prompt", response.json())
 
 
 class StoryListAndDetailTests(TestCase):
@@ -303,6 +304,11 @@ class CreateImageApiTests(TestCase):
         self.assertEqual(self.story.images.count(), 1)
         self.story.refresh_from_db()
         self.assertTrue(self.story.is_published)
+        self.assertEqual(self.story.images.first().prompt, (
+            "Cover image for a children's story "
+            f'called "{self.story.texts.first().title}". \n'
+            "Do not write anything on the image."
+        ))
 
 
 class CreateAudioApiTests(TestCase):
@@ -345,8 +351,16 @@ class CreateAudioApiTests(TestCase):
         data = resp.json()
         self.assertIn("audio_id", data)
         self.assertIn("file", data)
+        self.assertIn("prompt", data)
         self.assertIn(f"speech{self.story.id}_en", data["file"])
-        self.assertIn(f"speech{self.story.id}_en", self.story.audios.first().mp3.name)
+        self.assertIn(
+            f"speech{self.story.id}_en",
+            self.story.audios.first().mp3.name,
+        )
+        self.assertEqual(
+            self.story.audios.first().prompt,
+            "S\n...\nhello",
+        )
 
     @patch("taletinker.api.openai.OpenAI")
     def test_generate_audio_specific_language(self, mock_openai):
@@ -382,8 +396,13 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(self.story.audios.first().language, "es")
         data = resp.json()
         self.assertIn("file", data)
+        self.assertIn("prompt", data)
         self.assertIn(f"speech{self.story.id}_es", data["file"])
         self.assertIn(f"speech{self.story.id}_es", self.story.audios.first().mp3.name)
+        self.assertEqual(
+            self.story.audios.first().prompt,
+            "S\n...\nhola",
+        )
         create_mock.assert_called_with(
             model="tts-1",
             voice="shimmer",
@@ -440,11 +459,24 @@ class CreateAudioApiTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertIn("file", data)
+        self.assertIn("prompt", data)
         self.assertIn(f"speech{self.story.id}_es", data["file"])
         self.assertIn(f"speech{self.story.id}_es", self.story.audios.first().mp3.name)
         # translation should have been saved
         self.assertEqual(self.story.texts.filter(language="es").count(), 1)
         self.assertEqual(self.story.audios.filter(language="es").count(), 1)
+        self.assertEqual(
+            self.story.texts.get(language="es").prompt,
+            (
+                "Translate the following children's story to es. "
+                "Return the result strictly as JSON with keys 'title' and 'text'.\n"
+                f"Title: S\nStory: hello"
+            ),
+        )
+        self.assertEqual(
+            self.story.audios.get(language="es").prompt,
+            "Hola\n...\nhola",
+        )
 
     def test_audio_already_exists(self):
         self.story.audios.create(mp3=ContentFile(b"mp3", name="a.mp3"), language="en")

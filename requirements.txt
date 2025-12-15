@@ -1,5 +1,5 @@
 boto3
-django
+django==5.2
 django-storages
 django-recaptcha
 django-debug-toolbar
@@ -8,7 +8,6 @@ django-sesame
 django-widget-tweaks
 django-parler
 django-ninja
-gunicorn
 uvicorn[standard]
 python-slugify
 openai
@@ -22,3 +21,8 @@ celery
 django-celery-results
 pillow
 stripe
+
+# for deployment
+gunicorn
+fabric
+PyJWT

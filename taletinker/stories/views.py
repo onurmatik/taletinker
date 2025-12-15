@@ -159,6 +159,7 @@ def create_story(request):
                 language=get_language(),
                 title=title or (text.splitlines()[0][:255] if text and text.strip() else _("Story")),
                 text=text or "",
+                prompt=request.POST.get("text_prompt", ""),
             )
             return redirect("story_detail", story_uuid=story.uuid)
     else:
