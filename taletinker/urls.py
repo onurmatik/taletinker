@@ -3,8 +3,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 
+from .profiles import views as profiles_views
 from .api import api
-
 
 urlpatterns = [
 #    path("", FrontendAppView.as_view(), name="frontend_app"),
@@ -12,18 +12,14 @@ urlpatterns = [
 
     path("api/", api.urls),
 
-    path("login/auth/", profile_views.login_view, name="email_auth"),
-    path("logout/", profile_views.CustomLogoutView.as_view(), name="logout"),
-
-    path("payment/session", profile_views.stripe_checkout_session, name="payment_session"),
-    path("payment/result", profile_views.stripe_payment_result, name="payment_result"),
-    path("payment/config", profile_views.get_stripe_config, name="get_stripe_config"),
+    path("auth/login/", profiles_views.login_view, name="email_auth"),
+    path("auth/logout/", profiles_views.CustomLogoutView.as_view(), name="logout"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-admin.site.index_title = 'Photo Forge'
-admin.site.site_header = 'Photo Forge administration'
-admin.site.site_title = 'Photo Forge'
+admin.site.index_title = 'Tale Tinker'
+admin.site.site_header = 'Tale Tinker administration'
+admin.site.site_title = 'Tale Tinker'

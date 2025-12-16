@@ -9,12 +9,18 @@ from pydantic import BaseModel, Field
 import openai
 import logging
 
-from taletinker.stories.models import Story, Sentence
+from taletinker.stories.models import Story, Line
 
+
+
+from .api_auth import router as auth_router
+from .api_stories import router as stories_router
 
 api = NinjaAPI()
 logger = logging.getLogger(__name__)
 
+api.add_router("/auth", auth_router)
+api.add_router("/stories", stories_router)
 
 """
 Endpoints:
