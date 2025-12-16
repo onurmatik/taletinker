@@ -1,0 +1,491 @@
+/**
+ * Main application component for TaleTinker.
+ * Manages the story state, node tree, and interaction logic.
+ */
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid'; // We'll need a simple ID generator, but standard lib doesn't have one. I'll use Math.random for now to avoid external dep issues if uuid isn't avail.
+import { StoryNode } from './components/StoryNode';
+import { ChoicePanel } from './components/ChoicePanel';
+import { StoryEnding } from './components/StoryEnding';
+import { HomeView } from './components/HomeView';
+import { StoryDetailView } from './components/StoryDetailView';
+import { Navbar } from './components/Navbar'; // Import Navbar
+import { StoryNode as StoryNodeType } from './types';
+import { INITIAL_SENTENCES, KIDS_INITIAL_SENTENCES, getMockSuggestions, canEndStory, getRandomEnding, MOCK_SAVED_STORIES } from './data/mockStory';
+import { Book, X, ArrowLeft } from 'lucide-react';
+import { MagicLinkAuth } from './components/MagicLinkAuth';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Simple ID generator since we might not have uuid
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
+type ViewMode = 'home' | 'create' | 'read';
+
+export function TaleTinkerApp() {
+  // Navigation State
+  const [viewMode, setViewMode] = useState<ViewMode>('home');
+  const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
+  const [runtimeStories, setRuntimeStories] = useState<any[]>([]);
+
+  // Story State
+  const [nodes, setNodes] = useState<Record<string, StoryNodeType>>({});
+  const [headId, setHeadId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isEnded, setIsEnded] = useState(false);
+  const [endingText, setEndingText] = useState('');
+  
+  // New State for Title, Auth and Kids Mode
+  const [storyTitle, setStoryTitle] = useState("The Unnamed Story");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [userEmail, setUserEmail] = useState<string | null>(null); 
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isKidsMode, setIsKidsMode] = useState(false);
+
+  // Refs for scrolling
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when head changes
+  useEffect(() => {
+    // Only scroll if in create mode
+    if (viewMode === 'create') {
+      // Small delay to allow render
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [headId, isEnded, viewMode]);
+
+  const [previousStoryId, setPreviousStoryId] = useState<string | null>(null);
+
+  const startNewStory = () => {
+    setNodes({});
+    setHeadId(null);
+    // Use INITIAL_SENTENCES as suggestions for the start
+    // Shuffle and pick 3 to give variety
+    // Select source based on Kids Mode
+    const source = isKidsMode ? KIDS_INITIAL_SENTENCES : INITIAL_SENTENCES;
+    const shuffled = [...source].sort(() => 0.5 - Math.random());
+    setSuggestions(shuffled.slice(0, 2));
+    setIsEnded(false);
+    setEndingText('');
+    setStoryTitle("The Unnamed Story"); // Reset title
+    setPreviousStoryId(selectedStoryId); // Save previous story for back navigation if needed
+    setViewMode('create');
+  };
+
+  const handleSelectStory = (id: string) => {
+    setSelectedStoryId(id);
+    setViewMode('read');
+  };
+
+  const getStoryForReading = () => {
+    if (!selectedStoryId) return null;
+    return runtimeStories.find(s => s.id === selectedStoryId) || MOCK_SAVED_STORIES.find(s => s.id === selectedStoryId);
+  };
+
+  const handleForkFromLine = (textLineIndex: number, storyLines: string[], alternativeText?: string) => {
+    // If alternativeText is provided, we are SWITCHING to an alternative path in READ mode
+    if (alternativeText) {
+       // 1. Construct the new story path
+       const prefix = storyLines.slice(0, textLineIndex);
+       const newLines = [...prefix, alternativeText];
+
+       // 2. Generate a random continuation to make it a "complete" story for viewing
+       // We'll add 1-2 random suggestions and an ending
+       const extraLinesCount = Math.floor(Math.random() * 2) + 1;
+       const suggestions = getMockSuggestions(extraLinesCount * 2, isKidsMode); // Get more than needed to pick from
+       
+       for (let i = 0; i < extraLinesCount; i++) {
+         if (suggestions[i]) newLines.push(suggestions[i]);
+       }
+       
+       // Add ending
+       newLines.push(getRandomEnding(isKidsMode));
+
+       // 3. Create a new runtime story object
+       const newStoryId = generateId();
+       const originalStory = getStoryForReading();
+       const newTitle = originalStory ? `${originalStory.title} (Alt)` : "Alternative Story";
+
+       const newStory = {
+         id: newStoryId,
+         title: newTitle,
+         date: new Date().toLocaleDateString(),
+         isKidSafe: isKidsMode,
+         lines: newLines,
+         alternatives: {} // Fresh path, no alternatives for now (or could add random ones)
+       };
+
+       // 4. Update state to view this new story
+       setRuntimeStories(prev => [...prev, newStory]);
+       setPreviousStoryId(selectedStoryId); // Save the current story ID before switching
+       setSelectedStoryId(newStoryId);
+       // viewMode remains 'read', so the UI simply updates to the new story
+       return;
+    }
+
+    // --- Standard Fork (Edit Mode) Logic Below ---
+
+    // Reconstruct the story state up to this index
+    const newNodes: Record<string, StoryNodeType> = {};
+    let previousId: string | null = null;
+    let newHeadId: string | null = null;
+
+    // Create nodes for all lines up to the forked point
+    // If alternativeText is provided, we replace the line at textLineIndex with it
+    const effectiveLines = [...storyLines];
+    if (alternativeText) {
+      effectiveLines[textLineIndex] = alternativeText;
+    }
+
+    // We only go UP TO the forked index. Everything after is discarded (new path starts)
+    for (let i = 0; i <= textLineIndex; i++) {
+      const id = generateId();
+      const text = effectiveLines[i];
+      const node: StoryNodeType = {
+        id,
+        text,
+        parentId: previousId,
+        childrenIds: [],
+        createdAt: Date.now() + i * 1000, // Stagger times
+        isCustom: false // Assume from library is "ai" or "standard"
+      };
+
+      newNodes[id] = node;
+      
+      // Link parent to this child
+      if (previousId && newNodes[previousId]) {
+        newNodes[previousId].childrenIds.push(id);
+      }
+
+      previousId = id;
+      newHeadId = id;
+    }
+
+    // Set state
+    setNodes(newNodes);
+    setHeadId(newHeadId);
+    
+    // Generate suggestions based on this new head
+    // Determine path length
+    const pathLength = textLineIndex + 1;
+    if (canEndStory(pathLength)) {
+      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+    } else {
+      setSuggestions(getMockSuggestions(2, isKidsMode));
+    }
+    
+    setIsEnded(false);
+    setEndingText('');
+    
+    // Set title based on the story we forked from
+    const story = getStoryForReading();
+    if (story) {
+      setStoryTitle(`${story.title} (Remix)`);
+    } else {
+      setStoryTitle("Forked Story");
+    }
+
+    // Save previous story ID before switching modes
+    setPreviousStoryId(selectedStoryId);
+    // Switch view
+    setViewMode('create');
+  };
+
+  // Derive current linear path by tracing back parents
+  const currentPath = useMemo(() => {
+    const path: StoryNodeType[] = [];
+    let currentId = headId;
+    while (currentId) {
+      const node = nodes[currentId];
+      if (node) {
+        path.unshift(node);
+        currentId = node.parentId;
+      } else {
+        break;
+      }
+    }
+    return path;
+  }, [nodes, headId]);
+
+  const handleSelectNext = (text: string) => {
+    // Check if user chose to end
+    if (text.toLowerCase() === "the end") {
+      setEndingText(getRandomEnding(isKidsMode));
+      setIsEnded(true);
+      // Auto-generate a title based on content or random
+      const adjectives = isKidsMode 
+        ? ["Magical", "Happy", "Fun", "Little", "Brave", "Super"]
+        : ["Hidden", "Lost", "Silent", "Eternal", "Broken", "Golden"];
+      const nouns = isKidsMode
+        ? ["Adventure", "Friend", "Day", "Journey", "Puppy", "Star"]
+        : ["Journey", "Secret", "Wish", "Dream", "Promise", "Memory"];
+      
+      const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+      setStoryTitle(`The ${randomAdjective} ${randomNoun}`);
+      return;
+    }
+
+    const newNodeId = generateId();
+    const newNode: StoryNodeType = {
+      id: newNodeId,
+      text: text,
+      parentId: headId,
+      childrenIds: [],
+      createdAt: Date.now(),
+      isCustom: !suggestions.includes(text)
+    };
+
+    setNodes(prev => {
+      if (headId && prev[headId]) {
+        const parent = prev[headId];
+        return {
+          ...prev,
+          [headId]: { ...parent, childrenIds: [...parent.childrenIds, newNodeId] },
+          [newNodeId]: newNode
+        };
+      }
+      // If no headId (first node), just add the new node
+      return {
+        ...prev,
+        [newNodeId]: newNode
+      };
+    });
+
+    setHeadId(newNodeId);
+
+    // Prepare next suggestions
+    // Current path length + 1 (for the new node)
+    const nextPathLength = currentPath.length + 1;
+    if (canEndStory(nextPathLength)) {
+      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+    } else {
+      setSuggestions(getMockSuggestions(2, isKidsMode));
+    }
+  };
+
+  const handleBranch = (nodeId: string) => {
+    // When branching, we just set the head to that node
+    // The previous children are kept in the tree (preserved history), but we start a new path
+    setHeadId(nodeId);
+    setIsEnded(false);
+    
+    // We need to know the path length at this node to decide if we can end
+    let length = 0;
+    let curr = nodes[nodeId];
+    while (curr) {
+      length++;
+      if (curr.parentId) curr = nodes[curr.parentId];
+      else break;
+    }
+
+    if (canEndStory(length)) {
+      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+    } else {
+      setSuggestions(getMockSuggestions(2, isKidsMode));
+    }
+  };
+
+  const handleRefreshSuggestions = () => {
+    if (canEndStory(currentPath.length)) {
+      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+    } else {
+      setSuggestions(getMockSuggestions(2, isKidsMode));
+    }
+  };
+
+  const handleAuthSubmit = async (email: string) => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLoggedIn(true);
+    setUserEmail(email); // Set email
+    setTimeout(() => {
+      setShowAuthModal(false);
+    }, 2000); 
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserEmail(null);
+  };
+
+  const toggleKidsMode = () => {
+    setIsKidsMode(prev => !prev);
+  };
+
+  // Handle Back Navigation
+  const handleBack = () => {
+    if (viewMode === 'read' && previousStoryId) {
+       // If in read mode and we have history, go back to previous story
+       setSelectedStoryId(previousStoryId);
+       setPreviousStoryId(null); // Clear history (simple 1-level undo for now)
+    } else if (viewMode === 'create' && previousStoryId) {
+        // If in create mode (forked), go back to reading the original
+        setSelectedStoryId(previousStoryId);
+        setPreviousStoryId(null);
+        setViewMode('read');
+    } else {
+       // Default back to home
+       setViewMode('home');
+       setPreviousStoryId(null);
+    }
+  };
+
+  // Helper for rendering the navbar with context
+  const renderNavbar = (customLeftAction?: React.ReactNode) => (
+    <Navbar
+      isLoggedIn={isLoggedIn}
+      userEmail={userEmail}
+      onSignIn={() => setShowAuthModal(true)}
+      onLogout={handleLogout}
+      onHome={() => setViewMode('home')}
+      leftAction={customLeftAction}
+      isKidsMode={isKidsMode}
+      onToggleKidsMode={toggleKidsMode}
+    />
+  );
+
+  return (
+    <div className={`min-h-screen font-sans selection:bg-primary/20 ${isKidsMode ? 'bg-blue-50 text-slate-800' : 'bg-background text-foreground'}`}>
+      
+      {/* View Routing */}
+      {viewMode === 'home' && (
+        <>
+          {renderNavbar()}
+          <HomeView 
+            stories={MOCK_SAVED_STORIES
+              .filter(s => isKidsMode ? s.isKidSafe : true) // Filter if in kids mode
+              .map(s => ({
+                id: s.id,
+                title: s.title,
+                preview: s.lines[0],
+                date: s.date,
+                length: s.lines.length
+              }))}
+            onStartNew={startNewStory}
+            onSelectStory={handleSelectStory}
+          />
+        </>
+      )}
+
+      {viewMode === 'read' && (
+        <>
+          {renderNavbar(
+            <button 
+              onClick={handleBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-medium">Back</span>
+            </button>
+          )}
+          {(() => {
+            const story = getStoryForReading();
+            if (!story) return <div>Story not found</div>;
+
+            // Convert string[] to StoryNode[] for the detail view
+            const detailNodes: StoryNodeType[] = story.lines.map((text, i) => {
+              // Check if we have alternatives for this index in the mock data
+              // We need to cast story because TS doesn't know about alternatives property we just added to mockStory data if we didn't update the type there explicitly in imports or interface
+              // But since it's JS/TS objects it should be fine at runtime.
+              // We added 'alternatives' to the mock data.
+              const alternatives = (story as any).alternatives?.[i];
+
+              return {
+                id: `${story.id}-node-${i}`,
+                text,
+                parentId: i > 0 ? `${story.id}-node-${i-1}` : null,
+                childrenIds: [],
+                createdAt: Date.now(),
+                alternatives: alternatives
+              };
+            });
+
+            return (
+              <StoryDetailView
+                title={story.title}
+                path={detailNodes}
+                onFork={(nodeId, index, altText) => handleForkFromLine(index, story.lines, altText)}
+                onBack={handleBack}
+              />
+            );
+          })()}
+        </>
+      )}
+
+      {viewMode === 'create' && (
+        <>
+          {renderNavbar()}
+          <main className="container max-w-3xl mx-auto px-4 pt-24 pb-32 min-h-screen flex flex-col">
+            
+            {/* Story Flow */}
+            <div className="flex-1">
+              {currentPath.map((node, index) => (
+                <StoryNode 
+                  key={node.id} 
+                  node={node} 
+                  index={index}
+                  isLast={index === currentPath.length - 1 && !isEnded}
+                  onBranch={() => handleBranch(node.id)}
+                />
+              ))}
+              
+              {/* Ending */}
+              {isEnded && (
+                <StoryEnding 
+                  text={endingText} 
+                  storyTitle={storyTitle}
+                  setStoryTitle={setStoryTitle}
+                  isLoggedIn={isLoggedIn}
+                  onRestart={startNewStory}
+                  onSignUp={() => setShowAuthModal(true)} 
+                />
+              )}
+
+              <div ref={bottomRef} className="h-4" />
+            </div>
+
+            {/* Input Area */}
+            {!isEnded && (
+              <div className="sticky bottom-6 z-40">
+                <ChoicePanel
+                  suggestions={suggestions}
+                  onSelect={handleSelectNext}
+                  onRefresh={handleRefreshSuggestions}
+                  timeoutSeconds={15}
+                />
+              </div>
+            )}
+          </main>
+        </>
+      )}
+
+      {/* Global Auth Modal */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          >
+            <div className="relative w-full max-w-md">
+              <button 
+                onClick={() => setShowAuthModal(false)}
+                className="absolute -top-12 right-0 p-2 text-foreground/50 hover:text-foreground transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <MagicLinkAuth 
+                title="Sign in to TaleTinker"
+                description={isLoggedIn ? "You are already signed in." : "Enter your email to continue."}
+                onSubmit={handleAuthSubmit}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
