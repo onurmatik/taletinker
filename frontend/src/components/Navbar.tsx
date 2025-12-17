@@ -14,8 +14,6 @@ interface NavbarProps {
   onHome?: () => void;
   className?: string;
   leftAction?: React.ReactNode; // For things like "Back" buttons
-  isKidsMode?: boolean;
-  onToggleKidsMode?: () => void;
 }
 
 export function Navbar({ 
@@ -26,14 +24,11 @@ export function Navbar({
   onLogout,
   onHome,
   className,
-  leftAction,
-  isKidsMode = false,
-  onToggleKidsMode
+  leftAction
 }: NavbarProps) {
   return (
     <nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 h-16 px-4 backdrop-blur-md border-b border-border flex items-center justify-between transition-all",
-      isKidsMode ? "bg-blue-50/90 border-blue-200" : "bg-background/80",
+      "fixed top-0 left-0 right-0 z-50 h-16 px-4 backdrop-blur-md border-b border-blue-100 flex items-center justify-between transition-all bg-background/80",
       className
     )}>
       <div className="flex items-center gap-4">
@@ -53,39 +48,14 @@ export function Navbar({
                 className="w-8 h-8 object-contain transition-transform group-hover:scale-105" 
               />
             )}
-            <span className={cn(
-              "font-serif font-bold text-xl tracking-tight group-hover:text-primary transition-colors",
-              isKidsMode ? "text-blue-600" : "text-foreground"
-            )}>
-              {isKidsMode ? "TaleTinker Kids" : "TaleTinker"}
+            <span className="font-serif font-bold text-xl tracking-tight group-hover:text-primary transition-colors text-foreground">
+              TaleTinker
             </span>
           </button>
         )}
       </div>
 
       <div className="flex items-center gap-4">
-        {onToggleKidsMode && (
-           <button
-             onClick={onToggleKidsMode}
-             className={cn(
-               "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border",
-               isKidsMode 
-                 ? "bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200" 
-                 : "bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80"
-             )}
-           >
-             {isKidsMode ? (
-               <>
-                 <span>🎈 Kids Mode ON</span>
-               </>
-             ) : (
-               <>
-                 <span>Kids Mode OFF</span>
-               </>
-             )}
-           </button>
-        )}
-
         {isLoggedIn ? (
           <div className="flex items-center gap-3">
             <div className="hidden md:flex flex-col items-end">

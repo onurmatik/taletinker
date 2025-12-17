@@ -11,12 +11,23 @@ export interface StoryNode {
   createdAt: number;
   isCustom?: boolean; // If true, it was user input
   alternatives?: string[]; // Other choices available at this step
+  likes?: number; // Number of likes
 }
 
 export interface Choice {
   id: string;
   text: string;
   type: 'ai' | 'custom';
+}
+
+export interface SavedStory {
+  id: string;
+  rootId: string; // The ID of the original story this tree started from
+  title: string;
+  date: string;
+  isKidSafe: boolean;
+  lines: string[];
+  alternatives?: Record<number, string[]>;
 }
 
 export interface StoryState {

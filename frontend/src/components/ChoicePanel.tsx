@@ -147,7 +147,7 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
                 className="group text-left p-4 rounded-lg border border-border bg-background hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm transition-all duration-200 flex items-start gap-3"
               >
                 <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border border-muted-foreground/30 group-hover:border-primary group-hover:text-primary flex items-center justify-center text-[10px] text-muted-foreground transition-colors">
-                  {idx + 1}
+                  {String.fromCharCode(65 + idx)}
                 </div>
                 <span className="text-foreground/90 font-serif leading-relaxed group-hover:text-primary transition-colors">
                   {text}

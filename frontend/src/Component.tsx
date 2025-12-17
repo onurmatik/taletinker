@@ -9,10 +9,11 @@ import { ChoicePanel } from './components/ChoicePanel';
 import { StoryEnding } from './components/StoryEnding';
 import { HomeView } from './components/HomeView';
 import { StoryDetailView } from './components/StoryDetailView';
+import { StoryTreeView } from './components/StoryTreeView'; // Import new component
 import { Navbar } from './components/Navbar'; // Import Navbar
-import { StoryNode as StoryNodeType } from './types';
-import { INITIAL_SENTENCES, KIDS_INITIAL_SENTENCES, getMockSuggestions, canEndStory, getRandomEnding, MOCK_SAVED_STORIES } from './data/mockStory';
-import { Book, X, ArrowLeft } from 'lucide-react';
+import { StoryNode as StoryNodeType, SavedStory } from './types'; // Import SavedStory
+import { INITIAL_SENTENCES, getMockSuggestions, canEndStory, getRandomEnding, MOCK_SAVED_STORIES } from './data/mockStory';
+import { Book, X, ArrowLeft, GitGraph } from 'lucide-react'; // Import GitGraph icon
 import { MagicLinkAuth } from './components/MagicLinkAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,7 +26,8 @@ export function TaleTinkerApp() {
   // Navigation State
   const [viewMode, setViewMode] = useState<ViewMode>('home');
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
-  const [runtimeStories, setRuntimeStories] = useState<any[]>([]);
+  const [runtimeStories, setRuntimeStories] = useState<SavedStory[]>([]);
+  const [showTreeView, setShowTreeView] = useState(false); // State to toggle tree view
 
   // Story State
   const [nodes, setNodes] = useState<Record<string, StoryNodeType>>({});
@@ -34,12 +36,11 @@ export function TaleTinkerApp() {
   const [isEnded, setIsEnded] = useState(false);
   const [endingText, setEndingText] = useState('');
   
-  // New State for Title, Auth and Kids Mode
+  // New State for Title, Auth 
   const [storyTitle, setStoryTitle] = useState("The Unnamed Story");
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [userEmail, setUserEmail] = useState<string | null>(null); 
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isKidsMode, setIsKidsMode] = useState(false);
 
   // Refs for scrolling
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -57,30 +58,56 @@ export function TaleTinkerApp() {
 
   const [previousStoryId, setPreviousStoryId] = useState<string | null>(null);
 
-  const startNewStory = () => {
+  const startNewStory = (initialText?: string) => {
     setNodes({});
     setHeadId(null);
-    // Use INITIAL_SENTENCES as suggestions for the start
-    // Shuffle and pick 3 to give variety
-    // Select source based on Kids Mode
-    const source = isKidsMode ? KIDS_INITIAL_SENTENCES : INITIAL_SENTENCES;
-    const shuffled = [...source].sort(() => 0.5 - Math.random());
-    setSuggestions(shuffled.slice(0, 2));
     setIsEnded(false);
     setEndingText('');
     setStoryTitle("The Unnamed Story"); // Reset title
     setPreviousStoryId(selectedStoryId); // Save previous story for back navigation if needed
+
+    if (initialText) {
+      // Create first node immediately
+      const newId = generateId();
+      const newNode: StoryNodeType = {
+        id: newId,
+        text: initialText,
+        parentId: null,
+        childrenIds: [],
+        createdAt: Date.now(),
+        isCustom: true
+      };
+      setNodes({ [newId]: newNode });
+      setHeadId(newId);
+      // Generate suggestions for the next step immediately
+      setSuggestions(getMockSuggestions(2));
+    } else {
+      // Use INITIAL_SENTENCES as suggestions for the start
+      const shuffled = [...INITIAL_SENTENCES].sort(() => 0.5 - Math.random());
+      setSuggestions(shuffled.slice(0, 2));
+    }
+    
     setViewMode('create');
   };
+
+  // Get starter prompts for HomeView
+  const getStarterPrompts = () => {
+    // Just pick the first 2 of a shuffled copy
+    return [...INITIAL_SENTENCES].sort(() => 0.5 - Math.random()).slice(0, 2);
+  };
+  
+  // Memoize starter prompts so they don't change on every render
+  const starterPrompts = useMemo(() => getStarterPrompts(), []);
 
   const handleSelectStory = (id: string) => {
     setSelectedStoryId(id);
     setViewMode('read');
+    setShowTreeView(false); // Reset tree view when selecting
   };
 
   const getStoryForReading = () => {
     if (!selectedStoryId) return null;
-    return runtimeStories.find(s => s.id === selectedStoryId) || MOCK_SAVED_STORIES.find(s => s.id === selectedStoryId);
+    return runtimeStories.find(s => s.id === selectedStoryId) || MOCK_SAVED_STORIES.find(s => s.id === selectedStoryId) as SavedStory | undefined;
   };
 
   const handleForkFromLine = (textLineIndex: number, storyLines: string[], alternativeText?: string) => {
@@ -93,25 +120,28 @@ export function TaleTinkerApp() {
        // 2. Generate a random continuation to make it a "complete" story for viewing
        // We'll add 1-2 random suggestions and an ending
        const extraLinesCount = Math.floor(Math.random() * 2) + 1;
-       const suggestions = getMockSuggestions(extraLinesCount * 2, isKidsMode); // Get more than needed to pick from
+       const suggestions = getMockSuggestions(extraLinesCount * 2); // Get more than needed to pick from
        
        for (let i = 0; i < extraLinesCount; i++) {
          if (suggestions[i]) newLines.push(suggestions[i]);
        }
        
        // Add ending
-       newLines.push(getRandomEnding(isKidsMode));
+       newLines.push(getRandomEnding());
 
        // 3. Create a new runtime story object
        const newStoryId = generateId();
        const originalStory = getStoryForReading();
        const newTitle = originalStory ? `${originalStory.title} (Alt)` : "Alternative Story";
+       // Ensure we have a rootId. If original has one, use it. If not, the original IS the root (legacy).
+       const rootId = originalStory?.rootId || originalStory?.id || newStoryId; 
 
-       const newStory = {
+       const newStory: SavedStory = {
          id: newStoryId,
+         rootId,
          title: newTitle,
          date: new Date().toLocaleDateString(),
-         isKidSafe: isKidsMode,
+         isKidSafe: true, // Always safe now
          lines: newLines,
          alternatives: {} // Fresh path, no alternatives for now (or could add random ones)
        };
@@ -170,9 +200,9 @@ export function TaleTinkerApp() {
     // Determine path length
     const pathLength = textLineIndex + 1;
     if (canEndStory(pathLength)) {
-      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+      setSuggestions(["The End", ...getMockSuggestions(1)]);
     } else {
-      setSuggestions(getMockSuggestions(2, isKidsMode));
+      setSuggestions(getMockSuggestions(2));
     }
     
     setIsEnded(false);
@@ -211,15 +241,11 @@ export function TaleTinkerApp() {
   const handleSelectNext = (text: string) => {
     // Check if user chose to end
     if (text.toLowerCase() === "the end") {
-      setEndingText(getRandomEnding(isKidsMode));
+      setEndingText(getRandomEnding());
       setIsEnded(true);
       // Auto-generate a title based on content or random
-      const adjectives = isKidsMode 
-        ? ["Magical", "Happy", "Fun", "Little", "Brave", "Super"]
-        : ["Hidden", "Lost", "Silent", "Eternal", "Broken", "Golden"];
-      const nouns = isKidsMode
-        ? ["Adventure", "Friend", "Day", "Journey", "Puppy", "Star"]
-        : ["Journey", "Secret", "Wish", "Dream", "Promise", "Memory"];
+      const adjectives = ["Magical", "Happy", "Fun", "Little", "Brave", "Super", "Hidden", "Mystery", "Golden"];
+      const nouns = ["Adventure", "Friend", "Day", "Journey", "Puppy", "Star", "Secret", "Wish", "Dream"];
       
       const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
       const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
@@ -259,9 +285,9 @@ export function TaleTinkerApp() {
     // Current path length + 1 (for the new node)
     const nextPathLength = currentPath.length + 1;
     if (canEndStory(nextPathLength)) {
-      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+      setSuggestions(["The End", ...getMockSuggestions(1)]);
     } else {
-      setSuggestions(getMockSuggestions(2, isKidsMode));
+      setSuggestions(getMockSuggestions(2));
     }
   };
 
@@ -281,17 +307,17 @@ export function TaleTinkerApp() {
     }
 
     if (canEndStory(length)) {
-      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+      setSuggestions(["The End", ...getMockSuggestions(1)]);
     } else {
-      setSuggestions(getMockSuggestions(2, isKidsMode));
+      setSuggestions(getMockSuggestions(2));
     }
   };
 
   const handleRefreshSuggestions = () => {
     if (canEndStory(currentPath.length)) {
-      setSuggestions(["The End", ...getMockSuggestions(1, isKidsMode)]);
+      setSuggestions(["The End", ...getMockSuggestions(1)]);
     } else {
-      setSuggestions(getMockSuggestions(2, isKidsMode));
+      setSuggestions(getMockSuggestions(2));
     }
   };
 
@@ -308,10 +334,6 @@ export function TaleTinkerApp() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserEmail(null);
-  };
-
-  const toggleKidsMode = () => {
-    setIsKidsMode(prev => !prev);
   };
 
   // Handle Back Navigation
@@ -341,22 +363,18 @@ export function TaleTinkerApp() {
       onLogout={handleLogout}
       onHome={() => setViewMode('home')}
       leftAction={customLeftAction}
-      isKidsMode={isKidsMode}
-      onToggleKidsMode={toggleKidsMode}
     />
   );
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-primary/20 ${isKidsMode ? 'bg-blue-50 text-slate-800' : 'bg-background text-foreground'}`}>
+    <div className="min-h-screen font-sans selection:bg-primary/20 bg-background text-foreground">
       
       {/* View Routing */}
       {viewMode === 'home' && (
         <>
           {renderNavbar()}
           <HomeView 
-            stories={MOCK_SAVED_STORIES
-              .filter(s => isKidsMode ? s.isKidSafe : true) // Filter if in kids mode
-              .map(s => ({
+            stories={MOCK_SAVED_STORIES.map(s => ({
                 id: s.id,
                 title: s.title,
                 preview: s.lines[0],
@@ -365,52 +383,72 @@ export function TaleTinkerApp() {
               }))}
             onStartNew={startNewStory}
             onSelectStory={handleSelectStory}
+            starterPrompts={starterPrompts}
           />
         </>
       )}
 
       {viewMode === 'read' && (
         <>
-          {renderNavbar(
-            <button 
-              onClick={handleBack}
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back</span>
-            </button>
-          )}
-          {(() => {
-            const story = getStoryForReading();
-            if (!story) return <div>Story not found</div>;
+          {/* Main Layout Container - Full Height, Hidden Overflow */}
+          <div className="flex h-screen overflow-hidden bg-background">
+            
+            {/* Left Side Tree Panel - Animate width/presence */}
+            <AnimatePresence mode="wait">
+              {showTreeView && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 280, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="flex-shrink-0 border-r border-border h-full z-20 shadow-xl bg-background overflow-hidden relative"
+                >
+                   <div className="absolute inset-0 w-[280px]">
+                      <StoryTreeView
+                        currentStoryId={selectedStoryId || ''}
+                        stories={[...(MOCK_SAVED_STORIES as SavedStory[]), ...runtimeStories]}
+                        onSelectStory={(id) => setSelectedStoryId(id)}
+                        onClose={() => setShowTreeView(false)}
+                        className="h-full"
+                      />
+                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            // Convert string[] to StoryNode[] for the detail view
-            const detailNodes: StoryNodeType[] = story.lines.map((text, i) => {
-              // Check if we have alternatives for this index in the mock data
-              // We need to cast story because TS doesn't know about alternatives property we just added to mockStory data if we didn't update the type there explicitly in imports or interface
-              // But since it's JS/TS objects it should be fine at runtime.
-              // We added 'alternatives' to the mock data.
-              const alternatives = (story as any).alternatives?.[i];
+            {/* Main Content - Flex Grow */}
+            <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+              {(() => {
+                const story = getStoryForReading();
+                if (!story) return <div className="p-8 text-center text-muted-foreground">Story not found</div>;
 
-              return {
-                id: `${story.id}-node-${i}`,
-                text,
-                parentId: i > 0 ? `${story.id}-node-${i-1}` : null,
-                childrenIds: [],
-                createdAt: Date.now(),
-                alternatives: alternatives
-              };
-            });
+                const detailNodes: StoryNodeType[] = story.lines.map((text, i) => {
+                  const alternatives = (story as any).alternatives?.[i];
+                  return {
+                    id: `${story.id}-node-${i}`,
+                    text,
+                    parentId: i > 0 ? `${story.id}-node-${i-1}` : null,
+                    childrenIds: [],
+                    createdAt: Date.now(),
+                    alternatives: alternatives
+                  };
+                });
 
-            return (
-              <StoryDetailView
-                title={story.title}
-                path={detailNodes}
-                onFork={(nodeId, index, altText) => handleForkFromLine(index, story.lines, altText)}
-                onBack={handleBack}
-              />
-            );
-          })()}
+                return (
+                  <div className="h-full overflow-y-auto">
+                    <StoryDetailView
+                        title={story.title}
+                        path={detailNodes}
+                        onFork={(nodeId, index, altText) => handleForkFromLine(index, story.lines, altText)}
+                        onBack={handleBack}
+                        onToggleTree={() => setShowTreeView(!showTreeView)}
+                        showTree={showTreeView}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </>
       )}
 
