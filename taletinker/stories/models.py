@@ -63,7 +63,3 @@ class Story(models.Model):
         """
         return []
 
-    def is_kids_safe(self):
-        """
-        Returns True if all lines are kids safe
-        """

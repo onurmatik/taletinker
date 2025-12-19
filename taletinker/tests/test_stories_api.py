@@ -33,13 +33,18 @@ class StoryApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["title"], "My Story")
-        self.assertEqual(data["lines"], lines)
+        
+        # Verify lines are objects
+        self.assertEqual(len(data["lines"]), 2)
+        self.assertEqual(data["lines"][0]["text"], lines[0])
+        self.assertEqual(data["lines"][1]["text"], lines[1])
+        
         self.assertEqual(data["length"], 2)
         
         # Verify DB
         story = Story.objects.get(uuid=story_uuid)
-        self.assertEqual(story.end.text, "There was a coder")
-        self.assertEqual(story.end.previous.text, "Once upon a time")
+        self.assertEqual(story.last_line.text, "There was a coder")
+        self.assertEqual(story.last_line.previous.text, "Once upon a time")
 
     def test_fork_story_immutable_lines(self):
         # Create Original: A -> B
@@ -51,8 +56,8 @@ class StoryApiTests(TestCase):
         )
         orig_id = resp1.json()["id"]
         orig_story = Story.objects.get(uuid=orig_id)
-        line_a = orig_story.end.previous
-        line_b = orig_story.end
+        line_a = orig_story.last_line.previous
+        line_b = orig_story.last_line
 
         # Fork (Extend): A -> B -> C
         # Should REUSE A and B, CREATE C
@@ -70,8 +75,8 @@ class StoryApiTests(TestCase):
         ext_story = Story.objects.get(uuid=ext_id)
         
         # Verify Reuse
-        self.assertEqual(ext_story.end.previous.id, line_b.id) # C -> B (Same B)
-        self.assertEqual(ext_story.end.previous.previous.id, line_a.id) # B -> A (Same A)
+        self.assertEqual(ext_story.last_line.previous.id, line_b.id) # C -> B (Same B)
+        self.assertEqual(ext_story.last_line.previous.previous.id, line_a.id) # B -> A (Same A)
 
         # Fork (Branch): A -> X
         # Should REUSE A, CREATE X
@@ -88,8 +93,8 @@ class StoryApiTests(TestCase):
         branch_story = Story.objects.get(uuid=branch_id)
         
         # Verify Branching
-        self.assertEqual(branch_story.end.text, "X")
-        self.assertEqual(branch_story.end.previous.id, line_a.id) # X -> A (Same A)
+        self.assertEqual(branch_story.last_line.text, "X")
+        self.assertEqual(branch_story.last_line.previous.id, line_a.id) # X -> A (Same A)
         
         # Verify Tree Structure
         # A should have two next lines: B and X
@@ -105,3 +110,53 @@ class StoryApiTests(TestCase):
         self.assertEqual(len(data), 2)
         # Ordered by created_at desc
         self.assertEqual(data[0]["title"], "S2")
+        # Ensure likes fields are present
+        self.assertIn("like_count", data[0])
+        self.assertIn("is_liked", data[0])
+
+    def test_like_story(self):
+        # Create story
+        resp = self.client.post(
+            self.stories_url,
+            data=json.dumps({"title": "Likeable", "lines": ["Like me"]}),
+            content_type="application/json"
+        )
+        story_id = resp.json()["id"]
+        
+        # Like
+        url = f"{self.stories_url}{story_id}/like"
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["like_count"], 1)
+        self.assertEqual(resp.json()["is_liked"], True)
+        
+        # Unlike
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["like_count"], 0)
+        self.assertEqual(resp.json()["is_liked"], False)
+
+    def test_like_line(self):
+        # Create story
+        resp = self.client.post(
+            self.stories_url,
+            data=json.dumps({"title": "Line Like", "lines": ["Line 1"]}),
+            content_type="application/json"
+        )
+        story_id = resp.json()["id"]
+        
+        # Get Line ID
+        resp_get = self.client.get(f"{self.stories_url}{story_id}")
+        line_id = resp_get.json()["lines"][0]["id"]
+        
+        # Like Line
+        url = f"{self.stories_url}lines/{line_id}/like"
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["like_count"], 1)
+        self.assertEqual(resp.json()["is_liked"], True)
+        
+        # Check story view reflects line like
+        resp_get = self.client.get(f"{self.stories_url}{story_id}")
+        self.assertEqual(resp_get.json()["lines"][0]["like_count"], 1)
+        self.assertEqual(resp_get.json()["lines"][0]["is_liked"], True)

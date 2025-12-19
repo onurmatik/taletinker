@@ -24,7 +24,7 @@ api.add_router("/stories", stories_router)
 
 """
 Endpoints:
-- create follow up sentences(lang='en', kid_safe=False)
+- create follow up sentences(lang='en')
 - add sentence
 - suggest title
 """

@@ -1,5 +1,4 @@
-from typing import List, Optional
-from django.shortcuts import get_object_or_404
+from typing import List
 from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.db import transaction
@@ -8,96 +7,123 @@ from taletinker.stories.models import Story, Line
 
 router = Router()
 
+class LineSchema(Schema):
+    id: str # UUID
+    text: str
+    is_manual: bool
+    like_count: int = 0
+    is_liked: bool = False
+
 class StorySchema(Schema):
     id: int
     uuid: str
-    title: str
+    title: str | None
     preview: str | None = None
-    lines: List[str]
+    lines: List[LineSchema]
     created_at: str
     length: int
     author_name: str | None = None
+    like_count: int = 0
+    is_liked: bool = False
 
 class StoryCreateSchema(Schema):
     title: str
     lines: List[str]
-    is_kid_safe: bool = False # Not used in model yet but good for API contract
 
 class StoryResponse(Schema):
     id: str # UUID
-    title: str
+    title: str | None
     success: bool
+
+class LikeResponse(Schema):
+    success: bool
+    like_count: int
+    is_liked: bool
 
 @router.get("/", response=List[StorySchema])
 def list_stories(request):
-    stories = Story.objects.all().select_related('end', 'author').order_by('-created_at')
+    # Optimize query with annotations for likes
+    # author is likely on last_line, so we traverse last_line__author
+    stories = Story.objects.all().select_related('last_line__author').order_by('-created_at')
     
-    # Minimal serialization for list view
     results = []
+    
     for s in stories:
-        # Get first line for preview? 
-        # Since it's a backward linked list, getting the FIRST line is hard without traversing.
-        # But we can just use the title or maybe the end line text as preview for now?
-        # Or traverse fully?
-        # For performance, maybe just use end line.
+        is_liked = False
+        if request.user.is_authenticated:
+            is_liked = s.liked_by.filter(id=request.user.id).exists()
         
-        # let's try to get full lines for now, optimize later if slow
-        lines = []
-        curr = s.end
-        count = 0 
-        while curr and count < 5: # Just peek last few lines for preview?
-             # actually backwards traversal gives us the END of the story.
-             # The "preview" usually implies the START.
-             # Linked list makes this inefficient.
-             # We'll just return empty lines for list view or just the end line text?
-             curr = curr.previous
+        like_count = s.liked_by.count()
+
+        # Preview from last_line
+        preview = s.last_line.text if s.last_line else ""
         
-        # Proper way:
-        # We really should have a 'preview' field or 'start' field on Story for efficiency.
-        # For now, let's just return the END line text as preview.
-        preview = s.end.text if s.end else ""
+        # Safe author access
+        author_name = "Anonymous"
+        if s.last_line and s.last_line.author:
+             author_name = s.last_line.author.email
         
         results.append({
             "id": s.id,
             "uuid": str(s.uuid),
             "title": s.title,
             "preview": preview,
-            "lines": [], # Don't send all lines in list view
+            "lines": [], 
             "created_at": s.created_at.isoformat() if s.created_at else "",
-            "length": 0, # TODO: store length on Story model
-            "author_name": s.author.email if s.author else "Anonymous"
+            "length": 0, 
+            "author_name": author_name,
+            "like_count": like_count,
+            "is_liked": is_liked
         })
     return results
 
 @router.get("/{story_id}", response=StorySchema)
 def get_story(request, story_id: str):
-    # Support UUID or ID? Frontend likely uses UUID strings?
-    # Model has integer ID and UUID field.
-    # Frontend mocks used string IDs (UUIDs).
     try:
         story = Story.objects.get(uuid=story_id)
     except Story.DoesNotExist:
-        # Try integer ID fallback?
         try:
-             story = Story.objects.get(id=story_id)
+            story = Story.objects.get(id=story_id)
         except:
              raise HttpError(404, "Story not found")
 
-    lines = []
-    curr = story.end
+    # Build lines list (linked list traversal)
+    lines_data = []
+    curr = story.last_line
     while curr:
-        lines.insert(0, curr.text)
+        # Check likes for each line
+        l_is_liked = False
+        if request.user.is_authenticated:
+            l_is_liked = curr.liked_by.filter(id=request.user.id).exists()
+            
+        lines_data.insert(0, {
+            "id": str(curr.uuid),
+            "text": curr.text,
+            "is_manual": curr.is_manual,
+            "like_count": curr.liked_by.count(),
+            "is_liked": l_is_liked
+        })
         curr = curr.previous
+
+    is_liked = False
+    if request.user.is_authenticated:
+        is_liked = story.liked_by.filter(id=request.user.id).exists()
+
+    author_name = "Anonymous"
+    if story.last_line and story.last_line.author:
+         author_name = story.last_line.author.email
 
     return {
         "id": story.id,
         "uuid": str(story.uuid),
         "title": story.title,
-        "preview": lines[0] if lines else "",
-        "lines": lines,
+        "preview": lines_data[0]['text'] if lines_data else "",
+        "lines": lines_data,
         "created_at": story.created_at.isoformat() if story.created_at else "",
-        "length": len(lines),
-        "author_name": story.author.email if story.author else "Anonymous"
+        "length": len(lines_data),
+        "author_name": author_name,
+        "like_count": story.liked_by.count(),
+        "is_liked": is_liked
     }
 
 @router.post("/", response=StoryResponse)
@@ -121,16 +147,13 @@ def create_story(request, data: StoryCreateSchema):
                     'is_manual': True
                 }
             )
-            # If created, 'author' is set to current user.
-            # If retrieved, 'author' remains the original author.
-            
             prev_line = line
             
         # 3. Create Story pointer
+        # Note: 'author' is not a field on Story, it is inferred from last_line
         story = Story.objects.create(
             title=data.title,
-            end=prev_line,
-            author=author,
+            last_line=prev_line,
         )
         
     return {
@@ -149,8 +172,58 @@ def delete_story(request, story_id: str):
     except Story.DoesNotExist:
         raise HttpError(404, "Story not found")
         
-    if story.author != request.user:
+    # Check author via last_line
+    story_author = story.last_line.author if story.last_line else None
+    
+    if story_author != request.user:
         raise HttpError(403, "You can only delete your own stories")
         
     story.delete()
     return {"success": True}
+
+@router.post("/{story_id}/like", response=LikeResponse)
+def like_story(request, story_id: str):
+    if not request.user.is_authenticated:
+        raise HttpError(401, "Authentication required")
+        
+    try:
+        story = Story.objects.get(uuid=story_id)
+    except Story.DoesNotExist:
+        raise HttpError(404, "Story not found")
+        
+    if story.liked_by.filter(id=request.user.id).exists():
+        story.liked_by.remove(request.user)
+        is_liked = False
+    else:
+        story.liked_by.add(request.user)
+        is_liked = True
+        
+    return {
+        "success": True,
+        "like_count": story.liked_by.count(),
+        "is_liked": is_liked
+    }
+
+@router.post("/lines/{line_id}/like", response=LikeResponse)
+def like_line(request, line_id: str):
+    if not request.user.is_authenticated:
+        raise HttpError(401, "Authentication required")
+        
+    try:
+        # line_id is UUID string
+        line = Line.objects.get(uuid=line_id)
+    except Line.DoesNotExist:
+        raise HttpError(404, "Line not found")
+        
+    if line.liked_by.filter(id=request.user.id).exists():
+        line.liked_by.remove(request.user)
+        is_liked = False
+    else:
+        line.liked_by.add(request.user)
+        is_liked = True
+        
+    return {
+        "success": True,
+        "like_count": line.liked_by.count(),
+        "is_liked": is_liked
+    }
