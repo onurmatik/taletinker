@@ -24,7 +24,9 @@ class StorySchema(Schema):
     length: int
     author_name: str | None = None
     like_count: int = 0
+    like_count: int = 0
     is_liked: bool = False
+    root_node_id: str | None = None
 
 class StoryCreateSchema(Schema):
     title: str
@@ -63,17 +65,38 @@ def list_stories(request):
         if s.last_line and s.last_line.author:
              author_name = s.last_line.author.email
         
+        # Find root node for tree grouping
+        # Build lines and find root
+        curr = s.last_line
+        story_lines = []
+        
+        temp = curr
+        depth = 0
+        while temp and depth < 100:
+             story_lines.insert(0, {
+                 "id": str(temp.uuid),
+                 "text": temp.text,
+                 "is_manual": temp.is_manual,
+                 "like_count": 0, # Optimization: skip line likes in list view
+                 "is_liked": False
+             })
+             temp = temp.previous
+             depth += 1
+        
+        root_id = story_lines[0]['id'] if story_lines else None
+
         results.append({
             "id": s.id,
             "uuid": str(s.uuid),
             "title": s.title,
             "preview": preview,
-            "lines": [], 
+            "lines": story_lines, 
             "created_at": s.created_at.isoformat() if s.created_at else "",
-            "length": 0, 
+            "length": len(story_lines), 
             "author_name": author_name,
             "like_count": like_count,
-            "is_liked": is_liked
+            "is_liked": is_liked,
+            "root_node_id": root_id
         })
     return results
 
@@ -123,7 +146,8 @@ def get_story(request, story_id: str):
         "length": len(lines_data),
         "author_name": author_name,
         "like_count": story.liked_by.count(),
-        "is_liked": is_liked
+        "is_liked": is_liked,
+        "root_node_id": lines_data[0]['id'] if lines_data else None
     }
 
 @router.post("/", response=StoryResponse)
