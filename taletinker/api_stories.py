@@ -2,10 +2,14 @@ from typing import List
 from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.db import transaction
+from pydantic import BaseModel
+import openai
+import os
 
 from taletinker.stories.models import Story, Line
 
 router = Router()
+
 
 class LineSchema(Schema):
     id: str # UUID
@@ -99,6 +103,51 @@ def list_stories(request):
             "root_node_id": root_id
         })
     return results
+
+
+class SuggestSchema(Schema):
+    context: List[str]
+
+class StoryOptions(BaseModel):
+    options: List[str]
+
+@router.post("/suggest", response=List[str])
+def suggest_lines(request, data: SuggestSchema):
+    if not data.context:
+         # Initial prompts if context is empty
+         return [
+             "Once upon a time, in a magical forest...", 
+             "The little robot woke up with a beep..."
+         ]
+
+    prompt = (
+        "Continue the following children's story with 2 distinct, single-sentence options for what happens next.\\n"
+        "Return the options as a structured list.\\n\\nStory:\\n"
+    ) + "\\n".join(data.context)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        raise HttpError(500, "OPENAI_API_KEY not configured")
+    
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    response = client.responses.parse(
+        model="gpt-5-mini",
+        input=[{
+            "role": "system",
+            "content": "You are a helpful assistant for writing children's stories. "
+                       "You provide engaging continuations."
+        }, {
+            "role": "user", "content": prompt
+        }],
+        text_format=StoryOptions,
+    )
+    
+    event = response.output_parsed
+    
+    # Ensure we return at least 2
+    final_lines = event.options[:2] if len(event.options) >= 2 else event.options + ["Something unexpected happened."]
+    return final_lines
+
 
 @router.get("/{story_id}", response=StorySchema)
 def get_story(request, story_id: str):
@@ -251,3 +300,4 @@ def like_line(request, line_id: str):
         "like_count": line.liked_by.count(),
         "is_liked": is_liked
     }
+
