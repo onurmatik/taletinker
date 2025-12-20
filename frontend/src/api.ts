@@ -51,6 +51,16 @@ export const api = {
         return res.json();
     },
 
+    async suggestLines(context: string[]): Promise<string[]> {
+        const res = await fetch(`${API_BASE}/stories/suggest`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context })
+        });
+        if (!res.ok) throw new Error('Failed to fetch suggestions');
+        return res.json();
+    },
+
     async likeStory(id: string): Promise<{ success: boolean; like_count: number; is_liked: boolean }> {
         const res = await fetch(`${API_BASE}/stories/${id}/like`, { method: 'POST' });
         if (!res.ok) throw new Error('Failed to like story');

@@ -12,7 +12,7 @@ import { StoryDetailView } from './components/StoryDetailView';
 import { StoryTreeView } from './components/StoryTreeView'; // Import new component
 import { Navbar } from './components/Navbar'; // Import Navbar
 import { StoryNode as StoryNodeType, SavedStory } from './types'; // Import SavedStory
-import { INITIAL_SENTENCES, getMockSuggestions, canEndStory, getRandomEnding } from './data/mockStory';
+import { INITIAL_SENTENCES, canEndStory, getRandomEnding } from './data/mockStory';
 import { api, StorySummary, StoryData } from './api';
 import { Book, X, ArrowLeft, GitGraph } from 'lucide-react'; // Import GitGraph icon
 import { MagicLinkAuth } from './components/MagicLinkAuth';
@@ -36,6 +36,7 @@ export function TaleTinkerApp() {
   const [nodes, setNodes] = useState<Record<string, StoryNodeType>>({});
   const [headId, setHeadId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const [endingText, setEndingText] = useState('');
 
@@ -65,6 +66,33 @@ export function TaleTinkerApp() {
   }, []);
 
   const [previousStoryId, setPreviousStoryId] = useState<string | null>(null);
+  const suggestionRequestId = useRef(0);
+
+  const fetchSuggestions = async (context: string[], includeEndOption: boolean) => {
+    const requestId = ++suggestionRequestId.current;
+    setIsLoadingSuggestions(true);
+    setSuggestions([]);
+
+    try {
+      const options = await api.suggestLines(context);
+      if (suggestionRequestId.current !== requestId) return;
+
+      const trimmedOptions = options
+        .map((option) => option?.trim())
+        .filter((option): option is string => Boolean(option))
+        .filter((option) => option.toLowerCase() !== "the end");
+      const limitedOptions = includeEndOption ? trimmedOptions.slice(0, 1) : trimmedOptions.slice(0, 2);
+      const nextSuggestions = includeEndOption ? ["The End", ...limitedOptions] : limitedOptions;
+
+      setSuggestions(nextSuggestions);
+      setIsLoadingSuggestions(false);
+    } catch (error) {
+      if (suggestionRequestId.current !== requestId) return;
+      console.error("Failed to fetch suggestions", error);
+      setSuggestions(includeEndOption ? ["The End"] : []);
+      setIsLoadingSuggestions(false);
+    }
+  };
 
   const startNewStory = (initialText?: string) => {
     setNodes({});
@@ -73,6 +101,7 @@ export function TaleTinkerApp() {
     setEndingText('');
     setStoryTitle("The Unnamed Story"); // Reset title
     setPreviousStoryId(selectedStoryId); // Save previous story for back navigation if needed
+    setSuggestions([]);
 
     if (initialText) {
       // Create first node immediately
@@ -87,12 +116,9 @@ export function TaleTinkerApp() {
       };
       setNodes({ [newId]: newNode });
       setHeadId(newId);
-      // Generate suggestions for the next step immediately
-      setSuggestions(getMockSuggestions(2));
+      void fetchSuggestions([initialText], false);
     } else {
-      // Use INITIAL_SENTENCES as suggestions for the start
-      const shuffled = [...INITIAL_SENTENCES].sort(() => 0.5 - Math.random());
-      setSuggestions(shuffled.slice(0, 2));
+      void fetchSuggestions([], false);
     }
 
     setViewMode('create');
@@ -148,7 +174,7 @@ export function TaleTinkerApp() {
 
 
 
-  const handleForkFromLine = (textLineIndex: number, storyLines: string[], alternativeText?: string) => {
+  const handleForkFromLine = async (textLineIndex: number, storyLines: string[], alternativeText?: string) => {
     // If alternativeText is provided, we are SWITCHING to an alternative path in READ mode
     if (alternativeText) {
       // 1. Construct the new story path
@@ -158,10 +184,22 @@ export function TaleTinkerApp() {
       // 2. Generate a random continuation to make it a "complete" story for viewing
       // We'll add 1-2 random suggestions and an ending
       const extraLinesCount = Math.floor(Math.random() * 2) + 1;
-      const suggestions = getMockSuggestions(extraLinesCount * 2); // Get more than needed to pick from
-
       for (let i = 0; i < extraLinesCount; i++) {
-        if (suggestions[i]) newLines.push(suggestions[i]);
+        try {
+          const options = await api.suggestLines(newLines);
+          const filteredOptions = options
+            .map((option) => option?.trim())
+            .filter((option): option is string => Boolean(option))
+            .filter((option) => option.toLowerCase() !== "the end");
+
+          if (filteredOptions.length === 0) break;
+
+          const nextLine = filteredOptions[Math.floor(Math.random() * filteredOptions.length)];
+          if (nextLine) newLines.push(nextLine);
+        } catch (error) {
+          console.error("Failed to fetch suggestions", error);
+          break;
+        }
       }
 
       // Add ending
@@ -238,11 +276,8 @@ export function TaleTinkerApp() {
     // Generate suggestions based on this new head
     // Determine path length
     const pathLength = textLineIndex + 1;
-    if (canEndStory(pathLength)) {
-      setSuggestions(["The End", ...getMockSuggestions(1)]);
-    } else {
-      setSuggestions(getMockSuggestions(2));
-    }
+    const context = effectiveLines.slice(0, pathLength);
+    void fetchSuggestions(context, canEndStory(pathLength));
 
     setIsEnded(false);
     setEndingText('');
@@ -323,11 +358,8 @@ export function TaleTinkerApp() {
     // Prepare next suggestions
     // Current path length + 1 (for the new node)
     const nextPathLength = currentPath.length + 1;
-    if (canEndStory(nextPathLength)) {
-      setSuggestions(["The End", ...getMockSuggestions(1)]);
-    } else {
-      setSuggestions(getMockSuggestions(2));
-    }
+    const nextContext = [...currentPath.map((node) => node.text), text];
+    void fetchSuggestions(nextContext, canEndStory(nextPathLength));
   };
 
   const handleBranch = (nodeId: string) => {
@@ -337,27 +369,20 @@ export function TaleTinkerApp() {
     setIsEnded(false);
 
     // We need to know the path length at this node to decide if we can end
-    let length = 0;
+    const branchContext: string[] = [];
     let curr = nodes[nodeId];
     while (curr) {
-      length++;
+      branchContext.unshift(curr.text);
       if (curr.parentId) curr = nodes[curr.parentId];
       else break;
     }
 
-    if (canEndStory(length)) {
-      setSuggestions(["The End", ...getMockSuggestions(1)]);
-    } else {
-      setSuggestions(getMockSuggestions(2));
-    }
+    void fetchSuggestions(branchContext, canEndStory(branchContext.length));
   };
 
   const handleRefreshSuggestions = () => {
-    if (canEndStory(currentPath.length)) {
-      setSuggestions(["The End", ...getMockSuggestions(1)]);
-    } else {
-      setSuggestions(getMockSuggestions(2));
-    }
+    const context = currentPath.map((node) => node.text);
+    void fetchSuggestions(context, canEndStory(context.length));
   };
 
   const handleAuthSubmit = async (email: string) => {
@@ -494,7 +519,9 @@ export function TaleTinkerApp() {
                     <StoryDetailView
                       title={story.title}
                       path={detailNodes}
-                      onFork={(nodeId, index, altText) => handleForkFromLine(index, lineTexts, altText)}
+                      onFork={(nodeId, index, altText) => {
+                        void handleForkFromLine(index, lineTexts, altText);
+                      }}
                       onBack={handleBack}
                       onToggleTree={() => setShowTreeView(!showTreeView)}
                       showTree={showTreeView}
@@ -550,6 +577,7 @@ export function TaleTinkerApp() {
                   onSelect={handleSelectNext}
                   onRefresh={handleRefreshSuggestions}
                   timeoutSeconds={15}
+                  isLoading={isLoadingSuggestions}
                 />
               </div>
             )}

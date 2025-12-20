@@ -14,13 +14,22 @@ interface ChoicePanelProps {
   onRefresh?: () => void;
   timeoutSeconds: number;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
-export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, disabled = false }: ChoicePanelProps) {
+export function ChoicePanel({
+  suggestions,
+  onSelect,
+  onRefresh,
+  timeoutSeconds,
+  disabled = false,
+  isLoading = false
+}: ChoicePanelProps) {
   const [customInput, setCustomInput] = useState('');
   const [timeLeft, setTimeLeft] = useState(timeoutSeconds);
   const [isPaused, setIsPaused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isTimerPaused = disabled || isPaused || isLoading;
   
   // Reset timer when suggestions change (new turn)
   useEffect(() => {
@@ -30,7 +39,7 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
 
   // Timer logic
   useEffect(() => {
-    if (disabled || isPaused) return;
+    if (isTimerPaused) return;
     
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
@@ -47,7 +56,7 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
     }, 100);
 
     return () => clearInterval(interval);
-  }, [suggestions, onSelect, disabled, isPaused]);
+  }, [suggestions, onSelect, isTimerPaused]);
 
   // Handle custom submission
   const handleCustomSubmit = (e: React.FormEvent) => {
@@ -69,7 +78,7 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
           className={cn(
             "h-full origin-left",
             isUrgent ? "bg-destructive" : "bg-primary",
-            isPaused && "opacity-50"
+            isTimerPaused && "opacity-50"
           )}
           initial={{ width: "100%" }}
           animate={{ width: `${progressPercentage}%` }}
@@ -85,19 +94,24 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
           </h3>
           <div className={cn(
             "flex items-center gap-1.5 text-xs font-mono font-medium transition-colors",
-            isPaused ? "text-primary" : (isUrgent ? "text-destructive" : "text-muted-foreground")
+            isTimerPaused ? "text-primary" : (isUrgent ? "text-destructive" : "text-muted-foreground")
           )}>
             {onRefresh && (
               <button
                 onClick={onRefresh}
                 className="p-1.5 hover:bg-secondary rounded-md text-muted-foreground hover:text-primary transition-colors mr-2"
                 title="Refresh options"
-                disabled={disabled}
+                disabled={disabled || isLoading}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
             )}
-            {isPaused ? (
+            {isLoading ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                LOADING
+              </>
+            ) : isPaused ? (
               <>
                 <PauseCircle className="w-3.5 h-3.5" />
                 PAUSED
@@ -113,7 +127,21 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
 
         <div className="grid gap-3">
           {/* AI Suggestions */}
-          {suggestions.map((text, idx) => {
+          {isLoading ? (
+            Array.from({ length: 2 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-lg border border-border bg-background flex items-start gap-3 animate-pulse"
+              >
+                <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border border-muted-foreground/30" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 rounded bg-muted/50 w-4/5" />
+                  <div className="h-3 rounded bg-muted/40 w-2/3" />
+                </div>
+              </div>
+            ))
+          ) : (
+            suggestions.map((text, idx) => {
              const isEndOption = text === "The End";
              
              if (isEndOption) {
@@ -132,8 +160,8 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
                      The End.
                    </span>
                    <Sparkles className="w-4 h-4 text-primary" />
-                 </motion.button>
-               );
+                </motion.button>
+              );
              }
 
              return (
@@ -154,7 +182,7 @@ export function ChoicePanel({ suggestions, onSelect, onRefresh, timeoutSeconds, 
                 </span>
               </motion.button>
             );
-          })}
+          }))}
 
           {/* Custom Input */}
           <motion.form 
