@@ -64,8 +64,8 @@ def list_stories(request):
         
         like_count = s.liked_by.count()
 
-        # Preview from last_line
-        preview = s.last_line.text if s.last_line else ""
+        # Preview from tagline (library/landing view)
+        preview = s.tagline or ""
         
         # Safe author access
         author_name = "Anonymous"
@@ -243,7 +243,7 @@ def get_story(request, story_id: str):
         "uuid": str(story.uuid),
         "title": story.title,
         "tagline": story.tagline,
-        "preview": lines_data[0]['text'] if lines_data else "",
+        "preview": story.tagline or "",
         "lines": lines_data,
         "created_at": story.created_at.isoformat() if story.created_at else "",
         "length": len(lines_data),

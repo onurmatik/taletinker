@@ -497,7 +497,7 @@ export function TaleTinkerApp() {
             stories={stories.map(s => ({
               id: s.uuid, // Use UUID for selection
               title: s.title || 'Untitled Story',
-              preview: s.preview,
+              preview: s.tagline || s.preview,
               date: new Date(s.created_at).toLocaleDateString(),
               length: s.length
             }))}
