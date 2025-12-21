@@ -113,6 +113,15 @@ def list_stories(request):
 class SuggestSchema(Schema):
     context: List[str]
 
+class LineCheckSchema(Schema):
+    line: str
+    context: List[str] | None = None
+
+class LineCheckResponse(Schema):
+    is_valid: bool
+    line: str | None = None
+    reason: str | None = None
+
 class StoryMetaResponse(Schema):
     title: str | None
     tagline: str | None
@@ -123,6 +132,11 @@ class StoryMetaUpdateSchema(Schema):
 
 class StoryOptions(BaseModel):
     options: List[str]
+
+class LineCheckOptions(BaseModel):
+    is_valid: bool
+    line: str
+    reason: str
 
 class StoryMetaOptions(BaseModel):
     title: str
@@ -164,6 +178,62 @@ def suggest_lines(request, data: SuggestSchema):
     # Ensure we return at least 2
     final_lines = event.options[:2] if len(event.options) >= 2 else event.options + ["Something unexpected happened."]
     return final_lines
+
+
+@router.post("/check-line", response=LineCheckResponse)
+def check_line(request, data: LineCheckSchema):
+    line = (data.line or "").strip()
+    if not line:
+        return {
+            "is_valid": False,
+            "line": None,
+            "reason": "Please enter a sentence."
+        }
+
+    prompt = (
+        "You review a single proposed sentence for a children's story.\n"
+        "If it is meaningful and appropriate, return is_valid=true and the sentence with only minor typo fixes.\n"
+        "If it is nonsense, random characters, or too short to be a sentence, return is_valid=false and a short reason.\n"
+        "Do not add new information beyond minor fixes.\n\n"
+    )
+
+    context = data.context or []
+    if context:
+        prompt += "Story so far:\n" + "\n".join(context) + "\n\n"
+
+    prompt += f"Proposed line:\n{line}"
+
+    if not os.getenv("OPENAI_API_KEY"):
+        raise HttpError(500, "OPENAI_API_KEY not configured")
+
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    response = client.responses.parse(
+        model=settings.AI_DEFAULT_MODEL,
+        input=[{
+            "role": "system",
+            "content": "You validate and lightly correct short story sentences."
+        }, {
+            "role": "user", "content": prompt
+        }],
+        text_format=LineCheckOptions,
+    )
+
+    event = response.output_parsed
+    cleaned_line = (event.line or "").strip()
+
+    if not event.is_valid or not cleaned_line:
+        return {
+            "is_valid": False,
+            "line": None,
+            "reason": (event.reason or "Please enter a clearer sentence.").strip()
+        }
+
+    return {
+        "is_valid": True,
+        "line": cleaned_line,
+        "reason": None
+    }
 
 
 @router.post("/suggest-meta", response=StoryMetaResponse)

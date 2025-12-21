@@ -3,18 +3,19 @@
  * Includes 2 AI suggestions and 1 custom input.
  */
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Send, Clock, Sparkles, PenTool, PauseCircle, RefreshCw } from 'lucide-react';
-import { Choice } from '../types';
 import { cn } from '../utils';
 
 interface ChoicePanelProps {
   suggestions: string[];
-  onSelect: (text: string) => void;
+  onSelect: (text: string) => Promise<boolean> | boolean;
   onRefresh?: () => void;
   timeoutSeconds: number;
   disabled?: boolean;
   isLoading?: boolean;
+  statusMessage?: string | null;
+  statusTone?: 'info' | 'error';
 }
 
 export function ChoicePanel({
@@ -23,7 +24,9 @@ export function ChoicePanel({
   onRefresh,
   timeoutSeconds,
   disabled = false,
-  isLoading = false
+  isLoading = false,
+  statusMessage,
+  statusTone = 'info'
 }: ChoicePanelProps) {
   const [customInput, setCustomInput] = useState('');
   const [timeLeft, setTimeLeft] = useState(timeoutSeconds);
@@ -47,7 +50,7 @@ export function ChoicePanel({
           clearInterval(interval);
           // Auto-select first suggestion if time runs out
           if (suggestions.length > 0) {
-            onSelect(suggestions[0]);
+            void onSelect(suggestions[0]);
           }
           return 0;
         }
@@ -59,11 +62,13 @@ export function ChoicePanel({
   }, [suggestions, onSelect, isTimerPaused]);
 
   // Handle custom submission
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (customInput.trim()) {
-      onSelect(customInput.trim());
-      setCustomInput('');
+      const result = await onSelect(customInput.trim());
+      if (result !== false) {
+        setCustomInput('');
+      }
     }
   };
 
@@ -124,6 +129,16 @@ export function ChoicePanel({
             )}
           </div>
         </div>
+        {statusMessage && (
+          <div
+            className={cn(
+              "text-xs font-medium",
+              statusTone === 'error' ? "text-destructive" : "text-muted-foreground"
+            )}
+          >
+            {statusMessage}
+          </div>
+        )}
 
         <div className="grid gap-3">
           {/* AI Suggestions */}
@@ -151,7 +166,7 @@ export function ChoicePanel({
                    initial={{ opacity: 0, x: -10 }}
                    animate={{ opacity: 1, x: 0 }}
                    transition={{ delay: idx * 0.1 }}
-                   onClick={() => onSelect(text)}
+                   onClick={() => void onSelect(text)}
                    disabled={disabled}
                    className="group text-left p-4 rounded-lg border-2 border-primary/20 bg-primary/5 hover:border-primary hover:bg-primary/10 hover:shadow-md transition-all duration-200 flex items-center justify-center gap-3"
                  >
@@ -170,7 +185,7 @@ export function ChoicePanel({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                onClick={() => onSelect(text)}
+                onClick={() => void onSelect(text)}
                 disabled={disabled}
                 className="group text-left p-4 rounded-lg border border-border bg-background hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm transition-all duration-200 flex items-start gap-3"
               >

@@ -95,6 +95,14 @@ export const api = {
         }, 'Failed to request magic link');
     },
 
+    async checkLine(line: string, context: string[]): Promise<{ is_valid: boolean; line: string | null; reason?: string | null }> {
+        return fetchJson(`${API_BASE}/stories/check-line`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ line, context })
+        }, 'Failed to check line');
+    },
+
     async getMe(): Promise<{ email: string | null; is_authenticated: boolean }> {
         return fetchJson(`${API_BASE}/auth/me`, { method: 'GET' }, 'Failed to fetch user');
     },

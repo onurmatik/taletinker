@@ -14,3 +14,6 @@ revise initial sentences
 - prepare 2nd round suggestions
 - line hash => if no suggestions => AI
 
+story ending checks
+- minimum n lines
+- AI check for garbage "şlkhsdfls" user input

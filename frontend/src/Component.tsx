@@ -37,6 +37,9 @@ export function TaleTinkerApp() {
   const [headId, setHeadId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isCheckingLine, setIsCheckingLine] = useState(false);
+  const [lineCheckMessage, setLineCheckMessage] = useState<string | null>(null);
+  const [lineCheckTone, setLineCheckTone] = useState<'info' | 'error' | null>(null);
   const [isEnded, setIsEnded] = useState(false);
 
   // New State for Title, Auth 
@@ -161,6 +164,9 @@ export function TaleTinkerApp() {
     setIsSavingStory(false);
     setPreviousStoryId(selectedStoryId); // Save previous story for back navigation if needed
     setSuggestions([]);
+    setIsCheckingLine(false);
+    setLineCheckMessage(null);
+    setLineCheckTone(null);
 
     if (initialText) {
       // Create first node immediately
@@ -377,6 +383,9 @@ export function TaleTinkerApp() {
   }, [nodes, headId]);
 
   const handleSelectNext = async (text: string) => {
+    setLineCheckMessage(null);
+    setLineCheckTone(null);
+
     // Check if user chose to end
     if (text.toLowerCase() === "the end") {
       setIsEnded(true);
@@ -417,17 +426,45 @@ export function TaleTinkerApp() {
         console.error("Failed to save story", error);
         setIsLoadingStoryMeta(false);
       }
-      return;
+      return true;
+    }
+
+    const isManual = !suggestions.includes(text);
+    let nextText = text;
+
+    if (isManual) {
+      setIsCheckingLine(true);
+      setLineCheckMessage("Checking your line...");
+      setLineCheckTone('info');
+      try {
+        const res = await api.checkLine(text, currentPath.map((node) => node.text));
+        if (!res.is_valid || !res.line) {
+          setLineCheckMessage(res.reason || "Please enter a clearer sentence.");
+          setLineCheckTone('error');
+          setIsCheckingLine(false);
+          return false;
+        }
+        nextText = res.line;
+      } catch (error) {
+        console.error("Failed to check line", error);
+        setLineCheckMessage("Couldn't verify your line. Please try again.");
+        setLineCheckTone('error');
+        setIsCheckingLine(false);
+        return false;
+      }
+      setIsCheckingLine(false);
+      setLineCheckMessage(null);
+      setLineCheckTone(null);
     }
 
     const newNodeId = generateId();
     const newNode: StoryNodeType = {
       id: newNodeId,
-      text: text,
+      text: nextText,
       parentId: headId,
       childrenIds: [],
       createdAt: Date.now(),
-      isCustom: !suggestions.includes(text)
+      isCustom: isManual
     };
 
     setNodes(prev => {
@@ -451,8 +488,9 @@ export function TaleTinkerApp() {
     // Prepare next suggestions
     // Current path length + 1 (for the new node)
     const nextPathLength = currentPath.length + 1;
-    const nextContext = [...currentPath.map((node) => node.text), text];
+    const nextContext = [...currentPath.map((node) => node.text), nextText];
     void fetchSuggestions(nextContext, canEndStory(nextPathLength));
+    return true;
   };
 
   const handleBranch = (nodeId: string) => {
@@ -704,6 +742,9 @@ export function TaleTinkerApp() {
                   onRefresh={handleRefreshSuggestions}
                   timeoutSeconds={15}
                   isLoading={isLoadingSuggestions}
+                  disabled={isCheckingLine}
+                  statusMessage={lineCheckMessage}
+                  statusTone={lineCheckTone || undefined}
                 />
               </div>
             )}
