@@ -804,7 +804,9 @@ export function TaleTinkerApp() {
               title: s.title || 'Untitled Story',
               preview: s.tagline || s.preview,
               date: new Date(s.created_at).toLocaleDateString(),
-              length: s.length
+              length: s.length,
+              authorName: s.author_name,
+              likeCount: s.like_count
             }))}
             onStartNew={startNewStory}
             onSelectStory={handleSelectStory}

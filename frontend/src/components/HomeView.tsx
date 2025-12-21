@@ -5,7 +5,7 @@
  */
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, BookOpen, Clock, ChevronRight, Sparkles, PenTool, ArrowRight } from 'lucide-react';
+import { Plus, BookOpen, Clock, ChevronRight, Sparkles, PenTool, ArrowRight, User, Heart } from 'lucide-react';
 import { cn } from '../utils';
 
 interface StorySummary {
@@ -14,6 +14,8 @@ interface StorySummary {
   preview: string;
   date: string;
   length: number;
+  authorName?: string | null;
+  likeCount?: number;
 }
 
 interface HomeViewProps {
@@ -176,10 +178,24 @@ export function HomeView({ stories, onStartNew, onSelectStory, starterPrompts }:
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
                       {story.preview}
                     </p>
-                    <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground/70 font-medium">
+                    <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground/70 font-medium">
                       <span className="bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{story.date}</span>
                       <span>•</span>
                       <span>{story.length} lines</span>
+                      <span>•</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" />
+                        {story.authorName || 'Anonymous'}
+                      </span>
+                      {Number(story.likeCount ?? 0) > 0 && (
+                        <>
+                          <span>•</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Heart className="w-3.5 h-3.5" />
+                            {story.likeCount}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="self-center opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
