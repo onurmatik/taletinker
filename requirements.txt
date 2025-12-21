@@ -1,24 +1,12 @@
+requests
 boto3
 django==5.2
 django-storages
-django-recaptcha
-django-debug-toolbar
 django-ses[events]
 django-sesame
-django-widget-tweaks
-django-parler
 django-ninja
-uvicorn[standard]
-python-slugify
 openai
-openai-agents
 python-dotenv
-redis
-hiredis
-django-redis
-markdown
-celery
-django-celery-results
 pillow
 stripe
 
