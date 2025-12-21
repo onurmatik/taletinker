@@ -107,8 +107,16 @@ export const api = {
         return fetchJson(`${API_BASE}/stories/config`, { method: 'GET' }, 'Failed to fetch story config');
     },
 
-    async getMe(): Promise<{ email: string | null; is_authenticated: boolean }> {
+    async getMe(): Promise<{ email: string | null; display_name: string | null; is_authenticated: boolean }> {
         return fetchJson(`${API_BASE}/auth/me`, { method: 'GET' }, 'Failed to fetch user');
+    },
+
+    async updateDisplayName(displayName: string): Promise<{ email: string | null; display_name: string | null; is_authenticated: boolean }> {
+        return fetchJson(`${API_BASE}/auth/display-name`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ display_name: displayName })
+        }, 'Failed to update display name');
     },
 
     async logout(): Promise<{ success: boolean }> {

@@ -14,7 +14,7 @@ import { Navbar } from './components/Navbar'; // Import Navbar
 import { StoryNode as StoryNodeType, SavedStory } from './types'; // Import SavedStory
 import { INITIAL_SENTENCES } from './data/mockStory';
 import { api, StorySummary, StoryData } from './api';
-import { Book, X, ArrowLeft, GitGraph } from 'lucide-react'; // Import GitGraph icon
+import { Book, X, ArrowLeft, GitGraph, User, Loader2 } from 'lucide-react'; // Import GitGraph icon
 import { MagicLinkAuth } from './components/MagicLinkAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,7 +52,12 @@ export function TaleTinkerApp() {
   const [isSavingStory, setIsSavingStory] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [displayNameDraft, setDisplayNameDraft] = useState('');
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+  const [isUpdatingDisplayName, setIsUpdatingDisplayName] = useState(false);
   const hasInitializedRoute = useRef(false);
   const hasResumedDraft = useRef(false);
 
@@ -159,9 +164,16 @@ export function TaleTinkerApp() {
       .then((res) => {
         setIsLoggedIn(res.is_authenticated);
         setUserEmail(res.email);
+        setDisplayName(res.display_name);
       })
       .catch((err) => console.error("Failed to load user", err));
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setShowProfileModal(false);
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (viewMode === 'create' && !isEnded && currentPath.length > 0) {
@@ -695,6 +707,57 @@ export function TaleTinkerApp() {
     } finally {
       setIsLoggedIn(false);
       setUserEmail(null);
+      setDisplayName(null);
+    }
+  };
+
+  const getInitialDisplayName = () => {
+    if (displayName) {
+      return displayName;
+    }
+    if (userEmail) {
+      return userEmail.split('@')[0];
+    }
+    return '';
+  };
+
+  const validateDisplayName = (value: string) => {
+    if (!value) {
+      return 'Please enter a display name.';
+    }
+    if (value.length < 2) {
+      return 'Display names must be at least 2 characters.';
+    }
+    return null;
+  };
+
+  const handleProfileOpen = () => {
+    if (!isLoggedIn) return;
+    setDisplayNameDraft(getInitialDisplayName());
+    setDisplayNameError(null);
+    setShowProfileModal(true);
+  };
+
+  const handleDisplayNameSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = displayNameDraft.trim();
+    const error = validateDisplayName(trimmed);
+    if (error) {
+      setDisplayNameError(error);
+      return;
+    }
+    setIsUpdatingDisplayName(true);
+    setDisplayNameError(null);
+    try {
+      const res = await api.updateDisplayName(trimmed);
+      setDisplayName(res.display_name);
+      setUserEmail(res.email);
+      setShowProfileModal(false);
+    } catch (error) {
+      console.error("Failed to update display name", error);
+      setDisplayNameError("Couldn't update the display name. Please try again.");
+    } finally {
+      setIsUpdatingDisplayName(false);
     }
   };
 
@@ -722,6 +785,7 @@ export function TaleTinkerApp() {
       userEmail={userEmail}
       onSignIn={handlePromptSignIn}
       onLogout={handleLogout}
+      onProfile={handleProfileOpen}
       onHome={goHome}
       leftAction={customLeftAction}
     />
@@ -933,6 +997,105 @@ export function TaleTinkerApp() {
                 description={isLoggedIn ? "You are already signed in." : "Enter your email to continue."}
                 onSubmit={handleAuthSubmit}
               />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showProfileModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          >
+            <div className="relative w-full max-w-md">
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="absolute -top-12 right-0 p-2 text-foreground/50 hover:text-foreground transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="bg-background w-full rounded-[2rem] p-8 md:p-10 shadow-xl border border-border/50 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-36 h-36 bg-secondary/30 rounded-bl-full pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                      <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                        Choose your display name
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        This will appear as the author name on your stories.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleDisplayNameSave} className="mt-8 space-y-5">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="display-name"
+                        className="text-xs font-bold text-muted-foreground tracking-wider uppercase pl-1"
+                      >
+                        Display Name
+                      </label>
+                      <input
+                        id="display-name"
+                        type="text"
+                        value={displayNameDraft}
+                        onChange={(event) => {
+                          setDisplayNameDraft(event.target.value);
+                          if (displayNameError) {
+                            setDisplayNameError(null);
+                          }
+                        }}
+                        className="w-full bg-secondary/20 hover:bg-secondary/30 focus:bg-background transition-colors border border-border/50 focus:border-primary/50 rounded-xl py-3.5 px-4 outline-none text-lg text-foreground placeholder:text-muted-foreground/40 focus:ring-4 focus:ring-primary/5"
+                        placeholder="Storyteller"
+                        autoComplete="name"
+                        autoFocus
+                        maxLength={150}
+                      />
+                      {displayNameError && (
+                        <p className="text-sm text-destructive pl-1">
+                          {displayNameError}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowProfileModal(false)}
+                        className="px-4 py-2 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isUpdatingDisplayName}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        {isUpdatingDisplayName ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          "Save Display Name"
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}

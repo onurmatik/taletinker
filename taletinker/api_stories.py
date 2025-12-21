@@ -11,6 +11,20 @@ from taletinker.stories.models import Story, Line
 
 router = Router()
 
+def get_author_display_name(user) -> str:
+    if not user:
+        return "Anonymous"
+    display_name = (getattr(user, "first_name", "") or "").strip()
+    if display_name:
+        return display_name
+    email = (getattr(user, "email", "") or "").strip()
+    username = (getattr(user, "username", "") or "").strip()
+    if email:
+        return email
+    if username:
+        return username
+    return "Anonymous"
+
 
 class LineSchema(Schema):
     id: str # UUID
@@ -69,9 +83,7 @@ def list_stories(request):
         preview = s.tagline or ""
         
         # Safe author access
-        author_name = "Anonymous"
-        if s.last_line and s.last_line.author:
-             author_name = s.last_line.author.email
+        author_name = get_author_display_name(s.last_line.author if s.last_line else None)
         
         # Find root node for tree grouping
         # Build lines and find root
@@ -340,9 +352,7 @@ def get_story(request, story_id: str):
     if request.user.is_authenticated:
         is_liked = story.liked_by.filter(id=request.user.id).exists()
 
-    author_name = "Anonymous"
-    if story.last_line and story.last_line.author:
-         author_name = story.last_line.author.email
+    author_name = get_author_display_name(story.last_line.author if story.last_line else None)
 
     return {
         "id": story.id,

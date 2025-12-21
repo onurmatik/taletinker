@@ -18,11 +18,15 @@ class LoginSchema(Schema):
 
 class UserSchema(Schema):
     email: str | None = None
+    display_name: str | None = None
     is_authenticated: bool
 
 class LoginResponse(Schema):
     success: bool
     message: str
+
+class DisplayNameSchema(Schema):
+    display_name: str
 
 @csrf_exempt
 @router.post("/login", response=LoginResponse)
@@ -79,9 +83,34 @@ def me(request):
     if request.user.is_authenticated:
         return {
             "email": request.user.email,
+            "display_name": request.user.first_name,
             "is_authenticated": True
         }
     return {
         "email": None,
+        "display_name": None,
         "is_authenticated": False
+    }
+
+@csrf_exempt
+@router.post("/display-name", response=UserSchema)
+def update_display_name(request, data: DisplayNameSchema):
+    if not request.user.is_authenticated:
+        raise HttpError(401, "Authentication required")
+
+    display_name = (data.display_name or "").strip()
+    if not display_name:
+        raise HttpError(400, "Display name is required")
+
+    max_length = User._meta.get_field("first_name").max_length
+    if len(display_name) > max_length:
+        raise HttpError(400, f"Display name must be {max_length} characters or fewer")
+
+    request.user.first_name = display_name
+    request.user.save(update_fields=["first_name"])
+
+    return {
+        "email": request.user.email,
+        "display_name": request.user.first_name,
+        "is_authenticated": True
     }

@@ -11,6 +11,7 @@ interface NavbarProps {
   userEmail?: string | null;
   onSignIn: () => void;
   onLogout: () => void;
+  onProfile?: () => void;
   onHome?: () => void;
   className?: string;
   leftAction?: React.ReactNode; // For things like "Back" buttons
@@ -22,6 +23,7 @@ export function Navbar({
   userEmail,
   onSignIn,
   onLogout,
+  onProfile,
   onHome,
   className,
   leftAction
@@ -63,6 +65,16 @@ export function Navbar({
             </div>
             
             <div className="h-8 w-px bg-border hidden md:block" />
+
+            {onProfile && (
+              <button
+                onClick={onProfile}
+                className="flex items-center justify-center h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                title="Edit display name"
+              >
+                <UserIcon className="w-4 h-4" />
+              </button>
+            )}
             
             <button
               onClick={onLogout}
@@ -72,11 +84,6 @@ export function Navbar({
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Logout</span>
             </button>
-            
-            {/* Mobile Avatar / Placeholder */}
-            <div className="md:hidden w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <UserIcon className="w-4 h-4" />
-            </div>
           </div>
         ) : (
           <button
