@@ -126,6 +126,9 @@ class StoryMetaResponse(Schema):
     title: str | None
     tagline: str | None
 
+class StoryConfigResponse(Schema):
+    min_story_lines: int
+
 class StoryMetaUpdateSchema(Schema):
     title: str | None = None
     tagline: str | None = None
@@ -270,6 +273,13 @@ def suggest_story_meta(request, data: SuggestSchema):
     return {
         "title": event.title.strip() if event.title else "Untitled Story",
         "tagline": event.tagline.strip() if event.tagline else "A tale waiting to be told."
+    }
+
+
+@router.get("/config", response=StoryConfigResponse)
+def story_config(request):
+    return {
+        "min_story_lines": settings.STORY_MIN_LINES
     }
 
 

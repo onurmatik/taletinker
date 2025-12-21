@@ -17,6 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # AI defaults
 AI_DEFAULT_MODEL = os.getenv("AI_DEFAULT_MODEL", "gpt-5-nano")
+STORY_MIN_LINES = int(os.getenv("STORY_MIN_LINES", "5"))
 
 
 # Quick-start development settings - unsuitable for production

@@ -12,7 +12,7 @@ import { StoryDetailView } from './components/StoryDetailView';
 import { StoryTreeView } from './components/StoryTreeView'; // Import new component
 import { Navbar } from './components/Navbar'; // Import Navbar
 import { StoryNode as StoryNodeType, SavedStory } from './types'; // Import SavedStory
-import { INITIAL_SENTENCES, canEndStory } from './data/mockStory';
+import { INITIAL_SENTENCES } from './data/mockStory';
 import { api, StorySummary, StoryData } from './api';
 import { Book, X, ArrowLeft, GitGraph } from 'lucide-react'; // Import GitGraph icon
 import { MagicLinkAuth } from './components/MagicLinkAuth';
@@ -41,6 +41,7 @@ export function TaleTinkerApp() {
   const [lineCheckMessage, setLineCheckMessage] = useState<string | null>(null);
   const [lineCheckTone, setLineCheckTone] = useState<'info' | 'error' | null>(null);
   const [isEnded, setIsEnded] = useState(false);
+  const [minStoryLines, setMinStoryLines] = useState(5);
 
   // New State for Title, Auth 
   const [storyTitle, setStoryTitle] = useState('');
@@ -52,6 +53,8 @@ export function TaleTinkerApp() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const hasInitializedRoute = useRef(false);
+
+  const canEndStory = (pathLength: number) => pathLength >= minStoryLines;
 
   // Refs for scrolling
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -70,6 +73,12 @@ export function TaleTinkerApp() {
   // Load stories from API
   useEffect(() => {
     api.listStories().then(setStories).catch(err => console.error("Failed to load stories", err));
+  }, []);
+
+  useEffect(() => {
+    api.getStoryConfig()
+      .then((config) => setMinStoryLines(config.min_story_lines))
+      .catch((err) => console.error("Failed to load story config", err));
   }, []);
 
   useEffect(() => {
@@ -388,6 +397,11 @@ export function TaleTinkerApp() {
 
     // Check if user chose to end
     if (text.toLowerCase() === "the end") {
+      if (!canEndStory(currentPath.length)) {
+        setLineCheckMessage(`Write at least ${Math.max(minStoryLines - currentPath.length, 0)} more line(s) to end the story.`);
+        setLineCheckTone('error');
+        return false;
+      }
       setIsEnded(true);
       setIsLoadingStoryMeta(true);
       setStoryTitle('');
