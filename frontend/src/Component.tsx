@@ -818,6 +818,7 @@ export function TaleTinkerApp() {
                     <StoryDetailView
                       title={story.title || 'Untitled Story'}
                       tagline={story.tagline}
+                      authorName={story.author_name}
                       path={detailNodes}
                       onFork={(nodeId, index, altText) => {
                         void handleForkFromLine(index, lineTexts, altText);

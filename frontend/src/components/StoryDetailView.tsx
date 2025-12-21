@@ -12,6 +12,7 @@ import { cn } from '../utils';
 interface StoryDetailViewProps {
   title: string;
   tagline?: string | null;
+  authorName?: string | null;
   path: StoryNode[];
   onFork: (nodeId: string, index: number, alternativeText?: string) => void;
   onBack: () => void;
@@ -25,6 +26,7 @@ interface StoryDetailViewProps {
 export function StoryDetailView({
   title,
   tagline,
+  authorName,
   path,
   onFork,
   onBack,
@@ -100,7 +102,7 @@ export function StoryDetailView({
               </div>
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                <span>Unknown Author</span>
+                <span>{authorName || "Unknown Author"}</span>
               </div>
             </div>
 
