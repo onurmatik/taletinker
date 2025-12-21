@@ -22,6 +22,7 @@ class StorySchema(Schema):
     id: int
     uuid: str
     title: str | None
+    tagline: str | None = None
     preview: str | None = None
     lines: List[LineSchema]
     created_at: str
@@ -33,12 +34,14 @@ class StorySchema(Schema):
     root_node_id: str | None = None
 
 class StoryCreateSchema(Schema):
-    title: str
+    title: str | None = None
+    tagline: str | None = None
     lines: List[str]
 
 class StoryResponse(Schema):
     id: str # UUID
     title: str | None
+    tagline: str | None = None
     success: bool
 
 class LikeResponse(Schema):
@@ -93,6 +96,7 @@ def list_stories(request):
             "id": s.id,
             "uuid": str(s.uuid),
             "title": s.title,
+            "tagline": s.tagline,
             "preview": preview,
             "lines": story_lines, 
             "created_at": s.created_at.isoformat() if s.created_at else "",
@@ -108,8 +112,20 @@ def list_stories(request):
 class SuggestSchema(Schema):
     context: List[str]
 
+class StoryMetaResponse(Schema):
+    title: str | None
+    tagline: str | None
+
+class StoryMetaUpdateSchema(Schema):
+    title: str | None = None
+    tagline: str | None = None
+
 class StoryOptions(BaseModel):
     options: List[str]
+
+class StoryMetaOptions(BaseModel):
+    title: str
+    tagline: str
 
 @router.post("/suggest", response=List[str])
 def suggest_lines(request, data: SuggestSchema):
@@ -147,6 +163,43 @@ def suggest_lines(request, data: SuggestSchema):
     # Ensure we return at least 2
     final_lines = event.options[:2] if len(event.options) >= 2 else event.options + ["Something unexpected happened."]
     return final_lines
+
+
+@router.post("/suggest-meta", response=StoryMetaResponse)
+def suggest_story_meta(request, data: SuggestSchema):
+    if not data.context:
+        return {
+            "title": "Untitled Story",
+            "tagline": "A tale waiting to be told."
+        }
+
+    prompt = (
+        "Generate a short title (max 8 words) and a short tagline (max 12 words) "
+        "for the following children's story. Return both in a structured format.\n\nStory:\n"
+    ) + "\n".join(data.context)
+
+    if not os.getenv("OPENAI_API_KEY"):
+        raise HttpError(500, "OPENAI_API_KEY not configured")
+
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    response = client.responses.parse(
+        model="gpt-5-mini",
+        input=[{
+            "role": "system",
+            "content": "You suggest catchy, kid-friendly story titles and taglines."
+        }, {
+            "role": "user", "content": prompt
+        }],
+        text_format=StoryMetaOptions,
+    )
+
+    event = response.output_parsed
+
+    return {
+        "title": event.title.strip() if event.title else "Untitled Story",
+        "tagline": event.tagline.strip() if event.tagline else "A tale waiting to be told."
+    }
 
 
 @router.get("/{story_id}", response=StorySchema)
@@ -189,6 +242,7 @@ def get_story(request, story_id: str):
         "id": story.id,
         "uuid": str(story.uuid),
         "title": story.title,
+        "tagline": story.tagline,
         "preview": lines_data[0]['text'] if lines_data else "",
         "lines": lines_data,
         "created_at": story.created_at.isoformat() if story.created_at else "",
@@ -223,16 +277,45 @@ def create_story(request, data: StoryCreateSchema):
             prev_line = line
             
         # 3. Create Story pointer
-        # Note: 'author' is not a field on Story, it is inferred from last_line
         story = Story.objects.create(
             title=data.title,
+            tagline=data.tagline,
             last_line=prev_line,
         )
         
     return {
         "id": str(story.uuid),
         "title": story.title,
+        "tagline": story.tagline,
         "success": True
+    }
+
+
+@router.patch("/{story_id}", response=StoryMetaResponse)
+def update_story_meta(request, story_id: str, data: StoryMetaUpdateSchema):
+    try:
+        story = Story.objects.get(uuid=story_id)
+    except Story.DoesNotExist:
+        try:
+            story = Story.objects.get(id=story_id)
+        except:
+            raise HttpError(404, "Story not found")
+
+    fields_set = getattr(data, "model_fields_set", data.__fields_set__)
+    fields_to_update = []
+    if "title" in fields_set:
+        story.title = data.title
+        fields_to_update.append("title")
+    if "tagline" in fields_set:
+        story.tagline = data.tagline
+        fields_to_update.append("tagline")
+
+    if fields_to_update:
+        story.save(update_fields=fields_to_update)
+
+    return {
+        "title": story.title,
+        "tagline": story.tagline
     }
 
 @router.delete("/{story_id}")
@@ -300,4 +383,3 @@ def like_line(request, line_id: str):
         "like_count": line.liked_by.count(),
         "is_liked": is_liked
     }
-

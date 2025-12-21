@@ -33,11 +33,11 @@ class Line(models.Model):
 class Story(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
-    title = models.TextField(blank=True, null=True)
-    tagline = models.TextField(blank=True, null=True)
-
     last_line = models.ForeignKey(Line, on_delete=models.PROTECT, null=True, blank=True)
     # the final line of the story
+
+    title = models.TextField(blank=True, null=True)
+    tagline = models.TextField(blank=True, null=True)
 
     liked_by = models.ManyToManyField(
         settings.AUTH_USER_MODEL,

@@ -4,7 +4,8 @@ const API_BASE = '/api';
 export interface StorySummary {
     id: string;
     uuid: string;
-    title: string;
+    title: string | null;
+    tagline?: string | null;
     preview: string;
     created_at: string;
     length: number;
@@ -27,7 +28,8 @@ export interface LineData {
 export interface StoryData {
     id: string;
     uuid: string;
-    title: string;
+    title: string | null;
+    tagline?: string | null;
     preview: string;
     lines: LineData[];
     created_at: string;
@@ -51,6 +53,16 @@ export const api = {
         return res.json();
     },
 
+    async createStory(data: { title?: string | null; tagline?: string | null; lines: string[] }): Promise<{ id: string; title: string | null; tagline: string | null; success: boolean }> {
+        const res = await fetch(`${API_BASE}/stories/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to create story');
+        return res.json();
+    },
+
     async suggestLines(context: string[]): Promise<string[]> {
         const res = await fetch(`${API_BASE}/stories/suggest`, {
             method: 'POST',
@@ -58,6 +70,26 @@ export const api = {
             body: JSON.stringify({ context })
         });
         if (!res.ok) throw new Error('Failed to fetch suggestions');
+        return res.json();
+    },
+
+    async suggestStoryMeta(context: string[]): Promise<{ title: string; tagline: string }> {
+        const res = await fetch(`${API_BASE}/stories/suggest-meta`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context })
+        });
+        if (!res.ok) throw new Error('Failed to fetch story meta');
+        return res.json();
+    },
+
+    async updateStoryMeta(id: string, data: { title?: string | null; tagline?: string | null }): Promise<{ title: string | null; tagline: string | null }> {
+        const res = await fetch(`${API_BASE}/stories/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to update story meta');
         return res.json();
     },
 

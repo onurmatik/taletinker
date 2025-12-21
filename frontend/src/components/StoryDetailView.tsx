@@ -11,6 +11,7 @@ import { cn } from '../utils';
 
 interface StoryDetailViewProps {
   title: string;
+  tagline?: string | null;
   path: StoryNode[];
   onFork: (nodeId: string, index: number, alternativeText?: string) => void;
   onBack: () => void;
@@ -23,6 +24,7 @@ interface StoryDetailViewProps {
 
 export function StoryDetailView({
   title,
+  tagline,
   path,
   onFork,
   onBack,
@@ -54,6 +56,11 @@ export function StoryDetailView({
           <h1 className="text-3xl md:text-5xl font-serif font-bold text-foreground tracking-tight">
             {title}
           </h1>
+          {tagline && (
+            <p className="text-base md:text-lg font-serif italic text-muted-foreground">
+              {tagline}
+            </p>
+          )}
 
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">

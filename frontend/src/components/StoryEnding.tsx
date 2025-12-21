@@ -1,28 +1,39 @@
 /**
  * Component to display the story ending.
- * Allows editing title, signing up to save, and restarting.
+ * Allows editing title/tagline, saving, and restarting.
  */
 import { motion } from 'framer-motion';
 import { RotateCcw, BookOpen, Pencil, Lock, UserPlus, ArrowRight } from 'lucide-react';
 import { cn } from '../utils';
 
 interface StoryEndingProps {
-  text: string;
   storyTitle: string;
+  storyTagline: string;
   setStoryTitle: (title: string) => void;
+  setStoryTagline: (tagline: string) => void;
+  isLoadingMeta: boolean;
+  isSaving?: boolean;
+  canSaveAndView?: boolean;
   isLoggedIn: boolean;
   onRestart: () => void;
   onSignUp: () => void;
+  onSaveAndView: () => void;
 }
 
 export function StoryEnding({ 
-  text, 
   storyTitle, 
+  storyTagline,
   setStoryTitle, 
+  setStoryTagline,
+  isLoadingMeta,
+  isSaving = false,
+  canSaveAndView = true,
   isLoggedIn, 
   onRestart, 
-  onSignUp 
+  onSignUp,
+  onSaveAndView
 }: StoryEndingProps) {
+  const canSave = canSaveAndView && !isLoadingMeta && !isSaving;
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -39,33 +50,58 @@ export function StoryEnding({
       </div>
 
       {/* Editable Title Section */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="uppercase tracking-widest text-xs font-semibold text-muted-foreground">
           The End
         </div>
-        <div className="relative group inline-block max-w-full">
-          <input
-            type="text"
-            value={storyTitle}
-            onChange={(e) => setStoryTitle(e.target.value)}
-            className="text-3xl md:text-5xl font-serif font-bold text-center bg-transparent border-none focus:ring-0 p-0 text-foreground w-full min-w-[200px] placeholder:text-muted-foreground/50 truncate"
-            placeholder="Untitled Story"
-          />
-          <Pencil className="w-4 h-4 text-muted-foreground absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
-      </div>
-      
-      {/* Ending Text */}
-      <div className="relative">
-        <span className="absolute -top-4 -left-2 text-6xl text-primary/10 font-serif">"</span>
-        <p className="text-lg md:text-xl text-muted-foreground font-serif leading-relaxed italic px-8">
-          {text}
-        </p>
-        <span className="absolute -bottom-8 -right-2 text-6xl text-primary/10 font-serif leading-none">"</span>
+        {isLoadingMeta ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-10 md:h-12 rounded-lg bg-muted/40 w-64 mx-auto" />
+            <div className="h-4 rounded bg-muted/30 w-72 mx-auto" />
+          </div>
+        ) : (
+          <>
+            <div className="relative group inline-block max-w-full">
+              <input
+                type="text"
+                value={storyTitle}
+                onChange={(e) => setStoryTitle(e.target.value)}
+                className="text-3xl md:text-5xl font-serif font-bold text-center bg-transparent border-none focus:ring-0 p-0 text-foreground w-full min-w-[200px] placeholder:text-muted-foreground/50 truncate"
+                placeholder="Untitled Story"
+              />
+              <Pencil className="w-4 h-4 text-muted-foreground absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <div className="relative group inline-block max-w-full">
+              <input
+                type="text"
+                value={storyTagline}
+                onChange={(e) => setStoryTagline(e.target.value)}
+                className="text-base md:text-lg font-serif italic text-center bg-transparent border-none focus:ring-0 p-0 text-muted-foreground w-full min-w-[200px] placeholder:text-muted-foreground/50 truncate"
+                placeholder="Add a short tagline"
+              />
+              <Pencil className="w-3.5 h-3.5 text-muted-foreground absolute -right-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Action Cards */}
       <div className="grid gap-6 mt-12">
+        <div className="flex justify-center">
+          <button
+            onClick={onSaveAndView}
+            disabled={!canSave}
+            className={cn(
+              "inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all shadow-md",
+              !canSave
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg"
+            )}
+          >
+            <ArrowRight className="w-4 h-4" />
+            {isSaving ? "Saving..." : "Save and View Story"}
+          </button>
+        </div>
         {/* Guest Incentive Card */}
         {!isLoggedIn && (
           <motion.div 

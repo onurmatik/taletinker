@@ -12,7 +12,7 @@ import { StoryDetailView } from './components/StoryDetailView';
 import { StoryTreeView } from './components/StoryTreeView'; // Import new component
 import { Navbar } from './components/Navbar'; // Import Navbar
 import { StoryNode as StoryNodeType, SavedStory } from './types'; // Import SavedStory
-import { INITIAL_SENTENCES, canEndStory, getRandomEnding } from './data/mockStory';
+import { INITIAL_SENTENCES, canEndStory } from './data/mockStory';
 import { api, StorySummary, StoryData } from './api';
 import { Book, X, ArrowLeft, GitGraph } from 'lucide-react'; // Import GitGraph icon
 import { MagicLinkAuth } from './components/MagicLinkAuth';
@@ -38,10 +38,13 @@ export function TaleTinkerApp() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
-  const [endingText, setEndingText] = useState('');
 
   // New State for Title, Auth 
-  const [storyTitle, setStoryTitle] = useState("The Unnamed Story");
+  const [storyTitle, setStoryTitle] = useState('');
+  const [storyTagline, setStoryTagline] = useState('');
+  const [savedStoryId, setSavedStoryId] = useState<string | null>(null);
+  const [isLoadingStoryMeta, setIsLoadingStoryMeta] = useState(false);
+  const [isSavingStory, setIsSavingStory] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -98,8 +101,11 @@ export function TaleTinkerApp() {
     setNodes({});
     setHeadId(null);
     setIsEnded(false);
-    setEndingText('');
-    setStoryTitle("The Unnamed Story"); // Reset title
+    setStoryTitle(''); // Reset title
+    setStoryTagline('');
+    setSavedStoryId(null);
+    setIsLoadingStoryMeta(false);
+    setIsSavingStory(false);
     setPreviousStoryId(selectedStoryId); // Save previous story for back navigation if needed
     setSuggestions([]);
 
@@ -202,13 +208,11 @@ export function TaleTinkerApp() {
         }
       }
 
-      // Add ending
-      newLines.push(getRandomEnding());
-
       // 3. Create a new runtime story object
       const newStoryId = generateId();
       const originalStory = activeStory;
-      const newTitle = originalStory ? `${originalStory.title} (Alt)` : "Alternative Story";
+      const baseTitle = originalStory?.title || "Untitled Story";
+      const newTitle = `${baseTitle} (Alt)`;
       // Ensure we have a rootId. If original has one, use it. If not, the original IS the root (legacy).
       // For API stories, we treat the current story as the root reference for now if we don't have better info.
       const rootId = originalStory?.uuid || newStoryId;
@@ -280,12 +284,12 @@ export function TaleTinkerApp() {
     void fetchSuggestions(context, canEndStory(pathLength));
 
     setIsEnded(false);
-    setEndingText('');
 
     // Set title based on the story we forked from
     const story = activeStory;
     if (story) {
-      setStoryTitle(`${story.title} (Remix)`);
+      const baseTitle = story.title || "Untitled Story";
+      setStoryTitle(`${baseTitle} (Remix)`);
     } else {
       setStoryTitle("Forked Story");
     }
@@ -312,18 +316,44 @@ export function TaleTinkerApp() {
     return path;
   }, [nodes, headId]);
 
-  const handleSelectNext = (text: string) => {
+  const handleSelectNext = async (text: string) => {
     // Check if user chose to end
     if (text.toLowerCase() === "the end") {
-      setEndingText(getRandomEnding());
       setIsEnded(true);
-      // Auto-generate a title based on content or random
-      const adjectives = ["Magical", "Happy", "Fun", "Little", "Brave", "Super", "Hidden", "Mystery", "Golden"];
-      const nouns = ["Adventure", "Friend", "Day", "Journey", "Puppy", "Star", "Secret", "Wish", "Dream"];
+      setIsLoadingStoryMeta(true);
+      setStoryTitle('');
+      setStoryTagline('');
+      setSavedStoryId(null);
 
-      const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-      setStoryTitle(`The ${randomAdjective} ${randomNoun}`);
+      const lines = currentPath.map((node) => node.text);
+
+      try {
+        const created = await api.createStory({ title: null, tagline: null, lines });
+        setSavedStoryId(created.id);
+        void api.listStories().then(setStories).catch(err => console.error("Failed to refresh stories", err));
+        try {
+          const meta = await api.suggestStoryMeta(lines);
+          const nextTitle = meta.title || '';
+          const nextTagline = meta.tagline || '';
+          setStoryTitle(nextTitle);
+          setStoryTagline(nextTagline);
+          setIsLoadingStoryMeta(false);
+          try {
+            await api.updateStoryMeta(created.id, {
+              title: nextTitle,
+              tagline: nextTagline
+            });
+          } catch (error) {
+            console.error("Failed to update story meta", error);
+          }
+        } catch (error) {
+          console.error("Failed to fetch story meta", error);
+          setIsLoadingStoryMeta(false);
+        }
+      } catch (error) {
+        console.error("Failed to save story", error);
+        setIsLoadingStoryMeta(false);
+      }
       return;
     }
 
@@ -385,6 +415,26 @@ export function TaleTinkerApp() {
     void fetchSuggestions(context, canEndStory(context.length));
   };
 
+  const handleSaveAndView = async () => {
+    if (!savedStoryId) return;
+    setIsSavingStory(true);
+    try {
+      await api.updateStoryMeta(savedStoryId, {
+        title: storyTitle || '',
+        tagline: storyTagline || ''
+      });
+      const story = await api.getStory(savedStoryId);
+      setActiveStory(story);
+      setSelectedStoryId(savedStoryId);
+      setViewMode('read');
+      setShowTreeView(false);
+    } catch (error) {
+      console.error("Failed to save and view story", error);
+    } finally {
+      setIsSavingStory(false);
+    }
+  };
+
   const handleAuthSubmit = async (email: string) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -440,7 +490,7 @@ export function TaleTinkerApp() {
           <HomeView
             stories={stories.map(s => ({
               id: s.uuid, // Use UUID for selection
-              title: s.title,
+              title: s.title || 'Untitled Story',
               preview: s.preview,
               date: new Date(s.created_at).toLocaleDateString(),
               length: s.length
@@ -473,7 +523,7 @@ export function TaleTinkerApp() {
                       stories={[...stories.map(s => ({
                         id: s.uuid,
                         rootId: s.root_node_id || s.uuid, // Use root_node_id if available, else self (new root)
-                        title: s.title,
+                        title: s.title || 'Untitled Story',
                         date: new Date(s.created_at).toLocaleDateString(),
                         lines: s.lines ? s.lines.map(l => l.text) : [],
                       })), ...runtimeStories]}
@@ -517,7 +567,8 @@ export function TaleTinkerApp() {
                 return (
                   <div className="h-full overflow-y-auto">
                     <StoryDetailView
-                      title={story.title}
+                      title={story.title || 'Untitled Story'}
+                      tagline={story.tagline}
                       path={detailNodes}
                       onFork={(nodeId, index, altText) => {
                         void handleForkFromLine(index, lineTexts, altText);
@@ -557,12 +608,17 @@ export function TaleTinkerApp() {
               {/* Ending */}
               {isEnded && (
                 <StoryEnding
-                  text={endingText}
                   storyTitle={storyTitle}
                   setStoryTitle={setStoryTitle}
+                  storyTagline={storyTagline}
+                  setStoryTagline={setStoryTagline}
+                  isLoadingMeta={isLoadingStoryMeta}
+                  isSaving={isSavingStory}
+                  canSaveAndView={Boolean(savedStoryId)}
                   isLoggedIn={isLoggedIn}
                   onRestart={startNewStory}
                   onSignUp={() => setShowAuthModal(true)}
+                  onSaveAndView={handleSaveAndView}
                 />
               )}
 
