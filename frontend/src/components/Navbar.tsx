@@ -17,7 +17,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ 
-  logoUrl = "https://vgbujcuwptvheqijyjbe.supabase.co/storage/v1/object/public/hmac-uploads/uploads/96f11572-3efa-493f-af56-46d0e7e061a6/1765783798102-dea49690/logo.png",
+  logoUrl = "/images/logo.png",
   isLoggedIn,
   userEmail,
   onSignIn,
@@ -45,12 +45,9 @@ export function Navbar({
               <img 
                 src={logoUrl} 
                 alt="TaleTinker Logo" 
-                className="w-8 h-8 object-contain transition-transform group-hover:scale-105" 
+                className="h-10 object-contain transition-transform group-hover:scale-105"
               />
             )}
-            <span className="font-serif font-bold text-xl tracking-tight group-hover:text-primary transition-colors text-foreground">
-              TaleTinker
-            </span>
           </button>
         )}
       </div>

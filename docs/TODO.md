@@ -14,5 +14,3 @@ revise initial sentences
 - prepare 2nd round suggestions
 - line hash => if no suggestions => AI
 
-
-validate line before AI
