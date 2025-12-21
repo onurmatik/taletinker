@@ -21,6 +21,8 @@ STORY_ANON_SIGNIN_LINE = int(os.getenv("STORY_ANON_SIGNIN_LINE", "3"))
 STORY_LINE_MIN_CHARS = int(os.getenv("STORY_LINE_MIN_CHARS", "8"))
 STORY_LINE_MIN_WORDS = int(os.getenv("STORY_LINE_MIN_WORDS", "2"))
 
+NOTIFY_ON_SIGNUP = os.getenv("NOTIFY_ON_SIGNUP", "true").lower() == "true"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

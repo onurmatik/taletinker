@@ -37,6 +37,18 @@ def login(request, data: LoginSchema):
 
     # Get or create user - simpler flow for this app
     user, created = User.objects.get_or_create(username=email, defaults={'email': email})
+
+    if created and settings.NOTIFY_ON_SIGNUP:
+        try:
+            from django.core.mail import mail_admins
+            mail_admins(
+                subject=f"New User Signup: {email}",
+                message=f"A new user has signed up.\nEmail: {email}",
+                fail_silently=True
+            )
+        except Exception:
+            pass
+
     if not user.is_active:
          raise HttpError(403, "Account is disabled")
 
