@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.syndication",
-    "widget_tweaks",
 
     "storages",
     "django_ses",
