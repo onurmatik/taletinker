@@ -193,11 +193,34 @@ def check_line(request, data: LineCheckSchema):
             "line": None,
             "reason": "Please enter a sentence."
         }
+    min_chars = settings.STORY_LINE_MIN_CHARS
+    min_words = settings.STORY_LINE_MIN_WORDS
+    word_count = len(line.split())
+    alpha_count = sum(1 for char in line if char.isalpha())
+
+    if len(line) < min_chars:
+        return {
+            "is_valid": False,
+            "line": None,
+            "reason": f"Please write at least {min_chars} characters."
+        }
+    if word_count < min_words:
+        return {
+            "is_valid": False,
+            "line": None,
+            "reason": f"Please use at least {min_words} words."
+        }
+    if alpha_count < 3:
+        return {
+            "is_valid": False,
+            "line": None,
+            "reason": "Please include some letters."
+        }
 
     prompt = (
         "You review a single proposed sentence for a children's story.\n"
         "If it is meaningful and appropriate, return is_valid=true and the sentence with only minor typo fixes.\n"
-        "If it is nonsense, random characters, or too short to be a sentence, return is_valid=false and a short reason.\n"
+        "If it is nonsense or inappropriate, return is_valid=false and a short reason.\n"
         "Do not add new information beyond minor fixes.\n\n"
     )
 
