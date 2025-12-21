@@ -11,6 +11,31 @@ from taletinker.stories.models import Story, Line
 
 router = Router()
 
+def mask_email(value: str) -> str:
+    if "@" not in value:
+        return value
+    local, domain = value.split("@", 1)
+    domain_parts = domain.split(".")
+    domain_label = domain_parts[0] if domain_parts else ""
+    domain_tail = ".".join(domain_parts[1:]) if len(domain_parts) > 1 else ""
+
+    def mask_component(component: str) -> str:
+        if not component:
+            return component
+        if len(component) <= 2:
+            return component[0] + "*" * (len(component) - 1)
+        if len(component) <= 4:
+            return component[:2] + "*" * (len(component) - 2)
+        if len(component) <= 6:
+            return component[:3] + "*" * (len(component) - 3)
+        return component[:3] + "*" * (len(component) - 5) + component[-2:]
+
+    masked_local = mask_component(local)
+    masked_domain = mask_component(domain_label)
+    if domain_tail:
+        return f"{masked_local}@{masked_domain}.{domain_tail}"
+    return f"{masked_local}@{masked_domain}"
+
 def get_author_display_name(user) -> str:
     if not user:
         return "Anonymous"
@@ -20,9 +45,9 @@ def get_author_display_name(user) -> str:
     email = (getattr(user, "email", "") or "").strip()
     username = (getattr(user, "username", "") or "").strip()
     if email:
-        return email
+        return mask_email(email)
     if username:
-        return username
+        return mask_email(username)
     return "Anonymous"
 
 
