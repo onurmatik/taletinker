@@ -48,6 +48,7 @@ export function TaleTinkerApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const hasInitializedRoute = useRef(false);
 
   // Refs for scrolling
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -75,6 +76,49 @@ export function TaleTinkerApp() {
         setUserEmail(res.email);
       })
       .catch((err) => console.error("Failed to load user", err));
+  }, []);
+
+  const navigateTo = (path: string, replace = false) => {
+    if (replace) {
+      window.history.replaceState(null, '', path);
+    } else {
+      window.history.pushState(null, '', path);
+    }
+  };
+
+  const getStoryIdFromPath = () => {
+    const match = window.location.pathname.match(/^\/stories\/([^/]+)$/);
+    return match ? match[1] : null;
+  };
+
+  const goHome = (skipHistory = false) => {
+    setViewMode('home');
+    setSelectedStoryId(null);
+    setActiveStory(null);
+    setShowTreeView(false);
+    if (!skipHistory && window.location.pathname !== '/') {
+      navigateTo('/');
+    }
+  };
+
+  useEffect(() => {
+    if (hasInitializedRoute.current) return;
+    hasInitializedRoute.current = true;
+    const storyId = getStoryIdFromPath();
+    if (storyId) {
+      void handleSelectStory(storyId, { replace: true });
+    }
+
+    const handlePopState = () => {
+      const nextStoryId = getStoryIdFromPath();
+      if (nextStoryId) {
+        void handleSelectStory(nextStoryId, { skipHistory: true });
+      } else {
+        goHome(true);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const [previousStoryId, setPreviousStoryId] = useState<string | null>(null);
@@ -137,6 +181,9 @@ export function TaleTinkerApp() {
     }
 
     setViewMode('create');
+    if (window.location.pathname !== '/') {
+      navigateTo('/', true);
+    }
   };
 
   // Get starter prompts for HomeView
@@ -148,7 +195,7 @@ export function TaleTinkerApp() {
   // Memoize starter prompts so they don't change on every render
   const starterPrompts = useMemo(() => getStarterPrompts(), []);
 
-  const handleSelectStory = async (id: string) => {
+  const handleSelectStory = async (id: string, options?: { replace?: boolean; skipHistory?: boolean }) => {
     // Try to find in runtime first? No, API is truth.
     // If it's a runtime story (newly created but not saved to backend), handle separately?
     // For now, assume we primarily read from backend.
@@ -158,6 +205,9 @@ export function TaleTinkerApp() {
       setSelectedStoryId(id);
       setViewMode('read');
       setShowTreeView(false);
+      if (!options?.skipHistory) {
+        navigateTo(`/stories/${id}`, options?.replace);
+      }
     } catch (e) {
       console.error("Could not fetch story", e);
       // Fallback or error UI
@@ -241,6 +291,7 @@ export function TaleTinkerApp() {
       setPreviousStoryId(selectedStoryId); // Save the current story ID before switching
       setSelectedStoryId(newStoryId);
       // viewMode remains 'read', so the UI simply updates to the new story
+      navigateTo(`/stories/${newStoryId}`);
       return;
     }
 
@@ -443,6 +494,7 @@ export function TaleTinkerApp() {
       setSelectedStoryId(savedStoryId);
       setViewMode('read');
       setShowTreeView(false);
+      navigateTo(`/stories/${savedStoryId}`);
     } catch (error) {
       console.error("Failed to save and view story", error);
     } finally {
@@ -473,16 +525,15 @@ export function TaleTinkerApp() {
   const handleBack = () => {
     if (viewMode === 'read' && previousStoryId) {
       // If in read mode and we have history, go back to previous story
-      setSelectedStoryId(previousStoryId);
+      void handleSelectStory(previousStoryId);
       setPreviousStoryId(null); // Clear history (simple 1-level undo for now)
     } else if (viewMode === 'create' && previousStoryId) {
       // If in create mode (forked), go back to reading the original
-      setSelectedStoryId(previousStoryId);
+      void handleSelectStory(previousStoryId);
       setPreviousStoryId(null);
-      setViewMode('read');
     } else {
       // Default back to home
-      setViewMode('home');
+      goHome();
       setPreviousStoryId(null);
     }
   };
@@ -494,7 +545,7 @@ export function TaleTinkerApp() {
       userEmail={userEmail}
       onSignIn={() => setShowAuthModal(true)}
       onLogout={handleLogout}
-      onHome={() => setViewMode('home')}
+      onHome={goHome}
       leftAction={customLeftAction}
     />
   );
@@ -546,7 +597,9 @@ export function TaleTinkerApp() {
                         date: new Date(s.created_at).toLocaleDateString(),
                         lines: s.lines ? s.lines.map(l => l.text) : [],
                       })), ...runtimeStories]}
-                      onSelectStory={(id) => setSelectedStoryId(id)}
+                      onSelectStory={(id) => {
+                        void handleSelectStory(id);
+                      }}
                       onClose={() => setShowTreeView(false)}
                       className="h-full"
                     />
