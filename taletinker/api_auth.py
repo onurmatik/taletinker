@@ -7,6 +7,7 @@ from ninja import Router, Schema
 from ninja.errors import HttpError
 from sesame.utils import get_token
 import logging
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -23,6 +24,7 @@ class LoginResponse(Schema):
     success: bool
     message: str
 
+@csrf_exempt
 @router.post("/login", response=LoginResponse)
 def login(request, data: LoginSchema):
     email = data.email.lower().strip()
@@ -66,6 +68,7 @@ def login(request, data: LoginSchema):
         "message": "Magic link sent. Check your email."
     }
 
+@csrf_exempt
 @router.post("/logout", response={200: dict})
 def logout_view(request):
     logout(request)
