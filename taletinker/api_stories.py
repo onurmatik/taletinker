@@ -2,6 +2,7 @@ from typing import List
 from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.db import transaction
+from django.conf import settings
 from pydantic import BaseModel
 import openai
 import os
@@ -147,7 +148,7 @@ def suggest_lines(request, data: SuggestSchema):
     client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     response = client.responses.parse(
-        model="gpt-5-mini",
+        model=settings.AI_DEFAULT_MODEL,
         input=[{
             "role": "system",
             "content": "You are a helpful assistant for writing children's stories. "
@@ -184,7 +185,7 @@ def suggest_story_meta(request, data: SuggestSchema):
     client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     response = client.responses.parse(
-        model="gpt-5-mini",
+        model=settings.AI_DEFAULT_MODEL,
         input=[{
             "role": "system",
             "content": "You suggest catchy, kid-friendly story titles and taglines."

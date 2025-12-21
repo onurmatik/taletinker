@@ -442,13 +442,11 @@ export function TaleTinkerApp() {
   };
 
   const handleAuthSubmit = async (email: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoggedIn(true);
-    setUserEmail(email); // Set email
+    await api.requestMagicLink(email);
+    setUserEmail(email);
     setTimeout(() => {
       setShowAuthModal(false);
-    }, 2000);
+    }, 500);
   };
 
   const handleLogout = () => {

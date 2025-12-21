@@ -93,6 +93,16 @@ export const api = {
         return res.json();
     },
 
+    async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        if (!res.ok) throw new Error('Failed to request magic link');
+        return res.json();
+    },
+
     async likeStory(id: string): Promise<{ success: boolean; like_count: number; is_liked: boolean }> {
         const res = await fetch(`${API_BASE}/stories/${id}/like`, { method: 'POST' });
         if (!res.ok) throw new Error('Failed to like story');

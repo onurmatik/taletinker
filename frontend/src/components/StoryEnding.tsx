@@ -2,6 +2,7 @@
  * Component to display the story ending.
  * Allows editing title/tagline, saving, and restarting.
  */
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { RotateCcw, BookOpen, Pencil, Lock, UserPlus, ArrowRight } from 'lucide-react';
 import { cn } from '../utils';
@@ -34,6 +35,21 @@ export function StoryEnding({
   onSaveAndView
 }: StoryEndingProps) {
   const canSave = canSaveAndView && !isLoadingMeta && !isSaving;
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+  const taglineRef = useRef<HTMLTextAreaElement>(null);
+
+  const autosize = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (!isLoadingMeta) {
+      autosize(titleRef.current);
+      autosize(taglineRef.current);
+    }
+  }, [storyTitle, storyTagline, isLoadingMeta]);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -61,25 +77,51 @@ export function StoryEnding({
           </div>
         ) : (
           <>
-            <div className="relative group inline-block max-w-full">
-              <input
-                type="text"
-                value={storyTitle}
-                onChange={(e) => setStoryTitle(e.target.value)}
-                className="text-3xl md:text-5xl font-serif font-bold text-center bg-transparent border-none focus:ring-0 p-0 text-foreground w-full min-w-[200px] placeholder:text-muted-foreground/50 truncate"
-                placeholder="Untitled Story"
-              />
-              <Pencil className="w-4 h-4 text-muted-foreground absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-full max-w-2xl mx-auto text-left space-y-2">
+              <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                Title
+              </div>
+              <div className="relative">
+                <textarea
+                  ref={titleRef}
+                  value={storyTitle}
+                  onChange={(e) => {
+                    setStoryTitle(e.target.value);
+                    autosize(titleRef.current);
+                  }}
+                  className={cn(
+                    "w-full min-h-[84px] resize-none rounded-2xl border border-primary/30 bg-card/60 px-5 py-4",
+                    "text-2xl md:text-5xl font-serif font-bold text-foreground text-center",
+                    "placeholder:text-muted-foreground/50 shadow-sm",
+                    "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  )}
+                  placeholder="Untitled Story"
+                />
+                <Pencil className="w-4 h-4 text-muted-foreground absolute right-4 top-4" />
+              </div>
             </div>
-            <div className="relative group inline-block max-w-full">
-              <input
-                type="text"
-                value={storyTagline}
-                onChange={(e) => setStoryTagline(e.target.value)}
-                className="text-base md:text-lg font-serif italic text-center bg-transparent border-none focus:ring-0 p-0 text-muted-foreground w-full min-w-[200px] placeholder:text-muted-foreground/50 truncate"
-                placeholder="Add a short tagline"
-              />
-              <Pencil className="w-3.5 h-3.5 text-muted-foreground absolute -right-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-full max-w-2xl mx-auto text-left space-y-2">
+              <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                Tagline
+              </div>
+              <div className="relative">
+                <textarea
+                  ref={taglineRef}
+                  value={storyTagline}
+                  onChange={(e) => {
+                    setStoryTagline(e.target.value);
+                    autosize(taglineRef.current);
+                  }}
+                  className={cn(
+                    "w-full min-h-[56px] resize-none rounded-2xl border border-primary/20 bg-card/40 px-5 py-3",
+                    "text-base md:text-lg font-serif italic text-foreground text-center",
+                    "placeholder:text-muted-foreground/50 shadow-sm",
+                    "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60"
+                  )}
+                  placeholder="Add a short tagline"
+                />
+                <Pencil className="w-3.5 h-3.5 text-muted-foreground absolute right-4 top-4" />
+              </div>
             </div>
           </>
         )}
