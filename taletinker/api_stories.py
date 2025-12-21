@@ -128,6 +128,7 @@ class StoryMetaResponse(Schema):
 
 class StoryConfigResponse(Schema):
     min_story_lines: int
+    anon_signin_line: int
 
 class StoryMetaUpdateSchema(Schema):
     title: str | None = None
@@ -279,7 +280,8 @@ def suggest_story_meta(request, data: SuggestSchema):
 @router.get("/config", response=StoryConfigResponse)
 def story_config(request):
     return {
-        "min_story_lines": settings.STORY_MIN_LINES
+        "min_story_lines": settings.STORY_MIN_LINES,
+        "anon_signin_line": settings.STORY_ANON_SIGNIN_LINE
     }
 
 

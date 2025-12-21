@@ -103,7 +103,7 @@ export const api = {
         }, 'Failed to check line');
     },
 
-    async getStoryConfig(): Promise<{ min_story_lines: number }> {
+    async getStoryConfig(): Promise<{ min_story_lines: number; anon_signin_line: number }> {
         return fetchJson(`${API_BASE}/stories/config`, { method: 'GET' }, 'Failed to fetch story config');
     },
 

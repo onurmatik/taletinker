@@ -42,6 +42,7 @@ export function TaleTinkerApp() {
   const [lineCheckTone, setLineCheckTone] = useState<'info' | 'error' | null>(null);
   const [isEnded, setIsEnded] = useState(false);
   const [minStoryLines, setMinStoryLines] = useState(5);
+  const [anonSigninLine, setAnonSigninLine] = useState(3);
 
   // New State for Title, Auth 
   const [storyTitle, setStoryTitle] = useState('');
@@ -77,7 +78,10 @@ export function TaleTinkerApp() {
 
   useEffect(() => {
     api.getStoryConfig()
-      .then((config) => setMinStoryLines(config.min_story_lines))
+      .then((config) => {
+        setMinStoryLines(config.min_story_lines);
+        setAnonSigninLine(config.anon_signin_line);
+      })
       .catch((err) => console.error("Failed to load story config", err));
   }, []);
 
@@ -750,16 +754,36 @@ export function TaleTinkerApp() {
             {/* Input Area */}
             {!isEnded && (
               <div className="sticky bottom-6 z-40">
-                <ChoicePanel
-                  suggestions={suggestions}
-                  onSelect={handleSelectNext}
-                  onRefresh={handleRefreshSuggestions}
-                  timeoutSeconds={15}
-                  isLoading={isLoadingSuggestions}
-                  disabled={isCheckingLine}
-                  statusMessage={lineCheckMessage}
-                  statusTone={lineCheckTone || undefined}
-                />
+                {!isLoggedIn && currentPath.length >= anonSigninLine ? (
+                  <div className="w-full max-w-2xl mx-auto bg-card border border-border rounded-xl shadow-lg p-6 text-center">
+                    <div className="text-sm uppercase tracking-widest text-muted-foreground">
+                      Save Your Story
+                    </div>
+                    <h3 className="mt-3 text-xl font-serif font-bold text-foreground">
+                      Sign in to keep writing
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      You're making great progress. Sign in so we can save your story. It's free.
+                    </p>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm hover:shadow-md"
+                    >
+                      Sign In to Save
+                    </button>
+                  </div>
+                ) : (
+                  <ChoicePanel
+                    suggestions={suggestions}
+                    onSelect={handleSelectNext}
+                    onRefresh={handleRefreshSuggestions}
+                    timeoutSeconds={15}
+                    isLoading={isLoadingSuggestions}
+                    disabled={isCheckingLine}
+                    statusMessage={lineCheckMessage}
+                    statusTone={lineCheckTone || undefined}
+                  />
+                )}
               </div>
             )}
           </main>
