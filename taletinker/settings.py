@@ -29,7 +29,7 @@ STORY_LINE_MIN_WORDS = int(os.getenv("STORY_LINE_MIN_WORDS", "2"))
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-key-$$**')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+DEBUG = os.getenv("DEBUG", "").lower() == "true"
 
 ALLOWED_HOSTS = [
     os.getenv("DJANGO_ALLOWED_HOSTS", "localhost"),
