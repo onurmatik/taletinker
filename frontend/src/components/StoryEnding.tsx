@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { RotateCcw, BookOpen, Pencil, Lock, UserPlus, ArrowRight } from 'lucide-react';
+import { RotateCcw, BookOpen, Pencil, ArrowRight } from 'lucide-react';
 import { cn } from '../utils';
 
 interface StoryEndingProps {
@@ -15,9 +15,7 @@ interface StoryEndingProps {
   isLoadingMeta: boolean;
   isSaving?: boolean;
   canSaveAndView?: boolean;
-  isLoggedIn: boolean;
   onRestart: () => void;
-  onSignUp: () => void;
   onSaveAndView: () => void;
 }
 
@@ -29,9 +27,7 @@ export function StoryEnding({
   isLoadingMeta,
   isSaving = false,
   canSaveAndView = true,
-  isLoggedIn, 
   onRestart, 
-  onSignUp,
   onSaveAndView
 }: StoryEndingProps) {
   const canSave = canSaveAndView && !isLoadingMeta && !isSaving;
@@ -144,47 +140,6 @@ export function StoryEnding({
             {isSaving ? "Saving..." : "Save and View Story"}
           </button>
         </div>
-        {/* Guest Incentive Card */}
-        {!isLoggedIn && (
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="bg-card border border-border/50 rounded-2xl p-6 shadow-lg relative overflow-hidden text-left"
-          >
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="p-3 bg-secondary rounded-xl text-secondary-foreground">
-                <Lock className="w-6 h-6" />
-              </div>
-              
-              <div className="flex-1 space-y-1">
-                <h3 className="font-semibold text-lg">Don't lose your story</h3>
-                <p className="text-muted-foreground text-sm">
-                  This story is saved in our database. Sign up to claim 
-                  <span className="font-medium text-foreground italic"> "{storyTitle}" </span>
-                  and add it to your library.
-                </p>
-              </div>
-
-              <button
-                onClick={onSignUp}
-                className={cn(
-                  "whitespace-nowrap inline-flex items-center gap-2 px-5 py-2.5 rounded-full",
-                  "bg-primary text-primary-foreground font-medium text-sm",
-                  "hover:bg-primary/90 transition-all shadow-md hover:shadow-lg",
-                  "w-full md:w-auto justify-center"
-                )}
-              >
-                <UserPlus className="w-4 h-4" />
-                Sign Up to Save
-              </button>
-            </div>
-          </motion.div>
-        )}
-
         {/* Secondary Actions */}
         <div className="flex justify-center pt-4">
           <button

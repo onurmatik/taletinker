@@ -1,6 +1,12 @@
 
 const API_BASE = '/api';
 
+async function fetchJson<T>(url: string, options: RequestInit, errorMessage: string): Promise<T> {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(errorMessage);
+    return res.json();
+}
+
 export interface StorySummary {
     id: string;
     uuid: string;
@@ -42,76 +48,66 @@ export interface StoryData {
 
 export const api = {
     async listStories(): Promise<StorySummary[]> {
-        const res = await fetch(`${API_BASE}/stories/`);
-        if (!res.ok) throw new Error('Failed to fetch stories');
-        return res.json();
+        return fetchJson(`${API_BASE}/stories/`, { method: 'GET' }, 'Failed to fetch stories');
     },
 
     async getStory(id: string): Promise<StoryData> {
-        const res = await fetch(`${API_BASE}/stories/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch story');
-        return res.json();
+        return fetchJson(`${API_BASE}/stories/${id}`, { method: 'GET' }, 'Failed to fetch story');
     },
 
     async createStory(data: { title?: string | null; tagline?: string | null; lines: string[] }): Promise<{ id: string; title: string | null; tagline: string | null; success: boolean }> {
-        const res = await fetch(`${API_BASE}/stories/`, {
+        return fetchJson(`${API_BASE}/stories/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Failed to create story');
-        return res.json();
+        }, 'Failed to create story');
     },
 
     async suggestLines(context: string[]): Promise<string[]> {
-        const res = await fetch(`${API_BASE}/stories/suggest`, {
+        return fetchJson(`${API_BASE}/stories/suggest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ context })
-        });
-        if (!res.ok) throw new Error('Failed to fetch suggestions');
-        return res.json();
+        }, 'Failed to fetch suggestions');
     },
 
     async suggestStoryMeta(context: string[]): Promise<{ title: string; tagline: string }> {
-        const res = await fetch(`${API_BASE}/stories/suggest-meta`, {
+        return fetchJson(`${API_BASE}/stories/suggest-meta`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ context })
-        });
-        if (!res.ok) throw new Error('Failed to fetch story meta');
-        return res.json();
+        }, 'Failed to fetch story meta');
     },
 
     async updateStoryMeta(id: string, data: { title?: string | null; tagline?: string | null }): Promise<{ title: string | null; tagline: string | null }> {
-        const res = await fetch(`${API_BASE}/stories/${id}`, {
+        return fetchJson(`${API_BASE}/stories/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Failed to update story meta');
-        return res.json();
+        }, 'Failed to update story meta');
     },
 
     async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
-        const res = await fetch(`${API_BASE}/auth/login`, {
+        return fetchJson(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
-        });
-        if (!res.ok) throw new Error('Failed to request magic link');
-        return res.json();
+        }, 'Failed to request magic link');
+    },
+
+    async getMe(): Promise<{ email: string | null; is_authenticated: boolean }> {
+        return fetchJson(`${API_BASE}/auth/me`, { method: 'GET' }, 'Failed to fetch user');
+    },
+
+    async logout(): Promise<{ success: boolean }> {
+        return fetchJson(`${API_BASE}/auth/logout`, { method: 'POST' }, 'Failed to logout');
     },
 
     async likeStory(id: string): Promise<{ success: boolean; like_count: number; is_liked: boolean }> {
-        const res = await fetch(`${API_BASE}/stories/${id}/like`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to like story');
-        return res.json();
+        return fetchJson(`${API_BASE}/stories/${id}/like`, { method: 'POST' }, 'Failed to like story');
     },
 
     async likeLine(id: string): Promise<{ success: boolean; like_count: number; is_liked: boolean }> {
-        const res = await fetch(`${API_BASE}/stories/lines/${id}/like`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to like line');
-        return res.json();
+        return fetchJson(`${API_BASE}/stories/lines/${id}/like`, { method: 'POST' }, 'Failed to like line');
     }
 };

@@ -68,6 +68,15 @@ export function TaleTinkerApp() {
     api.listStories().then(setStories).catch(err => console.error("Failed to load stories", err));
   }, []);
 
+  useEffect(() => {
+    api.getMe()
+      .then((res) => {
+        setIsLoggedIn(res.is_authenticated);
+        setUserEmail(res.email);
+      })
+      .catch((err) => console.error("Failed to load user", err));
+  }, []);
+
   const [previousStoryId, setPreviousStoryId] = useState<string | null>(null);
   const suggestionRequestId = useRef(0);
 
@@ -449,9 +458,15 @@ export function TaleTinkerApp() {
     }, 500);
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserEmail(null);
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (error) {
+      console.error("Failed to logout", error);
+    } finally {
+      setIsLoggedIn(false);
+      setUserEmail(null);
+    }
   };
 
   // Handle Back Navigation
@@ -619,9 +634,7 @@ export function TaleTinkerApp() {
                   isLoadingMeta={isLoadingStoryMeta}
                   isSaving={isSavingStory}
                   canSaveAndView={Boolean(savedStoryId)}
-                  isLoggedIn={isLoggedIn}
                   onRestart={startNewStory}
-                  onSignUp={() => setShowAuthModal(true)}
                   onSaveAndView={handleSaveAndView}
                 />
               )}
