@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
@@ -5,6 +6,9 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
+
+
+logger = logging.getLogger("taletinker.settings")
 
 
 
@@ -185,6 +189,22 @@ else:
 
     MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+STATIC_SERVING_MODE = "s3" if AWS_STORAGE_BUCKET_NAME else "filesystem"
+logger.warning(
+    "Static config -> mode=%s DEBUG=%s STATIC_URL=%s AWS_STORAGE_BUCKET_NAME=%s",
+    STATIC_SERVING_MODE,
+    DEBUG,
+    STATIC_URL,
+    AWS_STORAGE_BUCKET_NAME,
+)
+
+if not DEBUG and not AWS_STORAGE_BUCKET_NAME:
+    logger.warning(
+        "DEBUG is False without cloud storage; django runserver will not serve admin static assets unless another web server or django.conf.urls.static handles %s",
+        STATIC_URL,
+    )
 
 
 # Static files (CSS, JavaScript, Images)

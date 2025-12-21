@@ -343,6 +343,9 @@ export function TaleTinkerApp() {
               title: nextTitle,
               tagline: nextTagline
             });
+            setStories(prev =>
+              prev.map(story => story.uuid === created.id ? { ...story, title: nextTitle, tagline: nextTagline } : story)
+            );
           } catch (error) {
             console.error("Failed to update story meta", error);
           }
@@ -419,10 +422,13 @@ export function TaleTinkerApp() {
     if (!savedStoryId) return;
     setIsSavingStory(true);
     try {
-      await api.updateStoryMeta(savedStoryId, {
+      const updated = await api.updateStoryMeta(savedStoryId, {
         title: storyTitle || '',
         tagline: storyTagline || ''
       });
+      setStories(prev =>
+        prev.map(story => story.uuid === savedStoryId ? { ...story, title: updated.title, tagline: updated.tagline } : story)
+      );
       const story = await api.getStory(savedStoryId);
       setActiveStory(story);
       setSelectedStoryId(savedStoryId);
