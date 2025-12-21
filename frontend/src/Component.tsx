@@ -54,8 +54,77 @@ export function TaleTinkerApp() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const hasInitializedRoute = useRef(false);
+  const hasResumedDraft = useRef(false);
 
   const canEndStory = (pathLength: number) => pathLength >= minStoryLines;
+  const DRAFT_STORAGE_KEY = 'taletinker:story-draft';
+  const RESUME_STORAGE_KEY = 'taletinker:resume-after-login';
+
+  const buildPathFromDraft = (draftNodes: Record<string, StoryNodeType>, draftHeadId: string | null) => {
+    const path: StoryNodeType[] = [];
+    let currentId = draftHeadId;
+    while (currentId) {
+      const node = draftNodes[currentId];
+      if (node) {
+        path.unshift(node);
+        currentId = node.parentId;
+      } else {
+        break;
+      }
+    }
+    return path;
+  };
+
+  const saveDraft = () => {
+    if (viewMode !== 'create' || isEnded || !headId || currentPath.length === 0) {
+      return;
+    }
+    const payload = {
+      version: 1,
+      nodes,
+      headId,
+      storyTitle
+    };
+    try {
+      window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.error("Failed to save draft", error);
+    }
+  };
+
+  const shouldPreserveDraft = () => {
+    try {
+      return window.localStorage.getItem(RESUME_STORAGE_KEY) === 'true';
+    } catch (error) {
+      console.error("Failed to read resume flag", error);
+      return false;
+    }
+  };
+
+  const clearDraft = () => {
+    try {
+      window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+      window.localStorage.removeItem(RESUME_STORAGE_KEY);
+    } catch (error) {
+      console.error("Failed to clear draft", error);
+    }
+  };
+
+  // Derive current linear path by tracing back parents
+  const currentPath = useMemo(() => {
+    const path: StoryNodeType[] = [];
+    let currentId = headId;
+    while (currentId) {
+      const node = nodes[currentId];
+      if (node) {
+        path.unshift(node);
+        currentId = node.parentId;
+      } else {
+        break;
+      }
+    }
+    return path;
+  }, [nodes, headId]);
 
   // Refs for scrolling
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -93,6 +162,62 @@ export function TaleTinkerApp() {
       })
       .catch((err) => console.error("Failed to load user", err));
   }, []);
+
+  useEffect(() => {
+    if (viewMode === 'create' && !isEnded && currentPath.length > 0) {
+      saveDraft();
+      return;
+    }
+    if (isEnded || viewMode === 'read') {
+      clearDraft();
+      return;
+    }
+    if (viewMode === 'home' && !shouldPreserveDraft()) {
+      clearDraft();
+    }
+  }, [viewMode, isEnded, currentPath.length, headId, nodes, storyTitle]);
+
+  useEffect(() => {
+    if (!isLoggedIn || hasResumedDraft.current) return;
+    let shouldResume = false;
+    try {
+      shouldResume = window.localStorage.getItem(RESUME_STORAGE_KEY) === 'true';
+    } catch (error) {
+      console.error("Failed to read resume flag", error);
+    }
+    if (!shouldResume) return;
+    hasResumedDraft.current = true;
+
+    try {
+      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { nodes?: Record<string, StoryNodeType>; headId?: string | null; storyTitle?: string };
+      if (!draft.nodes || !draft.headId) return;
+
+      setNodes(draft.nodes);
+      setHeadId(draft.headId);
+      setStoryTitle(draft.storyTitle || '');
+      setIsEnded(false);
+      setSuggestions([]);
+      setShowTreeView(false);
+      setLineCheckMessage(null);
+      setLineCheckTone(null);
+      setIsCheckingLine(false);
+      setViewMode('create');
+
+      const path = buildPathFromDraft(draft.nodes, draft.headId);
+      const context = path.map((node) => node.text);
+      void fetchSuggestions(context, canEndStory(context.length));
+    } catch (error) {
+      console.error("Failed to restore draft", error);
+    } finally {
+      try {
+        window.localStorage.removeItem(RESUME_STORAGE_KEY);
+      } catch (error) {
+        console.error("Failed to clear resume flag", error);
+      }
+    }
+  }, [isLoggedIn]);
 
   const navigateTo = (path: string, replace = false) => {
     if (replace) {
@@ -379,22 +504,6 @@ export function TaleTinkerApp() {
     setViewMode('create');
   };
 
-  // Derive current linear path by tracing back parents
-  const currentPath = useMemo(() => {
-    const path: StoryNodeType[] = [];
-    let currentId = headId;
-    while (currentId) {
-      const node = nodes[currentId];
-      if (node) {
-        path.unshift(node);
-        currentId = node.parentId;
-      } else {
-        break;
-      }
-    }
-    return path;
-  }, [nodes, headId]);
-
   const handleSelectNext = async (text: string) => {
     setLineCheckMessage(null);
     setLineCheckTone(null);
@@ -566,6 +675,18 @@ export function TaleTinkerApp() {
     }, 500);
   };
 
+  const handlePromptSignIn = () => {
+    if (viewMode === 'create' && currentPath.length > 0) {
+      saveDraft();
+      try {
+        window.localStorage.setItem(RESUME_STORAGE_KEY, 'true');
+      } catch (error) {
+        console.error("Failed to set resume flag", error);
+      }
+    }
+    setShowAuthModal(true);
+  };
+
   const handleLogout = async () => {
     try {
       await api.logout();
@@ -599,7 +720,7 @@ export function TaleTinkerApp() {
     <Navbar
       isLoggedIn={isLoggedIn}
       userEmail={userEmail}
-      onSignIn={() => setShowAuthModal(true)}
+      onSignIn={handlePromptSignIn}
       onLogout={handleLogout}
       onHome={goHome}
       leftAction={customLeftAction}
@@ -766,7 +887,7 @@ export function TaleTinkerApp() {
                       You're making great progress. Sign in so we can save your story. It's free.
                     </p>
                     <button
-                      onClick={() => setShowAuthModal(true)}
+                      onClick={handlePromptSignIn}
                       className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm hover:shadow-md"
                     >
                       Sign In to Save
