@@ -34,6 +34,36 @@ export function StoryDetailView({
   onLikeLine,
   isStoryLiked
 }: StoryDetailViewProps) {
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+  const shareResetRef = useRef<number | null>(null);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus('copied');
+    } catch (error) {
+      console.error("Failed to copy link", error);
+      setShareStatus('error');
+    }
+
+    if (shareResetRef.current) {
+      window.clearTimeout(shareResetRef.current);
+    }
+    shareResetRef.current = window.setTimeout(() => {
+      setShareStatus('idle');
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (shareResetRef.current) {
+        window.clearTimeout(shareResetRef.current);
+      }
+    };
+  }, []);
+
+  const shareLabel = shareStatus === 'copied' ? 'Link Copied' : shareStatus === 'error' ? 'Copy Failed' : 'Share';
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Sticky Navbar */}
@@ -89,9 +119,19 @@ export function StoryDetailView({
                 <span className="text-sm font-medium">{isStoryLiked ? 'Liked' : 'Like'}</span>
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary text-secondary-foreground transition-colors">
+              <button
+                onClick={handleShare}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors",
+                  shareStatus === 'copied'
+                    ? "bg-primary/10 text-primary"
+                    : shareStatus === 'error'
+                      ? "bg-destructive/10 text-destructive"
+                      : "bg-secondary/50 hover:bg-secondary text-secondary-foreground"
+                )}
+              >
                 <Share2 className="w-4 h-4" />
-                <span className="text-sm font-medium">Share</span>
+                <span className="text-sm font-medium">{shareLabel}</span>
               </button>
 
               {/* Tree View Toggle */}
