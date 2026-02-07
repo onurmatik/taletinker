@@ -1,7 +1,7 @@
 import { render } from 'vike/abort'
 import type { PageContextServer } from 'vike/types'
 import type { StoryData } from '../../../src/api'
-import { buildDjangoUrl, getForwardHeaders } from '../../lib/djangoApi'
+import { fetchDjango } from '../../lib/djangoApi'
 
 export type Data = {
   story: StoryData
@@ -9,9 +9,7 @@ export type Data = {
 
 export async function data(pageContext: PageContextServer): Promise<Data> {
   const id = pageContext.routeParams.id
-  const response = await fetch(buildDjangoUrl(`/api/stories/${encodeURIComponent(id)}`), {
-    headers: getForwardHeaders(pageContext.headers),
-  })
+  const response = await fetchDjango(`/api/stories/${encodeURIComponent(id)}`, pageContext.headers)
 
   if (response.status === 404) {
     throw render(404, 'Story not found')
