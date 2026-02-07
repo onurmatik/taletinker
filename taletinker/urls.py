@@ -8,7 +8,7 @@ from .api import api
 
 urlpatterns = [
 #    path("", FrontendAppView.as_view(), name="frontend_app"),
-    path("admin**/", admin.site.urls),
+    path("admin-qweasd123/", admin.site.urls),
 
     path("api/", api.urls),
 

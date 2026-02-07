@@ -1,4 +1,8 @@
 
+SEO:
+tale details => static ??
+
+
 cover image
 
 audio

@@ -2,19 +2,24 @@
   "name": "tale-tinker-app",
   "description": "An interactive story generator application",
   "dependencies": {
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "express": "^5.2.1",
+    "framer-motion": "^10.16.4",
+    "http-proxy-middleware": "^3.0.5",
+    "lucide-react": "^0.292.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "framer-motion": "^10.16.4",
-    "lucide-react": "^0.292.0",
-    "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0",
-    "date-fns": "^2.30.0"
+    "vike": "^0.4.210",
+    "vike-react": "^0.5.13"
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "dev": "node --enable-source-maps server/index.mjs",
+    "dev:vite": "vite",
+    "build": "vite build",
+    "preview": "npm run build && NODE_ENV=production node --enable-source-maps server/index.mjs"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

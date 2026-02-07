@@ -22,6 +22,26 @@ export default function Page() {
 }
 ```
 
+## SSR Setup (Vike)
+
+- Runtime server: `server/index.mjs`
+- SSR content routes:
+  - `/stories`
+  - `/stories/:id`
+- Editor route `/` stays client-rendered (`ssr: false`) to preserve current app behavior.
+
+### Local Run
+
+```bash
+npm run dev
+```
+
+Optional env vars:
+- `PORT` (default: `5173`)
+- `DJANGO_ORIGIN` (default: `http://127.0.0.1:8000`)
+
+`/api`, `/auth`, and `/admin` are proxied to `DJANGO_ORIGIN` by the Vike server.
+
 ## Dependencies
 - `framer-motion`: For smooth animations.
 - `lucide-react`: For icons.
