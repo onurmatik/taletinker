@@ -57,7 +57,7 @@ export function HomeView({ stories, onStartNew, onSelectStory, starterPrompts }:
         >
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide mb-4">
             <Sparkles className="w-3 h-3" />
-            AI STORYTELLER
+            AI Story Creator
           </span>
           <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-4 tracking-tight">
             What story will you <span className="text-primary italic">weave</span> today?
