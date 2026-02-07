@@ -2,6 +2,8 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from taletinker.stories.models import Story, Line
 import json
+from types import SimpleNamespace
+from unittest.mock import patch
 
 User = get_user_model()
 
@@ -160,3 +162,21 @@ class StoryApiTests(TestCase):
         resp_get = self.client.get(f"{self.stories_url}{story_id}")
         self.assertEqual(resp_get.json()["lines"][0]["like_count"], 1)
         self.assertEqual(resp_get.json()["lines"][0]["is_liked"], True)
+
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"})
+    @patch("taletinker.api_stories.openai.OpenAI")
+    def test_suggest_returns_two_options_with_single_openai_call(self, mock_openai):
+        mock_client = mock_openai.return_value
+        mock_client.responses.parse.return_value = SimpleNamespace(
+            output_parsed=SimpleNamespace(options=["Option 1", "Option 2"])
+        )
+
+        response = self.client.post(
+            f"{self.stories_url}suggest",
+            data=json.dumps({"context": ["A beginning line"]}),
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), ["Option 1", "Option 2"])
+        mock_client.responses.parse.assert_called_once()

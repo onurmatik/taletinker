@@ -237,7 +237,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Email & Authentication
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@photoforge.io')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'hello@taletinker.org')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 
@@ -251,13 +251,11 @@ if EMAIL_BACKEND:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
-DEFAULT_FROM_EMAIL = 'hello@taletinker.org'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
 ]
+
 SESAME_MAX_AGE = 300
 
 if not DEBUG:

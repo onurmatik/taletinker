@@ -402,25 +402,19 @@ export function TaleTinkerApp() {
       const prefix = storyLines.slice(0, textLineIndex);
       const newLines = [...prefix, alternativeText];
 
-      // 2. Generate a random continuation to make it a "complete" story for viewing
-      // We'll add 1-2 random suggestions and an ending
-      const extraLinesCount = Math.floor(Math.random() * 2) + 1;
-      for (let i = 0; i < extraLinesCount; i++) {
-        try {
-          const options = await api.suggestLines(newLines);
-          const filteredOptions = options
-            .map((option) => option?.trim())
-            .filter((option): option is string => Boolean(option))
-            .filter((option) => option.toLowerCase() !== "the end");
-
-          if (filteredOptions.length === 0) break;
-
+      // 2. Add one follow-up line from a single suggestion call
+      try {
+        const options = await api.suggestLines(newLines);
+        const filteredOptions = options
+          .map((option) => option?.trim())
+          .filter((option): option is string => Boolean(option))
+          .filter((option) => option.toLowerCase() !== "the end");
+        if (filteredOptions.length > 0) {
           const nextLine = filteredOptions[Math.floor(Math.random() * filteredOptions.length)];
           if (nextLine) newLines.push(nextLine);
-        } catch (error) {
-          console.error("Failed to fetch suggestions", error);
-          break;
         }
+      } catch (error) {
+        console.error("Failed to fetch suggestion", error);
       }
 
       // 3. Create a new runtime story object

@@ -215,10 +215,12 @@ def suggest_lines(request, data: SuggestSchema):
     )
     
     event = response.output_parsed
-    
-    # Ensure we return at least 2
-    final_lines = event.options[:2] if len(event.options) >= 2 else event.options + ["Something unexpected happened."]
-    return final_lines
+    options = [option.strip() for option in (event.options or []) if option and option.strip()]
+
+    if len(options) < 2:
+        options.extend(["Something unexpected happened."] * (2 - len(options)))
+
+    return options[:2]
 
 
 @router.post("/check-line", response=LineCheckResponse)
