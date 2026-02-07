@@ -23,9 +23,23 @@ async function startServer() {
     xfwd: true,
     ws: true,
     logLevel: isProduction ? 'warn' : 'silent',
+    pathRewrite: (_path, req) => req.originalUrl || req.url,
   })
 
-  app.use(['/api', '/auth', '/admin'], djangoProxy)
+  app.use((req, res, next) => {
+    const isDjangoRoute =
+      req.url === '/api' ||
+      req.url.startsWith('/api/') ||
+      req.url === '/auth' ||
+      req.url.startsWith('/auth/') ||
+      req.url === '/admin' ||
+      req.url.startsWith('/admin/')
+
+    if (isDjangoRoute) {
+      return djangoProxy(req, res, next)
+    }
+    return next()
+  })
 
   let viteDevServer = null
 
