@@ -8,7 +8,9 @@ import { renderPage } from 'vike/server'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
 const isProduction = process.env.NODE_ENV === 'production'
-const port = Number(process.env.PORT || 5173)
+const cliArgs = parseCliArgs(process.argv.slice(2))
+const host = cliArgs.host || process.env.HOST || '127.0.0.1'
+const port = Number(cliArgs.port || process.env.PORT || 5173)
 const djangoOrigin = process.env.DJANGO_ORIGIN || 'http://127.0.0.1:8000'
 
 void startServer()
@@ -81,9 +83,28 @@ async function startServer() {
     }
   })
 
-  app.listen(port, () => {
+  app.listen(port, host, () => {
     const env = isProduction ? 'production' : 'development'
     // eslint-disable-next-line no-console
-    console.log(`[vike] ${env} server running on http://localhost:${port}`)
+    console.log(`[vike] ${env} server running on http://${host}:${port}`)
   })
+}
+
+function parseCliArgs(args) {
+  const parsed = {}
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i]
+    if (arg === '--port' && args[i + 1]) {
+      parsed.port = args[i + 1]
+      i += 1
+    } else if (arg.startsWith('--port=')) {
+      parsed.port = arg.split('=')[1]
+    } else if (arg === '--host' && args[i + 1]) {
+      parsed.host = args[i + 1]
+      i += 1
+    } else if (arg.startsWith('--host=')) {
+      parsed.host = arg.split('=')[1]
+    }
+  }
+  return parsed
 }

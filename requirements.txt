@@ -9,6 +9,7 @@ openai
 python-dotenv
 pillow
 stripe
+whitenoise
 
 # for deployment
 gunicorn

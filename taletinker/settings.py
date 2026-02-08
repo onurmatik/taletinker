@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "taletinker.middleware.ApiPrefixCompatMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -189,7 +190,7 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
 
@@ -211,8 +212,8 @@ logger.warning(
 
 if not DEBUG and not AWS_STORAGE_BUCKET_NAME:
     logger.warning(
-        "DEBUG is False without cloud storage; django runserver will not serve admin static assets unless another web server or django.conf.urls.static handles %s",
-        STATIC_URL,
+        "DEBUG is False without cloud storage; ensure collectstatic has been run so WhiteNoise can serve assets from STATIC_ROOT (%s).",
+        STATIC_ROOT,
     )
 
 

@@ -19,7 +19,7 @@
     "dev": "node --enable-source-maps server/index.mjs",
     "dev:vite": "vite",
     "build": "vite build",
-    "preview": "npm run build && NODE_ENV=production node --enable-source-maps server/index.mjs"
+    "preview": "NODE_ENV=production node --enable-source-maps server/index.mjs"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
