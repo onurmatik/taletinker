@@ -16,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Story creation defaults
 AI_DEFAULT_MODEL = os.getenv("AI_DEFAULT_MODEL", "gpt-5-nano")
+AI_REASONING_EFFORT = os.getenv("AI_REASONING_EFFORT", "").strip().lower() or None
 STORY_MIN_LINES = int(os.getenv("STORY_MIN_LINES", "5"))
 STORY_ANON_SIGNIN_LINE = int(os.getenv("STORY_ANON_SIGNIN_LINE", "3"))
 STORY_LINE_MIN_CHARS = int(os.getenv("STORY_LINE_MIN_CHARS", "8"))

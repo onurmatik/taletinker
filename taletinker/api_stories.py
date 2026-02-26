@@ -11,6 +11,15 @@ from taletinker.stories.models import Story, Line
 
 router = Router()
 
+_ALLOWED_REASONING_EFFORTS = {"minimal", "low", "medium", "high", "none"}
+
+
+def _openai_reasoning_params():
+    effort = settings.AI_REASONING_EFFORT
+    if effort in _ALLOWED_REASONING_EFFORTS:
+        return {"reasoning": {"effort": settings.AI_REASONING_EFFORT}}
+    return {}
+
 def mask_email(value: str) -> str:
     if "@" not in value:
         return value
@@ -212,6 +221,7 @@ def suggest_lines(request, data: SuggestSchema):
             "role": "user", "content": prompt
         }],
         text_format=StoryOptions,
+        **_openai_reasoning_params(),
     )
     
     event = response.output_parsed
@@ -283,6 +293,7 @@ def check_line(request, data: LineCheckSchema):
             "role": "user", "content": prompt
         }],
         text_format=LineCheckOptions,
+        **_openai_reasoning_params(),
     )
 
     event = response.output_parsed
@@ -329,6 +340,7 @@ def suggest_story_meta(request, data: SuggestSchema):
             "role": "user", "content": prompt
         }],
         text_format=StoryMetaOptions,
+        **_openai_reasoning_params(),
     )
 
     event = response.output_parsed
