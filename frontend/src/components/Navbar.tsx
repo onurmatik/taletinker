@@ -2,7 +2,7 @@
  * Unified Navigation Bar component.
  * Handles branding, authentication state, and global navigation actions.
  */
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LifeBuoy, LogOut, User as UserIcon } from 'lucide-react';
 import { cn } from '../utils';
 
 interface NavbarProps {
@@ -55,6 +55,20 @@ export function Navbar({
       </div>
 
       <div className="flex items-center gap-4">
+        <a
+          href="https://featurerequest.io/onurmatik/tale-tinker/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Suggest a Feature or Report a Bug"
+          title="Suggest a Feature or Report a Bug"
+          className="group relative flex items-center justify-center h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+        >
+          <LifeBuoy className="w-4 h-4" />
+          <span className="pointer-events-none absolute top-full mt-2 left-1/2 -translate-x-1/2 rounded-md bg-gray-900 dark:bg-slate-800 px-2 py-1 text-[11px] whitespace-nowrap text-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-visible:opacity-100 group-focus-visible:visible transition-all">
+            Suggest a Feature or Report a Bug
+          </span>
+        </a>
+
         {isLoggedIn ? (
           <div className="flex items-center gap-3">
             <div className="hidden md:flex flex-col items-end">
