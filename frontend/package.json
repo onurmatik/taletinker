@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "node --enable-source-maps server/index.mjs",
     "dev:vite": "vite",
-    "build": "vite build",
+    "build": "vite build && rm -rf dist/assets dist/images && cp -R dist/client/assets dist/assets && if [ -d dist/client/images ]; then cp -R dist/client/images dist/images; fi",
     "preview": "NODE_ENV=production node --enable-source-maps server/index.mjs"
   },
   "devDependencies": {

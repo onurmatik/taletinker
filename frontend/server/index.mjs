@@ -46,7 +46,18 @@ async function startServer() {
   let viteDevServer = null
 
   if (isProduction) {
-    app.use(express.static(path.join(rootDir, 'dist', 'client'), { index: false }))
+    const distDir = path.join(rootDir, 'dist')
+    const clientDistDir = path.join(distDir, 'client')
+    const clientAssetsDir = path.join(clientDistDir, 'assets')
+    const legacyAssetsDir = path.join(distDir, 'assets')
+    const clientImagesDir = path.join(clientDistDir, 'images')
+    const legacyImagesDir = path.join(distDir, 'images')
+
+    app.use(express.static(clientDistDir, { index: false }))
+    app.use('/assets', express.static(clientAssetsDir))
+    app.use('/assets', express.static(legacyAssetsDir))
+    app.use('/images', express.static(clientImagesDir))
+    app.use('/images', express.static(legacyImagesDir))
   } else {
     const { createServer } = await import('vite')
     viteDevServer = await createServer({
