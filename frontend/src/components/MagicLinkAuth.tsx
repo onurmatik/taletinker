@@ -179,6 +179,15 @@ export function MagicLinkAuth({
                 <a href="#" className="hover:text-foreground transition-colors underline decoration-muted-foreground/30">Terms of Service</a>
                 {' '}and{' '}
                 <a href="#" className="hover:text-foreground transition-colors underline decoration-muted-foreground/30">Privacy Policy</a>.
+                {' '}
+                <a
+                  href="https://featurerequest.io/onurmatik/tale-tinker/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors underline decoration-muted-foreground/30"
+                >
+                  Suggest a Feature or Report a Bug
+                </a>
               </>
             )}
           </p>
