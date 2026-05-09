@@ -22,8 +22,9 @@ class ApiPrefixCompatMiddleware:
         # Keep browser-rendered auth pages untouched.
         is_known_page_route = path in {"/auth/login/", "/auth/logout/"}
 
+        should_rewrite_stories = is_stories_api and is_jsonish
         should_rewrite_auth = is_auth_api and (is_jsonish or not is_known_page_route)
-        should_rewrite = (is_stories_api or should_rewrite_auth) and not path.startswith("/api/")
+        should_rewrite = (should_rewrite_stories or should_rewrite_auth) and not path.startswith("/api/")
 
         if should_rewrite:
             rewritten = f"/api{path}"

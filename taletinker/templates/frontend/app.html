@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TaleTinker</title>
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script>
+      window.TALE_TINKER_INITIAL_STORY_ID = "{{ initial_story_id|escapejs }}";
+    </script>
+    <script src="{% static 'js/app.js' %}" defer></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div class="flex items-center gap-3 text-muted-foreground">
+          <span class="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+          Loading TaleTinker...
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -3,6 +3,7 @@ from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.db import transaction
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from pydantic import BaseModel
 import openai
 import os
@@ -363,10 +364,10 @@ def story_config(request):
 def get_story(request, story_id: str):
     try:
         story = Story.objects.get(uuid=story_id)
-    except Story.DoesNotExist:
+    except (Story.DoesNotExist, ValidationError, ValueError):
         try:
             story = Story.objects.get(id=story_id)
-        except:
+        except (Story.DoesNotExist, ValidationError, ValueError):
              raise HttpError(404, "Story not found")
 
     # Build lines list (linked list traversal)

@@ -54,6 +54,14 @@ python manage.py runserver
 | ---------- | ------------------------------------------- |
 | Django app | [http://localhost:8000/](http://localhost:8000/) |
 
+The frontend is rendered by Django templates. Tailwind assets are built from the `frontend/` directory:
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
 ### 3. Run Migrations & Create Superuser
 
 ```bash

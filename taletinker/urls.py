@@ -3,11 +3,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 
+from .frontend import app_view
 from .profiles import views as profiles_views
 from .api import api
 
 urlpatterns = [
-#    path("", FrontendAppView.as_view(), name="frontend_app"),
+    path("", app_view, name="frontend_app"),
+    path("stories/<str:story_id>", app_view, name="frontend_story"),
     path("admin-qweasd123/", admin.site.urls),
 
     path("api/", api.urls),
